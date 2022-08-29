@@ -1,7 +1,6 @@
-[submodule "base_graph"]
-    path = _midynet/base_graph
-    url = https://github.com/antoineallard/base_graph.git
-    branch = main
-[submodule "SamplableSet"]
-	path = _midynet/SamplableSet
+[submodule "_graphinf/SamplableSet"]
+	path = _graphinf/SamplableSet
 	url = https://github.com/gstonge/SamplableSet.git
+[submodule "_graphinf/base_graph"]
+	path = _graphinf/base_graph
+	url = https://github.com/antoineallard/base_graph.git
