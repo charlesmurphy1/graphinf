@@ -262,8 +262,9 @@ void VertexLabeledDegreeUniformHyperPrior::sampleState() {
 
 const double VertexLabeledDegreeUniformHyperPrior::getLogLikelihood() const {
     double logP = 0;
-    for (const auto& nk : m_degreeCounts)
+    for (const auto& nk : m_degreeCounts){
         logP += logFactorial(nk.second);
+    }
     for (const auto nr : getBlockPrior().getVertexCounts()){
         auto er = m_labelGraphPriorPtr->getEdgeCounts().get(nr.first);
         if (er == 0)
@@ -278,25 +279,16 @@ const double VertexLabeledDegreeUniformHyperPrior::getLogLikelihoodRatioFromGrap
     IntMap<std::pair<BlockIndex, size_t>> diffDegreeCountMap;
     IntMap<BlockIndex> diffEdgeMap;
     for (auto edge : move.addedEdges){
-        // size_t ki = m_state[edge.first], kj = m_state[edge.second];
-        // BlockIndex r = getBlockPrior().getBlockOfIdx(edge.first), s = getBlockPrior().getBlockOfIdx(edge.second);
-        // diffDegreeMap.increment({r, ki + 1});
-        // diffDegreeMap.decrement({r, ki});
-        // diffDegreeMap.increment({s, kj + 1});
-        // diffDegreeMap.decrement({s, kj});
         diffDegreeMap.increment(edge.first);
         diffDegreeMap.increment(edge.second);
 
-        diffEdgeMap.increment(getBlockPrior().getBlockOfIdx(edge.first));
-        diffEdgeMap.increment(getBlockPrior().getBlockOfIdx(edge.second));
+        const auto& r = getBlockPrior().getBlockOfIdx(edge.first);
+        const auto& s = getBlockPrior().getBlockOfIdx(edge.second);
+        diffEdgeMap.increment(r);
+        diffEdgeMap.increment(s);
     }
+
     for (auto edge : move.removedEdges){
-        // size_t ki = m_state[edge.first], kj = m_state[edge.second];
-        // BlockIndex r = getBlockPrior().getBlockOfIdx(edge.first), s = getBlockPrior().getBlockOfIdx(edge.second);
-        // diffDegreeMap.increment({r, ki - 1});
-        // diffDegreeMap.decrement({r, ki});
-        // diffDegreeMap.increment({s, kj - 1});
-        // diffDegreeMap.decrement({s, kj});
         diffDegreeMap.decrement(edge.first);
         diffDegreeMap.decrement(edge.second);
 
@@ -307,8 +299,8 @@ const double VertexLabeledDegreeUniformHyperPrior::getLogLikelihoodRatioFromGrap
     for (auto diff: diffDegreeMap){
         BlockIndex r = getBlockPrior().getBlockOfIdx(diff.first);
         BlockIndex k = m_state[diff.first];
-        diffDegreeCountMap.increment({r, k}, diff.second);
-
+        diffDegreeCountMap.decrement({r, k});
+        diffDegreeCountMap.increment({r, k + diff.second});
     }
 
     double logLikelihoodRatio = 0;

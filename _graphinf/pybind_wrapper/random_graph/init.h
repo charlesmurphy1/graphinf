@@ -6,6 +6,7 @@
 
 #include "likelihood/init.h"
 #include "prior/init.h"
+#include "proposer/init.h"
 #include "init_randomgraph.h"
 #include "init_erdosrenyi.h"
 #include "init_configuration.h"
@@ -23,6 +24,9 @@ void initRandomGraph(py::module& m){
 
     py::module prior = m.def_submodule("prior");
     initPriors(prior);
+
+    py::module proposer = m.def_submodule("proposer");
+    initPriors(proposer);
 
     initRandomGraphBaseClass(m);
     initErdosRenyi(m);

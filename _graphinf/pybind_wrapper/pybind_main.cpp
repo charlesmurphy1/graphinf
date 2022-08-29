@@ -9,7 +9,6 @@
 #include "init_generator.h"
 #include "init_rng.h"
 #include "random_graph/init.h"
-#include "proposer/init.h"
 #include "data/init.h"
 #include "mcmc/init.h"
 
@@ -33,10 +32,6 @@ PYBIND11_MODULE(_graphinf, m) {
         .def("check_safety", &NestedRandomVariable::checkSafety)
         .def("is_safe", &NestedRandomVariable::isSafe)
         ;
-
-
-    py::module proposer = m.def_submodule("proposer");
-    initProposer( proposer );
 
     py::module random_graph = m.def_submodule("random_graph");
     initRandomGraph( random_graph );

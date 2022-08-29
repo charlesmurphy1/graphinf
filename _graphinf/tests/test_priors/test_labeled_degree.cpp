@@ -287,7 +287,6 @@ TEST_F(VertexLabeledDegreeUniformHyperPriorTest, getLogLikelihoodRatioFromGraphM
     double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromGraphMove(move);
     double logLikelihoodBefore = prior.getLogLikelihood();
     prior.applyGraphMove(move);
-
     double logLikelihoodAfter = prior.getLogLikelihood();
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, TOL);
 }
