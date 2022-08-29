@@ -4,17 +4,17 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "GraphInf/proposer/python/edge_proposer.hpp"
+#include "GraphInf/random_graph/proposer/python/edge_proposer.hpp"
 
-#include "GraphInf/proposer/movetypes.h"
-#include "GraphInf/proposer/proposer.hpp"
-#include "GraphInf/proposer/edge/edge_proposer.h"
-#include "GraphInf/proposer/edge/double_edge_swap.h"
-#include "GraphInf/proposer/edge/hinge_flip.h"
-#include "GraphInf/proposer/edge/single_edge.h"
-// #include "GraphInf/proposer/edge/labeled_edge_proposer.h"
-// #include "GraphInf/proposer/edge/labeled_double_edge_swap.h"
-// #include "GraphInf/proposer/edge/labeled_hinge_flip.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/proposer.hpp"
+#include "GraphInf/random_graph/proposer/edge/edge_proposer.h"
+#include "GraphInf/random_graph/proposer/edge/double_edge_swap.h"
+#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/random_graph/proposer/edge/single_edge.h"
+// #include "GraphInf/random_graph/proposer/edge/labeled_edge_proposer.h"
+// #include "GraphInf/random_graph/proposer/edge/labeled_double_edge_swap.h"
+// #include "GraphInf/random_graph/proposer/edge/labeled_hinge_flip.h"
 
 
 namespace py = pybind11;

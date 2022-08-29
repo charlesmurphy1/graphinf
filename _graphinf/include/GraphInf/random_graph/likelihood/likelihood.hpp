@@ -2,7 +2,7 @@
 #define GRAPH_INF_RANDOMGRAPH_LIKELIHOOD_H
 
 #include "GraphInf/rv.hpp"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 
 namespace GraphInf{
 

@@ -1,6 +1,6 @@
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/rng.h"
-#include "GraphInf/proposer/edge/single_edge.h"
+#include "GraphInf/random_graph/proposer/edge/single_edge.h"
 
 
 namespace GraphInf {

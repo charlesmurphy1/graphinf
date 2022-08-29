@@ -2,8 +2,8 @@
 #define GRAPH_INF_LABELPROPOSER_H
 
 
-#include "GraphInf/proposer/movetypes.h"
-#include "GraphInf/proposer/proposer.hpp"
+#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/proposer.hpp"
 // #include "GraphInf/random_graph/random_graph.hpp"
 #include "GraphInf/rng.h"
 #include "GraphInf/rv.hpp"

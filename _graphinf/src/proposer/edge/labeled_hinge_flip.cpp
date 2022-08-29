@@ -1,4 +1,4 @@
-#include "GraphInf/proposer/edge/labeled_hinge_flip.h"
+#include "GraphInf/random_graph/proposer/edge/labeled_hinge_flip.h"
 
 
 namespace GraphInf{

@@ -3,7 +3,7 @@
 
 #include "GraphInf/data/dynamics/glauber.hpp"
 #include "GraphInf/random_graph/erdosrenyi.h"
-#include "GraphInf/proposer/edge/hinge_flip.h"
+#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
 #include "../fixtures.hpp"
 
 namespace GraphInf{

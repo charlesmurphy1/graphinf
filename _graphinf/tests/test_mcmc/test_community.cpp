@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
-#include "GraphInf/proposer/label/uniform.hpp"
-#include "GraphInf/proposer/nested_label/uniform.hpp"
+#include "GraphInf/random_graph/proposer/label/uniform.hpp"
+#include "GraphInf/random_graph/proposer/nested_label/uniform.hpp"
 #include "GraphInf/mcmc/community.hpp"
 #include "GraphInf/mcmc/callbacks/collector.hpp"
 #include "GraphInf/mcmc/callbacks/action.h"

@@ -5,9 +5,9 @@
 #include "GraphInf/random_graph/random_graph.hpp"
 #include "GraphInf/mcmc/mcmc.h"
 #include "GraphInf/mcmc/callbacks/callback.hpp"
-#include "GraphInf/proposer/edge/edge_proposer.h"
-#include "GraphInf/proposer/label/base.hpp"
-#include "GraphInf/proposer/nested_label/base.hpp"
+#include "GraphInf/random_graph/proposer/edge/edge_proposer.h"
+#include "GraphInf/random_graph/proposer/label/base.hpp"
+#include "GraphInf/random_graph/proposer/nested_label/base.hpp"
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/data/types.h"
 

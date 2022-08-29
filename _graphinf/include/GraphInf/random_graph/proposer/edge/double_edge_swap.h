@@ -2,7 +2,7 @@
 #define GRAPH_INF_DOUBLE_EDGE_SWAP_H
 
 #include "edge_proposer.h"
-#include "GraphInf/proposer/sampler/edge_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/edge_sampler.h"
 #include "SamplableSet.hpp"
 #include "hash_specialization.hpp"
 

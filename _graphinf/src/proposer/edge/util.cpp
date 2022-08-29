@@ -1,5 +1,5 @@
 #include "GraphInf/utility/functions.h"
-#include "GraphInf/proposer/edge/util.h"
+#include "GraphInf/random_graph/proposer/edge/util.h"
 
 
 namespace GraphInf{

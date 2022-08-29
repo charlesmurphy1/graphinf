@@ -4,9 +4,9 @@
 #include <time.h>
 
 #include "GraphInf/data/dynamics/sis.hpp"
-#include "GraphInf/proposer/edge/hinge_flip.h"
-#include "GraphInf/proposer/label/uniform.hpp"
-#include "GraphInf/proposer/nested_label/uniform.hpp"
+#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/random_graph/proposer/label/uniform.hpp"
+#include "GraphInf/random_graph/proposer/nested_label/uniform.hpp"
 #include "GraphInf/mcmc/reconstruction.hpp"
 #include "GraphInf/rng.h"
 #include "../fixtures.hpp"

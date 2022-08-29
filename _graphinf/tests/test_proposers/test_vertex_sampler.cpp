@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "GraphInf/proposer/sampler/vertex_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/vertex_sampler.h"
 
 
 namespace GraphInf{

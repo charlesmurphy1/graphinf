@@ -1,1 +1,1 @@
-#include "GraphInf/proposer/label/uniform.hpp"
+#include "GraphInf/random_graph/proposer/label/uniform.hpp"

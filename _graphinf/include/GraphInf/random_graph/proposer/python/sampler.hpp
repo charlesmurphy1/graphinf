@@ -6,7 +6,7 @@
 
 #include "BaseGraph/types.h"
 #include "GraphInf/types.h"
-#include "GraphInf/proposer/sampler/vertex_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/vertex_sampler.h"
 
 
 namespace py = pybind11;

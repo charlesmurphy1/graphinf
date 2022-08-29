@@ -2,8 +2,8 @@
 #define GRAPH_INF_COMMUNITY_H
 
 #include "GraphInf/random_graph/random_graph.hpp"
-#include "GraphInf/proposer/label/base.hpp"
-#include "GraphInf/proposer/nested_label/base.hpp"
+#include "GraphInf/random_graph/proposer/label/base.hpp"
+#include "GraphInf/random_graph/proposer/nested_label/base.hpp"
 #include "GraphInf/mcmc/callbacks/callback.hpp"
 #include "mcmc.h"
 

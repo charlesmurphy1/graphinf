@@ -4,16 +4,16 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "GraphInf/proposer/python/label.hpp"
-#include "GraphInf/proposer/python/nested_label.hpp"
+#include "GraphInf/random_graph/proposer/python/label.hpp"
+#include "GraphInf/random_graph/proposer/python/nested_label.hpp"
 
-#include "GraphInf/proposer/movetypes.h"
-#include "GraphInf/proposer/label/base.hpp"
-#include "GraphInf/proposer/label/uniform.hpp"
-#include "GraphInf/proposer/label/mixed.hpp"
-#include "GraphInf/proposer/nested_label/base.hpp"
-#include "GraphInf/proposer/nested_label/uniform.hpp"
-#include "GraphInf/proposer/nested_label/mixed.hpp"
+#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/label/base.hpp"
+#include "GraphInf/random_graph/proposer/label/uniform.hpp"
+#include "GraphInf/random_graph/proposer/label/mixed.hpp"
+#include "GraphInf/random_graph/proposer/nested_label/base.hpp"
+#include "GraphInf/random_graph/proposer/nested_label/uniform.hpp"
+#include "GraphInf/random_graph/proposer/nested_label/mixed.hpp"
 
 
 namespace py = pybind11;

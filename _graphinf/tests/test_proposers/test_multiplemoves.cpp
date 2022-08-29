@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "GraphInf/proposer/multiplemoves.hpp"
+#include "GraphInf/random_graph/proposer/multiplemoves.hpp"
 
 
 typedef bool DummyMove;

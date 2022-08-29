@@ -6,10 +6,10 @@
 
 #include "BaseGraph/types.h"
 #include "GraphInf/types.h"
-#include "GraphInf/proposer/python/proposer.hpp"
-#include "GraphInf/proposer/proposer.hpp"
-#include "GraphInf/proposer/label/base.hpp"
-#include "GraphInf/proposer/label/mixed.hpp"
+#include "GraphInf/random_graph/proposer/python/proposer.hpp"
+#include "GraphInf/random_graph/proposer/proposer.hpp"
+#include "GraphInf/random_graph/proposer/label/base.hpp"
+#include "GraphInf/random_graph/proposer/label/mixed.hpp"
 
 
 namespace py = pybind11;

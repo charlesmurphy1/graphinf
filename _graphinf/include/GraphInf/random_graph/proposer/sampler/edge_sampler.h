@@ -7,7 +7,7 @@
 #include "hash_specialization.hpp"
 #include "BaseGraph/types.h"
 #include "GraphInf/rng.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/utility/functions.h"
 

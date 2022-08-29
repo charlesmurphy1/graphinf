@@ -1,7 +1,7 @@
 // #include "gtest/gtest.h"
 //
 // #include "fixtures.hpp"
-// #include "GraphInf/proposer/edge_proposer/labeled_double_edge_swap.h"
+// #include "GraphInf/random_graph/proposer/edge_proposer/labeled_double_edge_swap.h"
 // #include "GraphInf/rng.h"
 //
 // namespace GraphInf{

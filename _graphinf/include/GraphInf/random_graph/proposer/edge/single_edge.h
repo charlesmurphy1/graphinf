@@ -4,7 +4,7 @@
 
 #include "GraphInf/exceptions.h"
 #include "edge_proposer.h"
-#include "GraphInf/proposer/sampler/vertex_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/vertex_sampler.h"
 #include "SamplableSet.hpp"
 #include "hash_specialization.hpp"
 

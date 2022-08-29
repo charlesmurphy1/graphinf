@@ -6,8 +6,8 @@
 #include "util.h"
 #include "GraphInf/random_graph/random_graph.hpp"
 #include "edge_proposer.h"
-#include "GraphInf/proposer/sampler/vertex_sampler.h"
-#include "GraphInf/proposer/sampler/edge_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/vertex_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/edge_sampler.h"
 #include "SamplableSet.hpp"
 #include "hash_specialization.hpp"
 

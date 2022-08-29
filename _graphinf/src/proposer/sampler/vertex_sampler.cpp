@@ -1,4 +1,4 @@
-#include "GraphInf/proposer/sampler/vertex_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/vertex_sampler.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/rng.h"
 

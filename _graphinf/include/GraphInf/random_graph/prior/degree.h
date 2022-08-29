@@ -5,7 +5,7 @@
 #include "GraphInf/types.h"
 #include "prior.hpp"
 #include "edge_count.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "GraphInf/utility/maps.hpp"
 
 

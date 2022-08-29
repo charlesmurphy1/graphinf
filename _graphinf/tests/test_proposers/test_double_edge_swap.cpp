@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "GraphInf/proposer/edge/double_edge_swap.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/edge/double_edge_swap.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "../fixtures.hpp"
 
 

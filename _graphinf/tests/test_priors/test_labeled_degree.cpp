@@ -8,7 +8,7 @@
 #include "GraphInf/random_graph/prior/block.h"
 #include "GraphInf/random_graph/prior/label_graph.h"
 #include "GraphInf/random_graph/prior/labeled_degree.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"

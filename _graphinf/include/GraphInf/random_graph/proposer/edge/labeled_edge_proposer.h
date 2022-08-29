@@ -3,9 +3,9 @@
 
 #include <map>
 #include "edge_proposer.h"
-#include "GraphInf/proposer/sampler/edge_sampler.h"
-#include "GraphInf/proposer/sampler/vertex_sampler.h"
-#include "GraphInf/proposer/sampler/label_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/edge_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/vertex_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/label_sampler.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/utility/maps.hpp"
 

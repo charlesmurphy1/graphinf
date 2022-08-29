@@ -1,4 +1,4 @@
-#include "GraphInf/proposer/edge/labeled_double_edge_swap.h"
+#include "GraphInf/random_graph/proposer/edge/labeled_double_edge_swap.h"
 
 
 namespace GraphInf{

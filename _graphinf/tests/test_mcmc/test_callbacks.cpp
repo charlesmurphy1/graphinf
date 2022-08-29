@@ -2,8 +2,8 @@
 
 #include "GraphInf/data/dynamics/sis.hpp"
 #include "GraphInf/random_graph/random_graph.hpp"
-#include "GraphInf/proposer/label/uniform.hpp"
-#include "GraphInf/proposer/edge/hinge_flip.h"
+#include "GraphInf/random_graph/proposer/label/uniform.hpp"
+#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
 #include "GraphInf/mcmc/callbacks/callback.hpp"
 #include "GraphInf/mcmc/callbacks/collector.hpp"
 #include "GraphInf/mcmc/callbacks/verbose.h"

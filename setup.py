@@ -225,7 +225,7 @@ setup(
     version=0.1,
     author="Charles Murphy",
     author_email="charles.murphy.1@ulaval.ca",
-    # url="https://github.com/charlesmurphy1/fast-midynet",
+    # url="https://github.com/charlesmurphy1/graphinf",
     license="MIT",
     description=description,
     packages=find_packages(),

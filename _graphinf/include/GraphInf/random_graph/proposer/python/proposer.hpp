@@ -3,7 +3,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "GraphInf/proposer/proposer.hpp"
+#include "GraphInf/random_graph/proposer/proposer.hpp"
 #include "GraphInf/python/rv.hpp"
 
 namespace py = pybind11;

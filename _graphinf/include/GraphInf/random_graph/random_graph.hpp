@@ -7,13 +7,13 @@
 #include "GraphInf/types.h"
 #include "GraphInf/rv.hpp"
 #include "GraphInf/exceptions.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/random_graph/likelihood/likelihood.hpp"
 
-#include "GraphInf/proposer/edge/edge_proposer.h"
-#include "GraphInf/proposer/label/base.hpp"
-#include "GraphInf/proposer/nested_label/base.hpp"
+#include "GraphInf/random_graph/proposer/edge/edge_proposer.h"
+#include "GraphInf/random_graph/proposer/label/base.hpp"
+#include "GraphInf/random_graph/proposer/nested_label/base.hpp"
 
 namespace GraphInf{
 

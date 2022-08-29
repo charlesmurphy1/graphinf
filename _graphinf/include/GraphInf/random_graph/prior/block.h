@@ -7,7 +7,7 @@
 
 #include "prior.hpp"
 #include "block_count.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "GraphInf/types.h"
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/utility/functions.h"

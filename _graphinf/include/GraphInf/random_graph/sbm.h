@@ -12,7 +12,7 @@
 #include "GraphInf/random_graph/random_graph.hpp"
 #include "GraphInf/random_graph/util.h"
 #include "GraphInf/random_graph/likelihood/sbm.h"
-#include "GraphInf/proposer/edge/edge_proposer.h"
+#include "GraphInf/random_graph/proposer/edge/edge_proposer.h"
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"

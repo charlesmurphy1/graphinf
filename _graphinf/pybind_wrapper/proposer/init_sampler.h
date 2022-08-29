@@ -4,13 +4,13 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "GraphInf/proposer/python/sampler.hpp"
+#include "GraphInf/random_graph/proposer/python/sampler.hpp"
 
 #include "BaseGraph/types.h"
-#include "GraphInf/proposer/movetypes.h"
-#include "GraphInf/proposer/sampler/vertex_sampler.h"
-#include "GraphInf/proposer/sampler/edge_sampler.h"
-#include "GraphInf/proposer/sampler/label_sampler.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/sampler/vertex_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/edge_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/label_sampler.h"
 
 
 namespace py = pybind11;

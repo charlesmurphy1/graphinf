@@ -1,7 +1,7 @@
 // #include "gtest/gtest.h"
 //
 // #include "fixtures.hpp"
-// #include "GraphInf/proposer/edge_proposer/labeled_hinge_flip.h"
+// #include "GraphInf/random_graph/proposer/edge_proposer/labeled_hinge_flip.h"
 // #include "GraphInf/rng.h"
 //
 // namespace GraphInf{

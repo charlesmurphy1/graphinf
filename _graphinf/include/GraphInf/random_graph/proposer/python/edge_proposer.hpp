@@ -6,12 +6,12 @@
 
 #include "BaseGraph/types.h"
 #include "GraphInf/types.h"
-#include "GraphInf/proposer/python/proposer.hpp"
-#include "GraphInf/proposer/edge/edge_proposer.h"
-#include "GraphInf/proposer/edge/hinge_flip.h"
-#include "GraphInf/proposer/edge/single_edge.h"
-// #include "GraphInf/proposer/edge/labeled_edge_proposer.h"
-// #include "GraphInf/proposer/edge/labeled_hinge_flip.h"
+#include "GraphInf/random_graph/proposer/python/proposer.hpp"
+#include "GraphInf/random_graph/proposer/edge/edge_proposer.h"
+#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/random_graph/proposer/edge/single_edge.h"
+// #include "GraphInf/random_graph/proposer/edge/labeled_edge_proposer.h"
+// #include "GraphInf/random_graph/proposer/edge/labeled_hinge_flip.h"
 
 // namespace py = pybind11;
 namespace GraphInf{

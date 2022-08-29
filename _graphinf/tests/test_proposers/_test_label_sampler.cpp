@@ -1,6 +1,6 @@
 // #include "gtest/gtest.h"
 // #include "fixtures.hpp"
-// #include "GraphInf/proposer/sampler/label_sampler.h"
+// #include "GraphInf/random_graph/proposer/sampler/label_sampler.h"
 //
 // namespace GraphInf{
 //

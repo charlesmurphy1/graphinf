@@ -7,7 +7,7 @@
 #include "GraphInf/types.h"
 #include "GraphInf/python/rv.hpp"
 #include "GraphInf/random_graph/likelihood/likelihood.hpp"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 
 
 namespace GraphInf{

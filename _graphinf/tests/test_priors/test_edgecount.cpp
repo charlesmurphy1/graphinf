@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "GraphInf/random_graph/prior/edge_count.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/exceptions.h"
 

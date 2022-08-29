@@ -4,10 +4,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "GraphInf/proposer/python/proposer.hpp"
+#include "GraphInf/random_graph/proposer/python/proposer.hpp"
 
-#include "GraphInf/proposer/movetypes.h"
-#include "GraphInf/proposer/proposer.hpp"
+#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/proposer.hpp"
 
 namespace py = pybind11;
 namespace GraphInf{

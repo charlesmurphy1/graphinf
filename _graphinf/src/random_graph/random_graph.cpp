@@ -7,7 +7,7 @@
 #include <string>
 
 #include "GraphInf/types.h"
-#include "GraphInf/proposer/edge/edge_proposer.h"
+#include "GraphInf/random_graph/proposer/edge/edge_proposer.h"
 #include "GraphInf/random_graph/random_graph.hpp"
 
 namespace GraphInf {

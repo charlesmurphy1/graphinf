@@ -4,8 +4,8 @@
 #include "hash_specialization.hpp"
 #include "GraphInf/random_graph/prior/edge_count.h"
 #include "GraphInf/random_graph/erdosrenyi.h"
-#include "GraphInf/proposer/edge/hinge_flip.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "GraphInf/rng.h"
 #include "../fixtures.hpp"
 

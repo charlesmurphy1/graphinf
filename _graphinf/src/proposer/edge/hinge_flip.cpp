@@ -1,6 +1,6 @@
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/rng.h"
-#include "GraphInf/proposer/edge/hinge_flip.h"
+#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
 
 
 namespace GraphInf {

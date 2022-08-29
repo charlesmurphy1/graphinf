@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <unordered_set>
 
-#include "GraphInf/proposer/proposer.hpp"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/proposer.hpp"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 #include "GraphInf/types.h"
 #include "GraphInf/exceptions.h"
 

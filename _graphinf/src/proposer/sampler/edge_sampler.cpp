@@ -1,4 +1,4 @@
-#include "GraphInf/proposer/sampler/edge_sampler.h"
+#include "GraphInf/random_graph/proposer/sampler/edge_sampler.h"
 #include "GraphInf/utility/functions.h"
 
 namespace GraphInf{

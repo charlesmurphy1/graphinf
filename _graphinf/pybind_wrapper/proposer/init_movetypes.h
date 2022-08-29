@@ -5,7 +5,7 @@
 #include <pybind11/stl.h>
 
 #include "BaseGraph/types.h"
-#include "GraphInf/proposer/movetypes.h"
+#include "GraphInf/random_graph/proposer/movetypes.h"
 
 namespace py = pybind11;
 namespace GraphInf{

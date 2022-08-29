@@ -4,7 +4,7 @@
 #include "GraphInf/data/dynamics/cowan.hpp"
 #include "GraphInf/data/types.h"
 #include "GraphInf/random_graph/erdosrenyi.h"
-#include "GraphInf/proposer/edge/hinge_flip.h"
+#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
 #include "../fixtures.hpp"
 
 
