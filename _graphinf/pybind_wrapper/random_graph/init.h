@@ -26,7 +26,7 @@ void initRandomGraph(py::module& m){
     initPriors(prior);
 
     py::module proposer = m.def_submodule("proposer");
-    initPriors(proposer);
+    initProposers(proposer);
 
     initRandomGraphBaseClass(m);
     initErdosRenyi(m);

@@ -13,7 +13,7 @@
 namespace py = pybind11;
 namespace GraphInf{
 
-void initProposer(py::module& m){
+void initProposers(py::module& m){
     initMoveTypes(m);
     initProposerBaseClass(m);
 
