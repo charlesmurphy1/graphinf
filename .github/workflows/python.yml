@@ -74,6 +74,6 @@ jobs:
                     [ -d "./build" ] && rm -r build
                     pip install .[testing]
 
-            - name: Run tests
-              shell: bash
-              run: pytest ./tests
+            # - name: Run tests
+            #   shell: bash
+            #   run: pytest ./tests
