@@ -63,4 +63,6 @@ jobs:
 
             - name: Run tests
               shell: bash
-              run: ctest -C Debug --output-on-failure --verbose
+              run: |
+                cd _graphinf/build
+                ctest -C Debug --output-on-failure --verbose
