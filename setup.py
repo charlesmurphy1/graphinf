@@ -2,7 +2,7 @@ import os
 import sys
 import setuptools
 
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 from setuptools.config import read_configuration
 
@@ -228,7 +228,7 @@ setup(
     # url="https://github.com/charlesmurphy1/fast-midynet",
     license="MIT",
     description=description,
-    packages=["graphinf"],
+    packages=find_packages(),
     install_requires=[
         "pybind11>=2.3",
         "numpy>=1.20.3",

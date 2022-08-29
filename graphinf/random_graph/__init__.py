@@ -4,13 +4,12 @@ from _graphinf.random_graph import (
     BlockLabeledRandomGraph,
     NestedBlockLabeledRandomGraph,
     ErdosRenyiModel,
-    # ConfigurationModel,
     ConfigurationModelFamily,
     StochasticBlockModel,
     PlantedPartitionModel,
 )
-from graphinf.wrapper import Wrapper as _Wrapper
-from graphinf.utility import poisson_degreeseq, nbinom_degreeseq
+from ..wrapper import Wrapper as _Wrapper
+from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
 
 __all__ = (
     "RandomGraph",
