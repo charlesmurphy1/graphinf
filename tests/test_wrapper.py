@@ -1,38 +1,32 @@
 import pytest
 
-from _midynet.random_graph.prior import BlockCountUniformPrior, BlockUniformPrior
-from midynet.wrapper import Wrapper
+from _graphinf.random_graph import ErdosRenyiModel, ConfigurationModelFamily
+from graphinf.wrapper import Wrapper
 
 
 @pytest.fixture
 def wrapper():
-    size = 100
-    max_block_count = 10
-    block_count = BlockCountUniformPrior(1, max_block_count)
-    blocks = BlockUniformPrior(size, block_count)
+    erdos = ErdosRenyiModel(10, 10)
+    configuration = ConfigurationModelFamily(10, 10)
     return Wrapper(
-        blocks,
-        block_count=block_count,
+        erdos,
+        configuration=configuration,
     )
 
 
 def test_access_wrapped_method(wrapper):
-    assert wrapper.get_size() == 100
-    wrapper.sample_priors()
+    assert wrapper.get_size() == 10
+    wrapper.sample()
 
 
 def test_wrap(wrapper):
-    assert isinstance(wrapper.wrap, BlockUniformPrior)
+    assert isinstance(wrapper.wrap, ErdosRenyiModel)
 
 
 def test_other(wrapper):
-    assert isinstance(wrapper.others["block_count"], BlockCountUniformPrior)
-    assert isinstance(wrapper.other("block_count"), BlockCountUniformPrior)
-    assert isinstance(wrapper.block_count, BlockCountUniformPrior)
-
-
-def test_correct_setup(wrapper):
-    assert id(wrapper.get_block_count_prior()) == id(wrapper.block_count)
+    assert isinstance(wrapper.others["configuration"], ConfigurationModelFamily)
+    assert isinstance(wrapper.other("configuration"), ConfigurationModelFamily)
+    assert isinstance(wrapper.configuration, ConfigurationModelFamily)
 
 
 if __name__ == "__main__":
