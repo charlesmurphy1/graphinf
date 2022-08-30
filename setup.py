@@ -82,35 +82,6 @@ def find_files_recursively(path, ext=[]):
     return file_list
 
 
-ext_modules = [
-    Extension(
-        "_graphinf",
-        include_dirs=[
-            get_pybind_include(),
-            get_pybind_include(user=True),
-            "_graphinf/include",
-            "_graphinf/base_graph/include",
-            "_graphinf/SamplableSet/src",
-        ],
-        sources=[
-            "_graphinf/src/rng.cpp",
-            "_graphinf/src/exceptions.cpp",
-            "_graphinf/src/generators.cpp",
-            *find_files_recursively("_graphinf/src/utility", "cpp"),
-            *find_files_recursively("_graphinf/src/random_graph", "cpp"),
-            *find_files_recursively("_graphinf/src/data", "cpp"),
-            *find_files_recursively("_graphinf/src/mcmc", "cpp"),
-            "_graphinf/pybind_wrapper/pybind_main.cpp",
-        ],
-        language="c++",
-        extra_objects=[
-            find_compiled_basegraph("_graphinf/base_graph/build"),
-            find_compiled_SamplableSet("_graphinf/SamplableSet/src/build"),
-        ],
-    ),
-]
-
-
 # As of Python 3.6, C Compiler has a `has_flag` method.
 # cf http://bugs.python.org/issue26689
 def has_flag(compiler, flagname):
@@ -210,15 +181,46 @@ try:
 except RuntimeError:
     print("Compiling SamplableSet")
     compile_from_cmake("_graphinf/SamplableSet/src")
-if importlib.util.find_spec("SamplableSet") is None or "--reinstall" in sys.argv:
-    print("Installing SamplableSet")
-    install_from_setup("_graphinf/SamplableSet")
 
 try:
     find_compiled_basegraph("_graphinf/base_graph/build")
 except RuntimeError:
     print("Compiling BaseGraph")
     compile_from_cmake("_graphinf/base_graph")
+
+ext_modules = [
+    Extension(
+        "_graphinf",
+        include_dirs=[
+            get_pybind_include(),
+            get_pybind_include(user=True),
+            "_graphinf/include",
+            "_graphinf/base_graph/include",
+            "_graphinf/SamplableSet/src",
+        ],
+        sources=[
+            "_graphinf/src/rng.cpp",
+            "_graphinf/src/exceptions.cpp",
+            "_graphinf/src/generators.cpp",
+            *find_files_recursively("_graphinf/src/utility", "cpp"),
+            *find_files_recursively("_graphinf/src/random_graph", "cpp"),
+            *find_files_recursively("_graphinf/src/data", "cpp"),
+            *find_files_recursively("_graphinf/src/mcmc", "cpp"),
+            "_graphinf/pybind_wrapper/pybind_main.cpp",
+        ],
+        language="c++",
+        extra_objects=[
+            find_compiled_basegraph("_graphinf/base_graph/build"),
+            find_compiled_SamplableSet("_graphinf/SamplableSet/src/build"),
+        ],
+    ),
+]
+
+
+if importlib.util.find_spec("SamplableSet") is None or "--reinstall" in sys.argv:
+    print("Installing SamplableSet")
+    install_from_setup("_graphinf/SamplableSet")
+
 if importlib.util.find_spec("basegraph") is None or "--reinstall" in sys.argv:
     print("Installing BaseGraph")
     install_from_setup("_graphinf/base_graph")
