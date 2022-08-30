@@ -197,12 +197,20 @@ def install_from_setup(path_to_setup):
     os.chdir(current_dir)
 
 
+def clear_module(path_to_setup):
+    current_dir = os.getcwd()
+    p = pathlib.Path(path_to_setup)
+    os.chdir(p)
+    os.rmdir(build)
+    os.chdir(current_dir)
+
+
 try:
     find_compiled_SamplableSet("_graphinf/SamplableSet/src/build")
 except RuntimeError:
     print("Compiling SamplableSet")
     compile_from_cmake("_graphinf/SamplableSet/src")
-if importlib.util.find_spec("SamplableSet") is None:
+if importlib.util.find_spec("SamplableSet") is None or "--reinstall" in sys.argv:
     print("Installing SamplableSet")
     install_from_setup("_graphinf/SamplableSet")
 
@@ -211,9 +219,13 @@ try:
 except RuntimeError:
     print("Compiling BaseGraph")
     compile_from_cmake("_graphinf/base_graph")
-if importlib.util.find_spec("basegraph") is None:
+if importlib.util.find_spec("basegraph") is None or "--reinstall" in sys.argv:
     print("Installing BaseGraph")
     install_from_setup("_graphinf/base_graph")
+
+
+if "--reinstall" in sys.argv:
+    sys.argv.remove("--reinstall")
 
 setup(
     name="graphinf",
