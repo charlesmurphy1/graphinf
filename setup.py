@@ -1,6 +1,7 @@
 import os
 import sys
 import setuptools
+import pathlib
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
@@ -95,53 +96,10 @@ ext_modules = [
             "_graphinf/src/rng.cpp",
             "_graphinf/src/exceptions.cpp",
             "_graphinf/src/generators.cpp",
-            "_graphinf/src/utility/functions.cpp",
-            "_graphinf/src/utility/integer_partition.cpp",
-            "_graphinf/src/utility/polylog2_integral.cpp",
-            "_graphinf/src/random_graph/prior/block_count.cpp",
-            "_graphinf/src/random_graph/prior/block.cpp",
-            "_graphinf/src/random_graph/prior/nested_block.cpp",
-            "_graphinf/src/random_graph/prior/edge_count.cpp",
-            "_graphinf/src/random_graph/prior/label_graph.cpp",
-            "_graphinf/src/random_graph/prior/nested_label_graph.cpp",
-            "_graphinf/src/random_graph/prior/degree.cpp",
-            "_graphinf/src/random_graph/prior/labeled_degree.cpp",
-            "_graphinf/src/random_graph/likelihood/likelihood.cpp",
-            "_graphinf/src/random_graph/likelihood/erdosrenyi.cpp",
-            "_graphinf/src/random_graph/likelihood/configuration.cpp",
-            "_graphinf/src/random_graph/likelihood/sbm.cpp",
-            "_graphinf/src/random_graph/likelihood/dcsbm.cpp",
-            "_graphinf/src/random_graph/proposer/sampler/vertex_sampler.cpp",
-            "_graphinf/src/random_graph/proposer/sampler/edge_sampler.cpp",
-            "_graphinf/src/random_graph/proposer/sampler/label_sampler.cpp",
-            "_graphinf/src/random_graph/proposer/edge/util.cpp",
-            "_graphinf/src/random_graph/proposer/edge/edge_proposer.cpp",
-            "_graphinf/src/random_graph/proposer/edge/double_edge_swap.cpp",
-            "_graphinf/src/random_graph/proposer/edge/hinge_flip.cpp",
-            "_graphinf/src/random_graph/proposer/edge/single_edge.cpp",
-            "_graphinf/src/random_graph/proposer/edge/labeled_edge_proposer.cpp",
-            "_graphinf/src/random_graph/proposer/edge/labeled_double_edge_swap.cpp",
-            "_graphinf/src/random_graph/proposer/edge/labeled_hinge_flip.cpp",
-            "_graphinf/src/random_graph/proposer/label/uniform.cpp",
-            "_graphinf/src/random_graph/proposer/label/mixed.cpp",
-            "_graphinf/src/random_graph/util.cpp",
-            "_graphinf/src/random_graph/random_graph.cpp",
-            "_graphinf/src/random_graph/sbm.cpp",
-            "_graphinf/src/random_graph/dcsbm.cpp",
-            "_graphinf/src/data/data_model.cpp",
-            "_graphinf/src/data/dynamics/dynamics.cpp",
-            "_graphinf/src/data/dynamics/binary_dynamics.cpp",
-            "_graphinf/src/data/dynamics/cowan.cpp",
-            "_graphinf/src/data/dynamics/degree.cpp",
-            "_graphinf/src/data/dynamics/glauber.cpp",
-            "_graphinf/src/data/dynamics/sis.cpp",
-            "_graphinf/src/mcmc/mcmc.cpp",
-            "_graphinf/src/mcmc/callbacks/callback.cpp",
-            "_graphinf/src/mcmc/callbacks/verbose.cpp",
-            "_graphinf/src/mcmc/callbacks/action.cpp",
-            "_graphinf/src/mcmc/callbacks/collector.cpp",
-            "_graphinf/src/mcmc/community.cpp",
-            "_graphinf/src/mcmc/reconstruction.cpp",
+            *find_files_recursively("_graphinf/src/utility", "cpp"),
+            *find_files_recursively("_graphinf/src/random_graph", "cpp"),
+            *find_files_recursively("_graphinf/src/data", "cpp"),
+            *find_files_recursively("_graphinf/src/mcmc", "cpp"),
             "_graphinf/pybind_wrapper/pybind_main.cpp",
         ],
         language="c++",
@@ -220,12 +178,49 @@ class BuildExt(build_ext):
 
 description = "Package for the analysis of stochastic processes on random graphs."
 
+
+def compile_from_cmake(path_to_cmake):
+    current_dir = os.getcwd()
+    p = pathlib.Path(path_to_cmake)
+    if not os.path.isdir(p / "build"):
+        os.mkdir(p / "build")
+    os.chdir(p / "build")
+    os.system("cmake ..; make clean; make -j4")
+    os.chdir(current_dir)
+
+
+def install_from_setup(path_to_setup):
+    current_dir = os.getcwd()
+    p = pathlib.Path(path_to_setup)
+    os.chdir(p)
+    os.system("pip install .")
+    os.chdir(current_dir)
+
+
+try:
+    find_compiled_SamplableSet("_graphinf/SamplableSet/src/build")
+except RuntimeError:
+    print("Compiling SamplableSet")
+    compile_from_cmake("_graphinf/SamplableSet/src")
+if importlib.util.find_spec("SamplableSet") is None:
+    print("Installing SamplableSet")
+    install_from_setup("_graphinf/SamplableSet")
+
+try:
+    find_compiled_basegraph("_graphinf/base_graph/build")
+except RuntimeError:
+    print("Compiling BaseGraph")
+    compile_from_cmake("_graphinf/base_graph")
+if importlib.util.find_spec("basegraph") is None:
+    print("Installing BaseGraph")
+    install_from_setup("_graphinf/base_graph")
+
 setup(
     name="graphinf",
     version=0.1,
     author="Charles Murphy",
     author_email="charles.murphy.1@ulaval.ca",
-    # url="https://github.com/charlesmurphy1/graphinf",
+    url="https://github.com/charlesmurphy1/graphinf",
     license="MIT",
     description=description,
     packages=find_packages(),
@@ -234,8 +229,6 @@ setup(
         "numpy>=1.20.3",
         "scipy>=1.7.1",
         "psutil>=5.8.0",
-        "basegraph==1.0.0",
-        "SamplableSet>=2.0.0",
     ],
     python_requires=">=3.6",
     zip_safe=False,
