@@ -270,17 +270,6 @@ TEST_P(HSBMParametrizedTest, isCompatible_forEmptyGraph_returnFalse){
     EXPECT_FALSE(randomGraph.isCompatible(g));
 }
 
-TEST_P(HSBMParametrizedTest, isCompatible_forGraphWithOneEdgeMissing_returnFalse){
-    randomGraph.sample();
-    auto g = randomGraph.getState();
-    for (auto vertex: g){
-        for (auto neighbor: g.getNeighboursOfIdx(vertex)){
-            g.removeEdgeIdx(vertex, neighbor.vertexIndex);
-            break;
-        }
-    }
-    EXPECT_FALSE(randomGraph.isCompatible(g));
-}
 
 
 TEST_P(HSBMParametrizedTest, setLabels_forSomeRandomLabels_returnDepletedMethodError){

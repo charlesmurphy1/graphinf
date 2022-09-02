@@ -89,18 +89,6 @@ TEST_P(CMParametrizedTest, isCompatible_forEmptyGraph_returnFalse){
     EXPECT_FALSE(randomGraph.isCompatible(g));
 }
 
-TEST_P(CMParametrizedTest, isCompatible_forGraphWithOneEdgeMissing_returnFalse){
-    randomGraph.sample();
-    auto g = randomGraph.getState();
-    for (auto vertex: g){
-        for (auto neighbor: g.getNeighboursOfIdx(vertex)){
-            g.removeEdgeIdx(vertex, neighbor.vertexIndex);
-            break;
-        }
-    }
-    EXPECT_FALSE(randomGraph.isCompatible(g));
-}
-
 TEST_P(CMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyError){
     EXPECT_NO_THROW(doMetropolisHastingsSweepForGraph(randomGraph));
 }

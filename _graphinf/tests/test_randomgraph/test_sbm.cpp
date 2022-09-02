@@ -287,18 +287,6 @@ TEST_P(SBMParametrizedTest, isCompatible_forEmptyGraph_returnFalse){
     EXPECT_FALSE(randomGraph.isCompatible(g));
 }
 
-TEST_P(SBMParametrizedTest, isCompatible_forGraphWithOneEdgeMissing_returnFalse){
-    randomGraph.sample();
-    auto g = randomGraph.getState();
-    for (auto vertex: g){
-        for (auto neighbor: g.getNeighboursOfIdx(vertex)){
-            g.removeEdgeIdx(vertex, neighbor.vertexIndex);
-            break;
-        }
-    }
-    EXPECT_FALSE(randomGraph.isCompatible(g));
-}
-
 
 TEST_P(SBMParametrizedTest, setLabels_forSomeRandomLabels_returnConsistentState){
     size_t N = randomGraph.getSize();
