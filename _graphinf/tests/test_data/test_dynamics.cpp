@@ -33,6 +33,7 @@ class TestDynamicsBaseClass: public::testing::Test{
         State state = STATE;
         bool expectConsistencyError = true;
         void SetUp() {
+            dynamics.acceptSelfLoops(false);
             dynamics.setGraph(graph);
             dynamics.setState(state);
             // dynamics.checkSafety();
@@ -149,10 +150,19 @@ TEST_F(TestDynamicsBaseClass, applyMove_forSomeGraphMove_expectChangesInTheGraph
         for(const auto vertex: graph){
             std::vector<size_t> actual(dynamics.getNumStates(), 0);
             for(auto neighbor: graph.getNeighboursOfIdx(vertex)){
-                actual[past[neighbor.vertexIndex][t]] += neighbor.label;
+                size_t edgeMult = neighbor.label;
+                if (neighbor.vertexIndex == vertex){
+                    if (dynamics.acceptSelfLoops())
+                        edgeMult *= 2;
+                    else
+                        continue;
+                }
+
+                actual[past[neighbor.vertexIndex][t]] += edgeMult;
             }
-            for (size_t s=0; s<dynamics.getNumStates(); ++s)
+            for (size_t s=0; s<dynamics.getNumStates(); ++s){
                 EXPECT_EQ(expected[vertex][t][s], actual[s]);
+            }
         }
     }
     EXPECT_EQ(dynamics.getNeighborsState(), dynamics.computeNeighborsState(dynamics.getState()));

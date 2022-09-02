@@ -31,6 +31,7 @@ protected:
     std::vector<VertexState> m_state;
     Matrix<VertexState> m_neighborsState;
     const bool m_normalizeCoupling;
+    bool m_acceptSelfLoops=false;
     Matrix<VertexState> m_pastStateSequence;
     Matrix<VertexState> m_futureStateSequence;
     Matrix<std::vector<VertexState>> m_neighborsPastStateSequence;
@@ -76,6 +77,8 @@ public:
         checkConsistency();
         #endif
     }
+    bool acceptSelfLoops() { return m_acceptSelfLoops; }
+    void acceptSelfLoops(bool condition) { m_acceptSelfLoops = condition; }
     const Matrix<VertexState>& getNeighborsState() const { return m_neighborsState; }
     const Matrix<VertexState>& getPastStates() const { return m_pastStateSequence; }
     const Matrix<VertexState>& getFutureStates() const { return m_futureStateSequence; }
@@ -192,7 +195,15 @@ const NeighborsState Dynamics<GraphPriorType>::computeNeighborsState(const State
     for ( auto idx: graph ){
         neighborsState[idx].resize(m_numStates);
         for ( auto neighbor: graph.getNeighboursOfIdx(idx) ){
-            neighborsState[ idx ][ state[neighbor.vertexIndex] ] += neighbor.label;
+            size_t edgeMult = neighbor.label;
+            if (idx == neighbor.vertexIndex){
+                if (m_acceptSelfLoops)
+                    edgeMult *= 2;
+                else
+                    continue;
+            }
+
+            neighborsState[ idx ][ state[neighbor.vertexIndex] ] += edgeMult;
         }
     }
     return neighborsState;
@@ -208,8 +219,16 @@ const NeighborsStateSequence Dynamics<GraphPriorType>::computeNeighborsStateSequ
         neighborsStateSequence[idx].resize(m_numSteps);
         for (size_t t=0; t<m_numSteps; t++){
             neighborsStateSequence[idx][t].resize(m_numStates);
-            for ( const auto& neighbor: graph.getNeighboursOfIdx(idx) )
-                neighborsStateSequence[ idx ][t][ stateSequence[neighbor.vertexIndex][t] ] += neighbor.label;
+            for ( const auto& neighbor: graph.getNeighboursOfIdx(idx) ){
+                size_t edgeMult = neighbor.label;
+                if (idx == neighbor.vertexIndex){
+                    if (m_acceptSelfLoops)
+                        edgeMult *= 2;
+                    else
+                        continue;
+                }
+                neighborsStateSequence[ idx ][t][ stateSequence[neighbor.vertexIndex][t] ] += edgeMult;
+            }
         }
     }
     return neighborsStateSequence;
@@ -218,16 +237,23 @@ const NeighborsStateSequence Dynamics<GraphPriorType>::computeNeighborsStateSequ
 
 template<typename GraphPriorType>
 void Dynamics<GraphPriorType>::updateNeighborsStateInPlace(
-    BaseGraph::VertexIndex vertexIdx,
+    BaseGraph::VertexIndex idx,
     VertexState prevVertexState,
     VertexState newVertexState,
     NeighborsState& neighborsState) const {
     const auto& graph = BaseClass::getGraph();
     if (prevVertexState == newVertexState)
         return;
-    for ( auto neighbor: graph.getNeighboursOfIdx(vertexIdx) ){
-        neighborsState[neighbor.vertexIndex][prevVertexState] -= neighbor.label;
-        neighborsState[neighbor.vertexIndex][newVertexState] += neighbor.label;
+    for ( auto neighbor: graph.getNeighboursOfIdx(idx) ){
+        size_t edgeMult = neighbor.label;
+        if (idx == neighbor.vertexIndex){
+            if (m_acceptSelfLoops)
+                edgeMult *= 2;
+            else
+                continue;
+        }
+        neighborsState[neighbor.vertexIndex][prevVertexState] -= edgeMult;
+        neighborsState[neighbor.vertexIndex][newVertexState] += edgeMult;
     }
 };
 
@@ -298,6 +324,8 @@ void Dynamics<GraphPriorType>::updateNeighborsStateFromEdgeMove(
     std::map<BaseGraph::VertexIndex, VertexNeighborhoodStateSequence>& nextNeighborMap) const{
     edge = getOrderedEdge(edge);
     BaseGraph::VertexIndex v = edge.first, u = edge.second;
+    if (u == v and not m_acceptSelfLoops)
+        return;
     const auto& graph = BaseClass::getGraph();
 
     if (graph.getEdgeMultiplicityIdx(edge) == 0 and counter < 0)
@@ -371,22 +399,24 @@ void Dynamics<GraphPriorType>::applyGraphMoveToSelf(const GraphMove& move) {
     for (const auto& edge : move.addedEdges){
         v = edge.first;
         u = edge.second;
+        if (u == v and not m_acceptSelfLoops)
+            continue;
         verticesAffected.insert(v);
         verticesAffected.insert(u);
         updateNeighborsStateFromEdgeMove(edge, 1, prevNeighborMap, nextNeighborMap);
         m_neighborsState[u][m_state[v]] += 1;
-        if (u != v)
-            m_neighborsState[v][m_state[u]] += 1;
+        m_neighborsState[v][m_state[u]] += 1;
     }
     for (const auto& edge : move.removedEdges){
         v = edge.first;
         u = edge.second;
+        if (u == v and not m_acceptSelfLoops)
+            continue;
         verticesAffected.insert(v);
         verticesAffected.insert(u);
         updateNeighborsStateFromEdgeMove(edge, -1, prevNeighborMap, nextNeighborMap);
         m_neighborsState[u][m_state[v]] -= 1;
-        if (u != v)
-            m_neighborsState[v][m_state[u]] -= 1;
+        m_neighborsState[v][m_state[u]] -= 1;
     }
 
     for (const auto& idx: verticesAffected){

@@ -52,11 +52,11 @@ class GlauberDynamics: public BinaryDynamics<GraphPriorType> {
             m_couplingConstant(couplingConstant) {}
 
         const double getActivationProb(const VertexNeighborhoodState& vertexNeighborState) const override {
-            double p = sigmoid( 2 * getCoupling() * ((int)vertexNeighborState[0] - (int)vertexNeighborState[1]));
+            double p = sigmoid(2 * getCoupling() * ((int)vertexNeighborState[1] - (int)vertexNeighborState[0]));
             return p;
         }
         const double getDeactivationProb(const VertexNeighborhoodState& vertexNeighborState) const override {
-            double p = sigmoid(-2 * getCoupling() * ((int)vertexNeighborState[0] - (int)vertexNeighborState[1]));
+            double p = sigmoid(2 * getCoupling() * ((int)vertexNeighborState[0] - (int)vertexNeighborState[1]));
             return p;
         }
         const double getCoupling() const {

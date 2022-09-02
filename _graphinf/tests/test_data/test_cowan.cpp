@@ -22,7 +22,6 @@ public:
 
 
 TEST_F(TestCowanDynamics, getActivationProb_forEachStateTransition_returnCorrectProbability) {
-    std::cout << "A=" << A << ", NU=" << NU << ", MU=" << MU << std::endl;
     for (const auto& neighbor_state: NEIGHBOR_STATES)
         EXPECT_EQ(sigmoid(A*(NU*neighbor_state[1] - MU)), dynamics.getActivationProb(neighbor_state));
 }

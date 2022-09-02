@@ -19,13 +19,17 @@ public:
     GraphInf::GlauberDynamics<RandomGraph> dynamics = GraphInf::GlauberDynamics<RandomGraph>(
         randomGraph, NUM_STEPS, COUPLING_CONSTANT, 0, 0, false, true, -1
     );
+
+    void SetUp(){
+        dynamics.acceptSelfLoops(false);
+    }
 };
 
 
 TEST_F(TestGlauberDynamics, getActivationProb_forEachStateTransition_returnCorrectProbability) {
     for (auto neighborState: NEIGHBOR_STATES){
         EXPECT_EQ(
-            sigmoid( 2 * COUPLING_CONSTANT/avgk * ((int)neighborState[0]-(int)neighborState[1]) ),
+            sigmoid( 2 * COUPLING_CONSTANT/avgk * ((int)neighborState[1]-(int)neighborState[0]) ),
             dynamics.getActivationProb(neighborState)
         );
     }
@@ -34,25 +38,47 @@ TEST_F(TestGlauberDynamics, getActivationProb_forEachStateTransition_returnCorre
 TEST_F(TestGlauberDynamics, getDeactivationProb_forEachStateTransition_returnCorrectProbability) {
     for (auto neighborState: NEIGHBOR_STATES){
         EXPECT_EQ(sigmoid(
-            -2*COUPLING_CONSTANT/avgk*((int)neighborState[0]-(int)neighborState[1])),
+            2*COUPLING_CONSTANT/avgk*((int)neighborState[0]-(int)neighborState[1])),
             dynamics.getDeactivationProb(neighborState)
         );
     }
+}
+
+TEST_F(TestGlauberDynamics, getLogLikelihoodRatioFromGraphMove_forAddedEdge_returnCorrectValue) {
+    dynamics.sample();
+    GraphMove move = {{}, {{0, 1}}};
+    double actual = dynamics.getLogLikelihoodRatioFromGraphMove(move);
+    double logLikelihoodBefore = dynamics.getLogLikelihood();
+    dynamics.applyGraphMove(move);
+    double logLikelihoodAfter = dynamics.getLogLikelihood();
+    EXPECT_NEAR(actual, logLikelihoodAfter - logLikelihoodBefore, 1e-6);
+}
+
+TEST_F(TestGlauberDynamics, getLogLikelihoodRatioFromGraphMove_forRemovedEdge_returnCorrectValue) {
+    dynamics.sample();
+    GraphMove move = {{{0, 1}}, {}};
+    GraphMove reversedMove = {{}, {{0, 1}}};
+    dynamics.applyGraphMove(reversedMove);
+    double actual = dynamics.getLogLikelihoodRatioFromGraphMove(move);
+    double logLikelihoodBefore = dynamics.getLogLikelihood();
+    dynamics.applyGraphMove(move);
+    double logLikelihoodAfter = dynamics.getLogLikelihood();
+    EXPECT_NEAR(actual, logLikelihoodAfter - logLikelihoodBefore, 1e-6);
 }
 
 TEST_F(TestGlauberDynamics, afterSample_getCorrectNeighborState){
     dynamics.sample();
     dynamics.checkConsistency();
     // std::vector<int> s(dynamics.getNumSteps(), 0);
-    std::cout << "s = [";
-    for (auto t=0; t<dynamics.getNumSteps(); ++t){
-        int s = 0;
-        for (auto i=0; i<dynamics.getSize(); ++i){
-            s += dynamics.getPastStates()[i][t];
-        }
-        std::cout << " " << s << " ";
-    }
-    std::cout << "]" << std::endl;;
+    // std::cout << "s = [";
+    // for (auto t=0; t<dynamics.getNumSteps(); ++t){
+    //     int s = 0;
+    //     for (auto i=0; i<dynamics.getSize(); ++i){
+    //         s += dynamics.getPastStates()[i][t];
+    //     }
+    //     std::cout << " " << s << " ";
+    // }
+    // std::cout << "]" << std::endl;;
 
 }
 
