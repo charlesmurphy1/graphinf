@@ -38,6 +38,8 @@ py::class_<Dynamics<GraphPriorType>, DataModel<GraphPriorType>, PyDynamics<Graph
         .def("set_num_steps", &Dynamics<GraphPriorType>::setNumSteps)
         .def("get_random_state", &Dynamics<GraphPriorType>::getRandomState)
         .def("normalizeCoupling", &Dynamics<GraphPriorType>::normalizeCoupling)
+        .def("accept_selfloops", [](Dynamics<GraphPriorType>& self){ return self.acceptSelfLoops(); })
+        .def("accept_selfloops", [](Dynamics<GraphPriorType>& self, bool condition){ self.acceptSelfLoops(condition); }, py::arg("condition"))
         .def("sync_update_state", &Dynamics<GraphPriorType>::syncUpdateState)
         .def("async_update_state", &Dynamics<GraphPriorType>::asyncUpdateState,
             py::arg("num_updates")=1)

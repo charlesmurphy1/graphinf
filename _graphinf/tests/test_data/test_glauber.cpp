@@ -16,7 +16,7 @@ public:
     const size_t NUM_STEPS=20;
     double avgk = 5;
     ErdosRenyiModel randomGraph = ErdosRenyiModel(100, 250);
-    GraphInf::GlauberDynamics<RandomGraph> dynamics = GraphInf::GlauberDynamics<RandomGraph>(
+    GlauberDynamics<RandomGraph> dynamics = GraphInf::GlauberDynamics<RandomGraph>(
         randomGraph, NUM_STEPS, COUPLING_CONSTANT, 0, 0, false, true, -1
     );
 
@@ -108,5 +108,78 @@ TEST_F(TestGlauberDynamics, getLogLikelihoodRatio_forSomeGraphMove_returnLogJoin
 
     EXPECT_NEAR(ratio, logLikelihoodAfter - logLikelihoodBefore, 1e-6);
 }
+//
+// TEST(ExtraGlauberTest, testing_tests){
+//     seedWithTime();
+//     ErdosRenyiModel g = {5, 5};
+//     GlauberDynamics<RandomGraph> m = {g, 100, 10};
+//     m.sample();
+//     std::vector<std::vector<size_t>> s;
+//     for (size_t t=0; t<100; ++t){
+//         s.push_back({});
+//         for (auto v : m.getGraph()){
+//             s[t].push_back(m.getPastStates()[v][t]);
+//         }
+//     }
+//     displayMatrix(s, "s", true);
+//
+//     m.setState(s[0]);
+//     auto p = m.getTransitionProbs(0);
+//     std::cout<< displayVector(s[0], "s0") << "->" << displayVector(s[1], "s1") << std::endl;
+//
+//     for (auto v : m.getGraph()){
+//         std::cout << "\t" << displayVector(m.getTransitionProbs(v), "p[" + std::to_string(v) + "]") << std::endl;
+//     }
+//
+// }
+
+TEST(ExtraGlauberTest, testing_tests){
+    seedWithTime();
+    ErdosRenyiModel g = {5, 5};
+    GlauberDynamics<RandomGraph> m = {g, 100, 10};
+    m.sample();
+
+    MultiGraph gg(5);
+    gg.addEdgeIdx(0, 1);
+    gg.addEdgeIdx(0, 1);
+    gg.addEdgeIdx(0, 3);
+    gg.addEdgeIdx(0, 4);
+    gg.addEdgeIdx(2, 3);
+
+    std::vector<size_t> s0 = {0, 1, 0, 1, 1};
+
+    m.setGraph(gg);
+    m.sampleState(s0);
+    std::vector<std::vector<size_t>> s;
+    for (size_t t=0; t<100; ++t){
+        s.push_back({});
+        for (auto v : m.getGraph()){
+            s[t].push_back(m.getPastStates()[v][t]);
+        }
+    }
+    displayMatrix(s, "s", true);
+
+    m.setState(s[0]);
+    auto p = m.getTransitionProbs(0);
+    std::cout<< displayVector(s[0], "s0") << "-> " << displayVector(s[1], "s1") << std::endl;
+    for (auto v : m.getGraph()){
+        std::cout << "\t" << displayVector(m.getTransitionProbs(v), "p[" + std::to_string(v) + "]") << std::endl;
+    }
+
+}
+
+/*
+
+[0 1 0 1 1] -> [0 0 0 0 0] : [1e-15, 0.999999999999999], n=[0, 4]
+Undirected graph of size: 5
+Neighbours of:
+0: (1, 2)(3, 1)(4, 1)
+1: (0, 2)
+2: (3, 1)
+3: (0, 1)(2, 1)
+4: (0, 1)
+
+
+*/
 
 }
