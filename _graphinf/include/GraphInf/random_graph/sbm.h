@@ -107,11 +107,6 @@ public:
         m_labelGraphPriorPtr->checkSelfConsistency();
         checkGraphConsistencyWithLabelGraph("StochasticBlockModelBase", m_state, getLabels(), getLabelGraph());
     }
-    const bool isCompatible(const MultiGraph& graph) const override{
-        if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)) return false;
-        auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
-        return labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix();
-    }
     void computationFinished() const override {
         m_isProcessed = false;
         m_labelGraphPriorPtr->computationFinished();
@@ -150,6 +145,12 @@ public:
                 checkSafety();
                 sample();
             }
+
+    const bool isCompatible(const MultiGraph& graph) const override{
+        if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)) return false;
+        auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
+        return labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix();
+    }
 };
 
 class StochasticBlockModelFamily: public StochasticBlockModelBase{
@@ -250,6 +251,13 @@ public:
             ),
             m_assortativity(assortativity) { }
     const double getAssortativity() const { return m_assortativity; }
+
+
+    const bool isCompatible(const MultiGraph& graph) const override{
+        if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)) return false;
+        auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
+        return labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix();
+    }
 };
 
 }// end GraphInf

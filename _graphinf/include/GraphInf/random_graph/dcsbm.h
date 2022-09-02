@@ -107,13 +107,13 @@ public:
             "DegreeCorrectedStochasticBlockModelBase", "m_state", m_state, "m_degreePriorPtr", getDegrees()
         );
     }
-    const bool isCompatible(const MultiGraph& graph) const override{
-        if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)) return false;
-        auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
-        bool sameLabelGraph = labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix() ;
-        bool sameDegrees = graph.getDegrees() == getDegrees();
-        return sameLabelGraph and sameDegrees;
-    }
+    // const bool isCompatible(const MultiGraph& graph) const override{
+    //     if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)) return false;
+    //     auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
+    //     bool sameLabelGraph = labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix() ;
+    //     bool sameDegrees = graph.getDegrees() == getDegrees();
+    //     return sameLabelGraph and sameDegrees;
+    // }
     void computationFinished() const override {
         m_isProcessed = false;
         m_degreePriorPtr->computationFinished();

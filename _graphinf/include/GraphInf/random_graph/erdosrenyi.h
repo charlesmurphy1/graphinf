@@ -49,9 +49,9 @@ public:
     const EdgeCountPrior& getEdgeCountPrior(){ return *m_edgeCountPriorPtr; }
     void setEdgeCountPrior(EdgeCountPrior& edgeCountPrior){ m_edgeCountPriorPtr = &edgeCountPrior; }
 
-    const bool isCompatible(const MultiGraph& graph) const override{
-        return RandomGraph::isCompatible(graph) and graph.getTotalEdgeNumber() == getEdgeCount();
-    }
+    // const bool isCompatible(const MultiGraph& graph) const override{
+    //     return RandomGraph::isCompatible(graph) and graph.getTotalEdgeNumber() == getEdgeCount();
+    // }
     void computationFinished() const override {
         m_isProcessed = false;
         m_edgeCountPriorPtr->computationFinished();

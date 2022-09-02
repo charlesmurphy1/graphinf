@@ -107,18 +107,18 @@ public:
         m_degreePriorPtr->checkSelfConsistency();
         checkGraphConsistencyWithLabelGraph("NestedDegreeStochasticBlockModelFamily", m_state, getLabels(), getLabelGraph());
     }
-    const bool isCompatible(const MultiGraph& graph) const override{
-        if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)){
-            return false;
-        }
-        if (getLabelGraphFromGraph(graph, getLabels()) != getLabelGraph()){
-            return false;
-        }
-        if (m_degreePriorPtr->getState() != graph.getDegrees()){
-            return false;
-        }
-        return true;
-    }
+    // const bool isCompatible(const MultiGraph& graph) const override{
+    //     if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)){
+    //         return false;
+    //     }
+    //     if (getLabelGraphFromGraph(graph, getLabels()) != getLabelGraph()){
+    //         return false;
+    //     }
+    //     if (m_degreePriorPtr->getState() != graph.getDegrees()){
+    //         return false;
+    //     }
+    //     return true;
+    // }
 
     void computationFinished() const override {
         m_isProcessed = false;

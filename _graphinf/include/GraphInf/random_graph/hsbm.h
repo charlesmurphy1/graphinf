@@ -104,11 +104,11 @@ public:
         m_nestedLabelGraphPrior.checkSelfConsistency();
         checkGraphConsistencyWithLabelGraph("NestedStochasticBlockModelBase", m_state, getLabels(), getLabelGraph());
     }
-    const bool isCompatible(const MultiGraph& graph) const override{
-        if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)) return false;
-        auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
-        return labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix();
-    }
+    // const bool isCompatible(const MultiGraph& graph) const override{
+    //     if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph)) return false;
+    //     auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
+    //     return labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix();
+    // }
     void computationFinished() const override {
         m_isProcessed = false;
         m_nestedLabelGraphPrior.computationFinished();

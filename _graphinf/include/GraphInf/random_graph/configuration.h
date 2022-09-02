@@ -57,9 +57,6 @@ public:
     const size_t getDegreeOfIdx(BaseGraph::VertexIndex vertex) const { return m_degreePriorPtr->getDegreeOfIdx(vertex);}
     const std::vector<size_t>& getDegrees() const { return m_degreePriorPtr->getState();}
 
-    const bool isCompatible(const MultiGraph& graph) const override{
-        return RandomGraph::isCompatible(graph) and graph.getDegrees() == m_degreePriorPtr->getState(); ;
-    }
     void computationFinished() const override {
         m_isProcessed = false;
         m_degreePriorPtr->computationFinished();
@@ -98,6 +95,10 @@ public:
             checkSafety();
             sample();
         }
+
+    const bool isCompatible(const MultiGraph& graph) const override{
+        return RandomGraph::isCompatible(graph) and graph.getDegrees() == m_degreePriorPtr->getState(); ;
+    }
 };
 
 class ConfigurationModelFamily : public ConfigurationModelBase{
