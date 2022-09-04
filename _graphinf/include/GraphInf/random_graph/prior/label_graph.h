@@ -200,7 +200,7 @@ private:
 
     }
     double getLogLikelihood(size_t blockCount, size_t edgeCount) const {
-        return -logMultisetCoefficient( blockCount*(blockCount+1)/2, edgeCount );
+        return -logMultisetCoefficient( blockCount*(blockCount + 1) / 2, edgeCount );
     }
 };
 

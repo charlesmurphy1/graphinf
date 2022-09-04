@@ -189,7 +189,7 @@ const double VertexLabeledDegreeUniformPrior::getLogLikelihood() const{
 
     for (size_t r = 0; r < getBlockPrior().getBlockCount(); r++)
         if (vertexCounts[r] > 0)
-            logLikelihood -= logMultisetCoefficient(edgeCounts[r], vertexCounts[r]);
+            logLikelihood -= logMultisetCoefficient(vertexCounts[r], edgeCounts[r]);
     return logLikelihood;
 }
 
@@ -213,7 +213,7 @@ const double VertexLabeledDegreeUniformPrior::getLogLikelihoodRatioFromGraphMove
     for (auto diff : diffEdgeCountsMap){
         auto er = edgeCounts[diff.first];
         auto nr = vertexCounts[diff.first];
-        logLikelihoodRatio -= logMultisetCoefficient(er + diff.second, nr) - logMultisetCoefficient(er, nr);
+        logLikelihoodRatio -= logMultisetCoefficient(nr, er + diff.second) - logMultisetCoefficient(nr, er);
     }
 
     return logLikelihoodRatio;
@@ -234,8 +234,8 @@ const double VertexLabeledDegreeUniformPrior::getLogLikelihoodRatioFromLabelMove
     size_t eta_s =  m_degreeCounts.get({s, k});
 
     double logLikelihoodRatio = 0;
-    logLikelihoodRatio -= logMultisetCoefficient(er - k, nr - 1) - logMultisetCoefficient(er, nr);
-    logLikelihoodRatio -= logMultisetCoefficient(es + k, ns + 1) - logMultisetCoefficient(es, ns);
+    logLikelihoodRatio -= logMultisetCoefficient(nr - 1, er - k) - logMultisetCoefficient(nr, er);
+    logLikelihoodRatio -= logMultisetCoefficient(ns + 1, es + k) - logMultisetCoefficient(ns, es);
     return logLikelihoodRatio;
 }
 

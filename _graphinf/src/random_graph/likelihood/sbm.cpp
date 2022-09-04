@@ -145,8 +145,6 @@ const double UniformStochasticBlockModelLikelihood::getLogLikelihood() const {
 
     const MultiGraph& labelGraph = (*m_labelGraphPriorPtrPtr)->getState() ;
     const CounterMap<BlockIndex>& vertexCounts = (*m_labelGraphPriorPtrPtr)->getBlockPrior().getVertexCounts();
-    const auto& likelihoodFunction = (*m_withParallelEdgesPtr) ? logMultisetCoefficient: logBinomialCoefficient;
-
 
     double logLikelihood = 0;
 
@@ -155,15 +153,10 @@ const double UniformStochasticBlockModelLikelihood::getLogLikelihood() const {
             continue;
         if (vFunc(vertexCounts[r]) < labelGraph.getEdgeMultiplicityIdx(r, r) and not *m_withParallelEdgesPtr)
             return -INFINITY;
-        logLikelihood -= likelihoodFunction(
-            vFunc(vertexCounts[r]),
-            labelGraph.getEdgeMultiplicityIdx(r, r)
-        ) ;
+        logLikelihood -= logLikelihoodFunc( vertexCounts[r], vertexCounts[r], labelGraph.getEdgeMultiplicityIdx(r, r), true ) ;
         for (const auto& s : labelGraph.getNeighboursOfIdx(r))
             if (r < s.vertexIndex){
-                if (vertexCounts[r] * vertexCounts[s.vertexIndex] < s.label and not *m_withParallelEdgesPtr)
-                    return -INFINITY;
-                logLikelihood -= likelihoodFunction(vertexCounts[r] * vertexCounts[s.vertexIndex], s.label);
+                logLikelihood -= logLikelihoodFunc(vertexCounts[r], vertexCounts[s.vertexIndex], s.label, false);
             }
     }
     return logLikelihood;
@@ -172,7 +165,6 @@ const double UniformStochasticBlockModelLikelihood::getLogLikelihood() const {
 const double UniformStochasticBlockModelLikelihood::getLogLikelihoodRatioFromGraphMove (const GraphMove& move) const {
     const MultiGraph& labelGraph = (*m_labelGraphPriorPtrPtr)->getState();
     const CounterMap<BlockIndex>& vertexCounts = (*m_labelGraphPriorPtrPtr)->getBlockPrior().getVertexCounts();
-    const auto& likelihoodFunction = (*m_withParallelEdgesPtr) ? logMultisetCoefficient: logBinomialCoefficient;
     double logLikelihoodRatio = 0;
 
     IntMap<std::pair<BlockIndex, BlockIndex>> diffEdgeMatMap;
@@ -186,9 +178,13 @@ const double UniformStochasticBlockModelLikelihood::getLogLikelihoodRatioFromGra
         auto r = diff.first.first, s = diff.first.second;
         size_t nr = vertexCounts[r], ns = vertexCounts[s];
         int ers = (r >= labelGraph.getSize() or s >= labelGraph.getSize()) ? 0 : labelGraph.getEdgeMultiplicityIdx(r, s);
-        int vertexTerm = (r == s) ? vFunc(nr) : nr * ns;
-        logLikelihoodRatio -= likelihoodFunction(vertexTerm, ers + diff.second);
-        logLikelihoodRatio += likelihoodFunction(vertexTerm, ers);
+        if (r == s){
+            logLikelihoodRatio -= logLikelihoodFunc(nr, ns, ers + diff.second, true);
+            logLikelihoodRatio += logLikelihoodFunc(nr, ns, ers, true);
+        } else {
+            logLikelihoodRatio -= logLikelihoodFunc(nr, ns, ers + diff.second, false);
+            logLikelihoodRatio += logLikelihoodFunc(nr, ns, ers, false);
+        }
     }
 
     return logLikelihoodRatio;
@@ -199,7 +195,6 @@ const double UniformStochasticBlockModelLikelihood::getLogLikelihoodRatioFromLab
         return 0;
     const MultiGraph& labelGraph = (*m_labelGraphPriorPtrPtr)->getState();
     const CounterMap<BlockIndex>& vertexCounts = (*m_labelGraphPriorPtrPtr)->getBlockPrior().getVertexCounts();
-    const auto& likelihoodFunction = (*m_withParallelEdgesPtr) ? logMultisetCoefficient: logBinomialCoefficient;
 
     double logLikelihoodRatio = 0;
 
@@ -211,14 +206,15 @@ const double UniformStochasticBlockModelLikelihood::getLogLikelihoodRatioFromLab
     getDiffEdgeMatMapFromBlockMove(move, eDiffMap);
     for (auto diff : eDiffMap){
         auto r = diff.first.first, s = diff.first.second;
-        size_t nr = vertexCounts[r], ns = vertexCounts[s];
-        int edgeTermBefore = (r >= labelGraph.getSize() or s >= labelGraph.getSize()) ? 0 : labelGraph.getEdgeMultiplicityIdx(r, s);
-        int edgeTermAfter = (r >= labelGraph.getSize() or s >= labelGraph.getSize()) ? diff.second : (labelGraph.getEdgeMultiplicityIdx(r, s) + diff.second);
-        int vertexTermBefore = (r == s) ? vFunc(nr) : nr * ns;
-        int vertexTermAfter = (r == s) ? vFunc(nr + vDiffMap.get(r)) : (nr + vDiffMap.get(r)) * (ns + vDiffMap.get(s));
-        if (vertexTermAfter < edgeTermAfter and not *m_withParallelEdgesPtr)
-            return -INFINITY;
-        logLikelihoodRatio -= likelihoodFunction(vertexTermAfter, edgeTermAfter) - likelihoodFunction(vertexTermBefore, edgeTermBefore);
+        size_t nr = vertexCounts[r], ns = vertexCounts[s], dnr = vDiffMap.get(r), dns = vDiffMap.get(s);
+        int ers = (r >= labelGraph.getSize() or s >= labelGraph.getSize()) ? 0 : labelGraph.getEdgeMultiplicityIdx(r, s);
+        if (r == s){
+            logLikelihoodRatio -= logLikelihoodFunc((nr + dnr), (ns + dns), ers + diff.second, true);
+            logLikelihoodRatio += logLikelihoodFunc(nr, ns, ers, true);
+        } else {
+            logLikelihoodRatio -= logLikelihoodFunc((nr + dnr), (ns + dns), ers + diff.second, false);
+            logLikelihoodRatio += logLikelihoodFunc(nr, ns, ers, false);
+        }
     }
 
     // remaining contributions that did not change the edge counts
@@ -233,13 +229,15 @@ const double UniformStochasticBlockModelLikelihood::getLogLikelihoodRatioFromLab
             if (visited.count(rs) > 0 or not eDiffMap.isEmpty(rs))
                 continue;
             visited.insert(rs);
-            size_t nr = vertexCounts[r], ns = vertexCounts[s];
-            int vertexTermBefore = (r == s) ? vFunc(nr) : nr * ns;
-            int vertexTermAfter = (r == s) ? vFunc(nr + vDiffMap.get(r)) : (nr + vDiffMap.get(r)) * (ns + vDiffMap.get(s));
-            int edgeTerm = neighbor.label;
-            if (vertexTermAfter < edgeTerm and not *m_withParallelEdgesPtr)
-                return -INFINITY;
-            logLikelihoodRatio -= likelihoodFunction(vertexTermAfter, edgeTerm) - likelihoodFunction(vertexTermBefore, edgeTerm);
+            size_t nr = vertexCounts[r], ns = vertexCounts[s], dnr = vDiffMap.get(r), dns = vDiffMap.get(s);
+            int ers = neighbor.label;
+            if (r == s){
+                logLikelihoodRatio -= logLikelihoodFunc((nr + dnr), (ns + dns), neighbor.label, true);
+                logLikelihoodRatio += logLikelihoodFunc(nr, ns, neighbor.label, true);
+            } else {
+                logLikelihoodRatio -= logLikelihoodFunc((nr + dnr), (ns + dns), neighbor.label, false);
+                logLikelihoodRatio += logLikelihoodFunc(nr, ns, neighbor.label, false);
+            }
         }
     }
 

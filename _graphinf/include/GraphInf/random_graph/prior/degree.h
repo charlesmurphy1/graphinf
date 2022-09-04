@@ -135,7 +135,7 @@ public:
 
 class DegreeUniformPrior: public DegreePrior{
     const double getLogLikelihoodFromEdgeCount(size_t edgeCount) const {
-        return -logMultisetCoefficient(edgeCount, getSize());
+        return -logMultisetCoefficient(getSize(), 2 * edgeCount);
     }
 public:
     using DegreePrior::DegreePrior;

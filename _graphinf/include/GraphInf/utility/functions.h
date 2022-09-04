@@ -14,7 +14,7 @@ namespace GraphInf {
 
 double logFactorial(size_t);
 double logDoubleFactorial(size_t);
-double logBinomialCoefficient(size_t, size_t);
+double logBinomialCoefficient(size_t, size_t, bool force=true);
 double logPoissonPMF(size_t x, double mean);
 double logZeroTruncatedPoissonPMF(size_t x, double mean);
 double logMultinomialCoefficient(std::list<size_t> sequence);

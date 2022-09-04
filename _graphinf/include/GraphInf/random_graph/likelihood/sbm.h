@@ -45,6 +45,20 @@ class UniformStochasticBlockModelLikelihood: public StochasticBlockModelLikeliho
         else
             return nr * (nr - 1) / 2;
     }
+    const double logLikelihoodFunc(int nr, int ns, int ers, bool isSelfLoop) const {
+        if (*m_withParallelEdgesPtr){
+            if (isSelfLoop)
+                return logMultisetCoefficient(nr * (nr + 1) / 2, ers);
+            else
+                return logMultisetCoefficient(nr * ns, ers);
+        } else {
+            if (isSelfLoop)
+                return logBinomialCoefficient(nr * (nr + 1) / 2, ers);
+            else
+                return logBinomialCoefficient(nr * ns, ers);
+        }
+        return 0;
+    }
 public:
     const MultiGraph sample() const override {
         const auto& blocks = (*m_labelGraphPriorPtrPtr)->getBlocks();
