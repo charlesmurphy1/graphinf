@@ -39,8 +39,8 @@ void initLabeledDegreePrior(py::module& m){
         ;
 
     py::class_<VertexLabeledDegreeUniformHyperPrior, VertexLabeledDegreePrior>(m, "VertexLabeledDegreeUniformHyperPrior")
-        .def(py::init<>())
-        .def(py::init<LabelGraphPrior&>(), py::arg("label_graph_prior"))
+        .def(py::init<bool>(), py::arg("exact")=false)
+        .def(py::init<LabelGraphPrior&, bool>(), py::arg("label_graph_prior"), py::arg("exact")=false)
         ;
 
 

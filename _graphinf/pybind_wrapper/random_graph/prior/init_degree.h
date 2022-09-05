@@ -36,8 +36,8 @@ void initDegreePrior(py::module& m){
         ;
 
     py::class_<DegreeUniformHyperPrior, DegreePrior>(m, "DegreeUniformHyperPrior")
-        .def(py::init<size_t>(), py::arg("size"))
-        .def(py::init<size_t, EdgeCountPrior&>(), py::arg("size"), py::arg("edge_count_prior"))
+        .def(py::init<size_t, bool>(), py::arg("size"), py::arg("exact")=false)
+        .def(py::init<size_t, EdgeCountPrior&, bool>(), py::arg("size"), py::arg("edge_count_prior"), py::arg("exact")=false)
         ;
 
 

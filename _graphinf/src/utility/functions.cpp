@@ -154,4 +154,23 @@ void displayGraph(const MultiGraph&graph, std::string name){
     }
 }
 
+std::list<MultiGraph> enumerateAllGraphs(size_t N, size_t E, bool withSelfLoops, bool withParallelEdges){
+    std::list<BaseGraph::VertexIndex> allVertices;
+    for (auto i=0; i<N; ++i)
+        allVertices.push_back(i);
+    std::list<std::list<BaseGraph::VertexIndex>> allEdges = combinations(allVertices, 2, withSelfLoops);
+    std::list<std::list<std::list<BaseGraph::VertexIndex>>> allEdgeLists = combinations(allEdges, E, withParallelEdges);
+
+    std::list<MultiGraph> graphs;
+    for (auto edges : allEdgeLists){
+        MultiGraph g(N);
+        for(auto e : edges){
+            g.addEdgeIdx(e.front(), e.back());
+        }
+        graphs.push_back(g);
+    }
+    return graphs;
+
+}
+
 } // namespace GraphInf

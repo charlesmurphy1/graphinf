@@ -9,6 +9,7 @@
 #include "GraphInf/random_graph/configuration.h"
 #include "GraphInf/types.h"
 #include "GraphInf/utility/functions.h"
+#include "GraphInf/utility/integer_partition.h"
 #include "BaseGraph/types.h"
 
 using namespace std;
@@ -18,7 +19,7 @@ using namespace GraphInf;
 class CMParametrizedTest: public::testing::TestWithParam<bool>{
     public:
         const size_t NUM_VERTICES = 50, NUM_EDGES = 100;
-        ConfigurationModelFamily randomGraph = ConfigurationModelFamily(NUM_VERTICES, NUM_EDGES);
+        ConfigurationModelFamily randomGraph = ConfigurationModelFamily(NUM_VERTICES, NUM_EDGES, GetParam());
         void SetUp() {
             randomGraph.sample();
         }
@@ -93,6 +94,20 @@ TEST_P(CMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyE
     EXPECT_NO_THROW(doMetropolisHastingsSweepForGraph(randomGraph));
 }
 
+TEST_P(CMParametrizedTest, enumeratingAllGraphs_likelihoodIsNormalized){
+    ConfigurationModelFamily g(3, 3, GetParam());
+
+    std::list<double> s;
+    for (auto gg : enumerateAllGraphs(3, 3)){
+        g.setState(gg);
+        double logPrior = g.getLogPrior();
+        if (GetParam()) // if GetParam() [using hyperprior], then compute logPrior with exact value of number of partitions
+            logPrior = -logMultinomialCoefficient(g.getDegreePrior().getDegreeCounts().getValues()) - log_q(2 * g.getEdgeCount(), g.getSize(), true);
+        s.push_back(g.getLogLikelihood() + logPrior);
+    }
+    EXPECT_NEAR(logSumExp(s), 0, 1e-6);
+}
+
 
 INSTANTIATE_TEST_CASE_P(
         ConfigurationModelFamilyTests,
@@ -103,7 +118,8 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST(CMTests, instanciateConfigurationModel_forRegularSequence){
     std::vector<size_t> degrees(100, 5);
-
     ConfigurationModel graph(degrees);
+    EXPECT_EQ(graph.getSize(), 100);
+    EXPECT_EQ(graph.getDegrees(), degrees);
 
 }

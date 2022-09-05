@@ -309,6 +309,24 @@ TEST_P(SBMParametrizedTest, doingMetropolisHastingsWithLabels_expectNoConsistenc
     EXPECT_NO_THROW(doMetropolisHastingsSweepForLabels(randomGraph));
 }
 
+TEST_P(SBMParametrizedTest, enumeratingAllGraphs_likelihoodIsNormalized){
+    size_t N = 4, E = 4, B = 0;
+    StochasticBlockModelFamily g(
+        N, E, B,
+        std::get<0>(GetParam()),
+        std::get<1>(GetParam()),
+        false,
+        std::get<2>(GetParam())
+    );
+
+    std::list<double> s;
+    for (auto gg : enumerateAllGraphs(N, E)){
+        g.setState(gg);
+        s.push_back(g.getLogJoint());
+    }
+    EXPECT_NEAR(logSumExp(s) - g.getLabelLogJoint(), 0, 1e-6);
+}
+
 
 INSTANTIATE_TEST_CASE_P(
         StochasticBlockModelFamilyTests,

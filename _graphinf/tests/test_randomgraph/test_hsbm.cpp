@@ -19,7 +19,7 @@ using namespace GraphInf;
 class HSBMParametrizedTest: public::testing::TestWithParam<bool>{
 public:
     const size_t NUM_VERTICES = 50, NUM_EDGES = 100;
-    const bool canonical = false, stubLabeled = false;
+    const bool canonical = false;
     NestedStochasticBlockModelFamily randomGraph = NestedStochasticBlockModelFamily(
         NUM_VERTICES, NUM_EDGES, canonical, GetParam()
     );

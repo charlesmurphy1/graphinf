@@ -75,7 +75,18 @@ TEST_F(ErdosRenyiModelTest, isCompatible_forEmptyGraph_returnFalse){
     MultiGraph g(0);
     EXPECT_FALSE(randomGraph.isCompatible(g));
 }
+
 TEST_F(ErdosRenyiModelTest, doingMetropolisHastingsWithGraph_expectNoConsistencyError){
     EXPECT_NO_THROW(doMetropolisHastingsSweepForGraph(randomGraph));
+}
 
+TEST_F(ErdosRenyiModelTest, enumeratingAllGraphs_likelihoodIsNormalized){
+    ErdosRenyiModel g(3, 3);
+
+    std::list<double> s;
+    for (auto gg : enumerateAllGraphs(3, 3)){
+        g.setState(gg);
+        s.push_back(g.getLogJoint());
+    }
+    EXPECT_NEAR(logSumExp(s), 0, 1e-6);
 }

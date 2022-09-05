@@ -29,6 +29,53 @@ MultiGraph getSubGraphByBlocks(const MultiGraph& graph, const BlockSequence& blo
 double clip(double x, double min, double max);
 double clipProb(double p, double epsilon=1e-15);
 
+
+
+std::list<MultiGraph> enumerateAllGraphs(size_t N, size_t E, bool withSelfLoops=true, bool withParallelEdges=true);
+
+template<typename ContainerType>
+double logSumExp(ContainerType xSeq){
+    auto xMax = *std::max_element(xSeq.begin(), xSeq.end());
+    double s = 0;
+    for (auto x : xSeq)
+        s += exp(x - xMax);
+    return log(s) + xMax;
+}
+
+template<typename ContainerType>
+double logMeanExp(ContainerType xSeq){
+    auto N = xSeq.size();
+    return logSumExp(xSeq) - log(N);
+}
+
+template<typename T>
+std::list<std::list<T>> combinations(const std::list<T> elements, size_t repeat, bool withReplacement=false, std::list<T> prefix={}){
+    std::list<std::list<T>> combs;
+    if (repeat==1){
+        for (auto x : elements){
+            std::list<T> _prefix = prefix;
+            _prefix.push_back(x);
+            combs.push_back(_prefix);
+        }
+        return combs;
+    }
+    std::list<T> subElements = elements;
+    for (auto x: elements){
+        if (not withReplacement)
+            subElements.pop_front();
+        std::list<T> _prefix = prefix;
+
+        _prefix.push_back(x);
+
+        for (std::list<T> o: combinations(subElements, repeat-1, withReplacement, _prefix))
+            combs.push_back(o);
+
+        if (withReplacement)
+            subElements.pop_front();
+    }
+    return combs;
+}
+
 template<typename T>
 std::vector<T> listToVec(std::list<T> other){
     std::vector<T> myVec;

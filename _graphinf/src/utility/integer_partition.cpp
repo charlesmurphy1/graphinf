@@ -100,6 +100,12 @@ double log_q_approx(size_t n, size_t k)
     return lf - log(n) + sqrt(n) * g;
 }
 
+double log_q(size_t n, size_t k, bool exact){
+    if (exact)
+        return log(q_rec(n, k));
+    return log_q_approx(n, k);
+}
+
 void printArray(std::vector<int> p){
     for (auto pp : p)
         std::cout << pp << " ";

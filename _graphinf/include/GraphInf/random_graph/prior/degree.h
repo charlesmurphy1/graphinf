@@ -152,9 +152,12 @@ public:
 };
 
 class DegreeUniformHyperPrior: public DegreePrior{
+    bool m_exact;
 public:
+    /* Constructors */
+    DegreeUniformHyperPrior(size_t graphSize, bool exact=false): DegreePrior(graphSize), m_exact(exact){}
+    DegreeUniformHyperPrior(size_t graphSize, EdgeCountPrior& prior, bool exact=false): DegreePrior(graphSize, prior), m_exact(exact){}
 
-    using DegreePrior::DegreePrior;
     void sampleState() override;
     const double getLogLikelihood() const override;
     const double getLogLikelihoodRatioFromGraphMove(const GraphMove&) const;

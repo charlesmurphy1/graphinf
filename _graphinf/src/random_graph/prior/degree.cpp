@@ -155,34 +155,31 @@ void DegreeUniformHyperPrior::sampleState() {
 }
 
 const double DegreeUniformHyperPrior::getLogLikelihood() const {
-    double logLikelihood = -logFactorial(getSize()) - log_q_approx(getEdgeCount(), getSize());
-    for (const auto& nk : m_degreeCounts)
-        logLikelihood += logFactorial(nk.second);
+    double logLikelihood = -logMultinomialCoefficient(m_degreeCounts.getValues()) - log_q(2 * getEdgeCount(), getSize(), m_exact);
     return logLikelihood;
 }
 
 const double DegreeUniformHyperPrior::getLogLikelihoodRatioFromGraphMove(const GraphMove& move) const {
-    IntMap<size_t> diffDegreeMap;
+    IntMap<size_t> diffDegreeMap, diffDegreeCountMap;
     int dE = move.addedEdges.size() - move.removedEdges.size();
 
     for (auto edge : move.addedEdges){
-        size_t ki = m_state[edge.first], kj = m_state[edge.second];
-        diffDegreeMap.increment(ki + 1);
-        diffDegreeMap.increment(kj + 1);
-        diffDegreeMap.decrement(ki);
-        diffDegreeMap.decrement(kj);
+        diffDegreeMap.increment(edge.first);
+        diffDegreeMap.increment(edge.second);
     }
 
     for (auto edge : move.removedEdges){
-        size_t ki = m_state[edge.first], kj = m_state[edge.second];
-        diffDegreeMap.increment(ki - 1);
-        diffDegreeMap.increment(kj - 1);
-        diffDegreeMap.decrement(ki);
-        diffDegreeMap.decrement(kj);
+        diffDegreeMap.decrement(edge.first);
+        diffDegreeMap.decrement(edge.second);
     }
 
-    double logLikelihoodRatio = log_q_approx(getEdgeCount(), getSize()) - log_q_approx(getEdgeCount() + dE, getSize());
     for (auto diff : diffDegreeMap){
+        diffDegreeCountMap.increment(m_state[diff.first] + diff.second);
+        diffDegreeCountMap.decrement(m_state[diff.first]);
+    }
+
+    double logLikelihoodRatio = log_q(2 * getEdgeCount(), getSize(), m_exact) - log_q(2 * (getEdgeCount() + dE), getSize(), m_exact);
+    for (auto diff : diffDegreeCountMap){
         logLikelihoodRatio += logFactorial(m_degreeCounts.get(diff.first) + diff.second);
         logLikelihoodRatio -= logFactorial(m_degreeCounts.get(diff.first));
     }

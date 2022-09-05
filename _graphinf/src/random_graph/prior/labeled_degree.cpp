@@ -270,7 +270,7 @@ const double VertexLabeledDegreeUniformHyperPrior::getLogLikelihood() const {
         if (er == 0)
             continue;
         logP -= logFactorial(nr.second);
-        logP -= log_q_approx(er, nr.second);
+        logP -= log_q(er, nr.second, m_exact);
     }
     return logP;
 }
@@ -313,8 +313,8 @@ const double VertexLabeledDegreeUniformHyperPrior::getLogLikelihoodRatioFromGrap
     auto nr = getBlockPrior().getVertexCounts();
 
     for (auto diff : diffEdgeMap){
-        logLikelihoodRatio -= log_q_approx(er[diff.first] + diff.second, nr[diff.first]);
-        logLikelihoodRatio += log_q_approx(er[diff.first], nr[diff.first]);
+        logLikelihoodRatio -= log_q(er[diff.first] + diff.second, nr[diff.first], m_exact);
+        logLikelihoodRatio += log_q(er[diff.first], nr[diff.first], m_exact);
     }
 
     return logLikelihoodRatio;
@@ -334,10 +334,10 @@ const double VertexLabeledDegreeUniformHyperPrior::getLogLikelihoodRatioFromLabe
     double logLikelihoodRatio = 0;
     logLikelihoodRatio += log(eta_s + 1) - log(eta_r);
     logLikelihoodRatio -= log(ns + 1) - log(nr);
-    logLikelihoodRatio -= log_q_approx(er - k, nr - 1) - log_q_approx(er, nr);
-    logLikelihoodRatio -= log_q_approx(es + k, ns + 1);
+    logLikelihoodRatio -= log_q(er - k, nr - 1, m_exact) - log_q(er, nr, m_exact);
+    logLikelihoodRatio -= log_q(es + k, ns + 1, m_exact);
     if (not getBlockPrior().creatingNewBlock(move))
-        logLikelihoodRatio -= -log_q_approx(es, ns);
+        logLikelihoodRatio -= -log_q(es, ns, m_exact);
     return logLikelihoodRatio;
 }
 

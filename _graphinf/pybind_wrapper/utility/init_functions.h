@@ -20,6 +20,7 @@ void initFunctions(py::module& m){
     m.def("log_multiset", &logMultisetCoefficient, py::arg("n"), py::arg("k"));
     m.def("get_edge_list", &getEdgeList, py::arg("graph"));
     m.def("get_weighted_edge_list", &getWeightedEdgeList, py::arg("graph"));
+    m.def("enumerate_all_graphs", &enumerateAllGraphs, py::arg("size"), py::arg("edge_count"), py::arg("selfloops")=true, py::arg("parallel_edges")=true);
 }
 
 }

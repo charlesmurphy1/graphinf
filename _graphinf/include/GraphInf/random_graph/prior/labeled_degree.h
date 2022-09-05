@@ -151,9 +151,12 @@ public:
 };
 
 class VertexLabeledDegreeUniformHyperPrior: public VertexLabeledDegreePrior{
+    bool m_exact;
 public:
-
-    using VertexLabeledDegreePrior::VertexLabeledDegreePrior;
+    VertexLabeledDegreeUniformHyperPrior(bool exact=false):
+        VertexLabeledDegreePrior(), m_exact(exact){}
+    VertexLabeledDegreeUniformHyperPrior(LabelGraphPrior& labelGraphPrior, bool exact=false):
+        VertexLabeledDegreePrior(labelGraphPrior), m_exact(exact){}
     void sampleState() override;
 
     const double getLogLikelihood() const override;

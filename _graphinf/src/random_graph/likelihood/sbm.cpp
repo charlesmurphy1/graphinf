@@ -56,8 +56,13 @@ const double StubLabeledStochasticBlockModelLikelihood::getLogLikelihoodRatioEdg
         size_t ers = (r >= labelGraph.getSize() or s >= labelGraph.getSize()) ? 0 : labelGraph.getEdgeMultiplicityIdx(r, s);
         diffEdgeCountsMap.increment(r, diff.second);
         diffEdgeCountsMap.increment(s, diff.second);
-        logLikelihoodRatioTerm += (r == s) ? logDoubleFactorial(2 * ers + 2 * diff.second) : logFactorial(ers + diff.second);
-        logLikelihoodRatioTerm -= (r == s) ? logDoubleFactorial(2 * ers) : logFactorial(ers);
+        if (r == s){
+            logLikelihoodRatioTerm += logDoubleFactorial(2 * (ers + diff.second));
+            logLikelihoodRatioTerm -= logDoubleFactorial(2 * ers);
+        } else {
+            logLikelihoodRatioTerm += logFactorial(ers + diff.second);
+            logLikelihoodRatioTerm -= logFactorial(ers);
+        }
     }
 
     for (auto diff : diffEdgeCountsMap){
@@ -76,10 +81,15 @@ const double StubLabeledStochasticBlockModelLikelihood::getLogLikelihoodRatioAdj
         getDiffAdjMatMapFromEdgeMove(edge, -1, diffAdjMatMap);
 
     for (auto diff : diffAdjMatMap){
-        auto u = diff.first.first, v = diff.first.second;
-        auto edgeMult = m_statePtr->getEdgeMultiplicityIdx(u, v);
-        logLikelihoodRatioTerm -= (u == v) ? logDoubleFactorial(2 * edgeMult + 2 * diff.second) : logFactorial(edgeMult + diff.second);
-        logLikelihoodRatioTerm += (u == v) ? logDoubleFactorial(2 * edgeMult) : logFactorial(edgeMult);
+        auto i = diff.first.first, j = diff.first.second;
+        auto edgeMult = m_statePtr->getEdgeMultiplicityIdx(i, j);
+        if (i == j){
+            logLikelihoodRatioTerm += -logDoubleFactorial(2 * (edgeMult + diff.second));
+            logLikelihoodRatioTerm -= -logDoubleFactorial(2 * edgeMult);
+        } else {
+            logLikelihoodRatioTerm += -logFactorial(edgeMult + diff.second);
+            logLikelihoodRatioTerm -= -logFactorial(edgeMult);
+        }
     }
     return logLikelihoodRatioTerm;
 }
@@ -93,17 +103,28 @@ const double StubLabeledStochasticBlockModelLikelihood::getLogLikelihood() const
 
     for (const auto& r : labelGraph) {
         auto er = labelGraph.getDegreeOfIdx(r), nr = vertexCounts.get(r);
-        if (er == 0 or vertexCounts.get(r) == 0)
+        if (er == 0 or nr == 0)
             continue;
         logLikelihood -= er * log(nr);
-        for (const auto& s : labelGraph.getNeighboursOfIdx(r))
-            if (r <= s.vertexIndex)
-                logLikelihood += (r == s.vertexIndex) ? logDoubleFactorial(2 * s.label) : logFactorial(s.label);
+        for (const auto& s : labelGraph.getNeighboursOfIdx(r)){
+            if (r > s.vertexIndex)
+                continue;
+            if (r == s.vertexIndex)
+                logLikelihood += logDoubleFactorial(2 * s.label);
+            else
+                logLikelihood += logFactorial(s.label);
+        }
     }
-    for (const auto& idx : *m_statePtr)
-        for (const auto& neighbor : m_statePtr->getNeighboursOfIdx(idx))
-            if (idx <= neighbor.vertexIndex)
-                logLikelihood -= (idx == neighbor.vertexIndex) ? logDoubleFactorial(2 * neighbor.label) : logFactorial(neighbor.label);
+    for (const auto& idx : *m_statePtr){
+        for (const auto& neighbor : m_statePtr->getNeighboursOfIdx(idx)){
+            if (idx > neighbor.vertexIndex)
+                continue;
+            if (idx == neighbor.vertexIndex)
+                logLikelihood -= logDoubleFactorial(2 * neighbor.label);
+            else
+                logLikelihood -= logFactorial(neighbor.label);
+        }
+    }
     return logLikelihood;
 }
 
@@ -129,14 +150,21 @@ const double StubLabeledStochasticBlockModelLikelihood::getLogLikelihoodRatioFro
     for (auto diff : diffEdgeMatMap){
         auto r = diff.first.first, s = diff.first.second;
         size_t ers = (r >= edgeMat.getSize() or s >= edgeMat.getSize()) ? 0 : edgeMat.getEdgeMultiplicityIdx(r, s);
-        logLikelihoodRatio += (r == s) ? logDoubleFactorial(2 * ers + 2 * diff.second) : logFactorial(ers + diff.second);
-        logLikelihoodRatio -= (r == s) ? logDoubleFactorial(2 * ers) : logFactorial(ers);
+        if (r == s){
+            logLikelihoodRatio += logDoubleFactorial(2 * (ers + diff.second));
+            logLikelihoodRatio -= logDoubleFactorial(2 * ers);
+        } else {
+            logLikelihoodRatio += logFactorial(ers + diff.second);
+            logLikelihoodRatio -= logFactorial(ers);
+        }
     }
 
     logLikelihoodRatio += edgeCounts[move.prevLabel] * log(vertexCounts[move.prevLabel]) ;
-    logLikelihoodRatio -= (vertexCounts.get(move.prevLabel) == 1) ? 0: (edgeCounts[move.prevLabel] - degree) * log(vertexCounts[move.prevLabel] - 1);
+    if (vertexCounts.get(move.prevLabel) > 1)
+        logLikelihoodRatio -= (edgeCounts[move.prevLabel] - degree) * log(vertexCounts[move.prevLabel] - 1);
 
-    logLikelihoodRatio += (vertexCounts.get(move.nextLabel) == 0) ? 0: edgeCounts[move.nextLabel] * log(vertexCounts[move.nextLabel]);
+    if (vertexCounts.get(move.nextLabel) > 0)
+        logLikelihoodRatio += edgeCounts[move.nextLabel] * log(vertexCounts[move.nextLabel]);
     logLikelihoodRatio -= (edgeCounts[move.nextLabel] + degree) * log(vertexCounts[move.nextLabel] + 1) ;
     return logLikelihoodRatio;
 }
@@ -178,13 +206,8 @@ const double UniformStochasticBlockModelLikelihood::getLogLikelihoodRatioFromGra
         auto r = diff.first.first, s = diff.first.second;
         size_t nr = vertexCounts[r], ns = vertexCounts[s];
         int ers = (r >= labelGraph.getSize() or s >= labelGraph.getSize()) ? 0 : labelGraph.getEdgeMultiplicityIdx(r, s);
-        if (r == s){
-            logLikelihoodRatio -= logLikelihoodFunc(nr, ns, ers + diff.second, true);
-            logLikelihoodRatio += logLikelihoodFunc(nr, ns, ers, true);
-        } else {
-            logLikelihoodRatio -= logLikelihoodFunc(nr, ns, ers + diff.second, false);
-            logLikelihoodRatio += logLikelihoodFunc(nr, ns, ers, false);
-        }
+        logLikelihoodRatio -= logLikelihoodFunc(nr, ns, ers + diff.second, r == s);
+        logLikelihoodRatio += logLikelihoodFunc(nr, ns, ers, r == s);
     }
 
     return logLikelihoodRatio;

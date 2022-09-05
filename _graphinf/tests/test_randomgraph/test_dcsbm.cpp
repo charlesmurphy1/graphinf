@@ -16,12 +16,12 @@ using namespace std;
 using namespace GraphInf;
 
 
-class DCSBMParametrizedTest: public::testing::TestWithParam<std::tuple<bool,bool>>{
+class DCSBMParametrizedTest: public::testing::TestWithParam<std::tuple<bool,bool,bool>>{
     public:
         const size_t NUM_VERTICES = 50, NUM_EDGES = 100, NUM_BLOCKS = 3;
         const bool canonical=false;
         DegreeCorrectedStochasticBlockModelFamily randomGraph = DegreeCorrectedStochasticBlockModelFamily(
-            NUM_VERTICES, NUM_EDGES, NUM_BLOCKS, std::get<0>(GetParam()), std::get<1>(GetParam()), canonical
+            NUM_VERTICES, NUM_EDGES, NUM_BLOCKS, std::get<0>(GetParam()), std::get<1>(GetParam()), std::get<2>(GetParam()), canonical
         );
 
         BaseGraph::VertexIndex vertexIdx = 4;
@@ -290,14 +290,37 @@ TEST_P(DCSBMParametrizedTest, doingMetropolisHastingsWithLabels_expectNoConsiste
     EXPECT_NO_THROW(doMetropolisHastingsSweepForLabels(randomGraph));
 }
 
+TEST_P(DCSBMParametrizedTest, enumeratingAllGraphs_likelihoodIsNormalized){
+    size_t N = 4, E = 4, B = 0;
+    DegreeCorrectedStochasticBlockModelFamily g(
+        N, E, B,
+        std::get<0>(GetParam()),
+        std::get<1>(GetParam()),
+        std::get<2>(GetParam()),
+        false
+    );
+
+    std::list<double> s;
+    for (auto gg : enumerateAllGraphs(N, E)){
+        g.setState(gg);
+        s.push_back(g.getLogJoint());
+    }
+    if (not std::get<1>(GetParam()))
+        EXPECT_NEAR(logSumExp(s) - g.getLabelLogJoint(), 0, 1e-6);
+}
+
 
 INSTANTIATE_TEST_CASE_P(
         DegreeCorrectedStochasticBlockModelFamilyTests,
         DCSBMParametrizedTest,
         ::testing::Values(
-            std::make_tuple(false, false),
-            std::make_tuple(false, true),
-            std::make_tuple(true, false),
-            std::make_tuple(true, true)
+            std::make_tuple(false, false, false),
+            std::make_tuple(false, true, false),
+            std::make_tuple(true, false, false),
+            std::make_tuple(true, true, false),
+            std::make_tuple(false, false, true),
+            std::make_tuple(false, true, true),
+            std::make_tuple(true, false, true),
+            std::make_tuple(true, true, true)
          )
     );
