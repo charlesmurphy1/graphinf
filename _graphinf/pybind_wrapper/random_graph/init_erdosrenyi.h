@@ -13,7 +13,7 @@ void initErdosRenyi(py::module& m){
     py::class_<ErdosRenyiModelBase, RandomGraph>(m, "ErdosRenyiModelBase")
         // .def(py::init<size_t, bool, bool>(), py::arg("size"), py::arg("with_self_loops")=true, py::arg("with_parallel_edges")=true)
         // .def(py::init<size_t, EdgeCountPrior&, bool, bool>(), py::arg("size"), py::arg("edge_count_prior"), py::arg("with_self_loops")=true, py::arg("with_parallel_edges")=true)
-        .def("get_edge_count_prior", &ErdosRenyiModelBase::getEdgeCountPrior)
+        .def("get_edge_count_prior", &ErdosRenyiModelBase::getEdgeCountPrior, py::return_value_policy::reference_internal)
         .def("set_edge_count_prior", &ErdosRenyiModelBase::setEdgeCountPrior, py::arg("prior"))
         ;
     py::class_<ErdosRenyiModel, ErdosRenyiModelBase>(m, "ErdosRenyiModel")

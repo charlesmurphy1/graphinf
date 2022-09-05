@@ -27,10 +27,10 @@ void initLabelGraphPrior(py::module& m){
         .def("get_graph", &LabelGraphPrior::getGraph)
         .def("set_graph", &LabelGraphPrior::setGraph, py::arg("graph"))
         .def("set_partition", &LabelGraphPrior::setPartition)
-        .def("get_edge_count_prior", &LabelGraphPrior::getEdgeCountPrior)
-        .def("set_edge_count_prior", &LabelGraphPrior::setEdgeCountPrior)
-        .def("get_block_prior", &LabelGraphPrior::getBlockPrior)
-        .def("set_block_prior", &LabelGraphPrior::setBlockPrior)
+        .def("get_edge_count_prior", &LabelGraphPrior::getEdgeCountPrior, py::return_value_policy::reference_internal)
+        .def("set_edge_count_prior", &LabelGraphPrior::setEdgeCountPrior, py::arg("prior"))
+        .def("get_block_prior", &LabelGraphPrior::getBlockPrior, py::return_value_policy::reference_internal)
+        .def("set_block_prior", &LabelGraphPrior::setBlockPrior, py::arg("prior"))
         .def("reduce_partition", &LabelGraphPrior::reducePartition)
         ;
 

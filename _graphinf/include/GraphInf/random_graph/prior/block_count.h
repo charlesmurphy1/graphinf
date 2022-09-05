@@ -112,7 +112,7 @@ class BlockCountUniformPrior: public BlockCountPrior{
         const double getLogLikelihoodFromState(const size_t& state) const override{
             if (state > m_max or state < m_min)
                 return -INFINITY;
-            return -log(m_max - m_min);
+            return -log(m_max - m_min + 1);
         };
 
         void checkMin() const;

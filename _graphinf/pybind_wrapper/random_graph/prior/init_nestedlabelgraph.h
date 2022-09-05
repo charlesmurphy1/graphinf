@@ -21,7 +21,7 @@ void initNestedLabelGraphPrior(py::module& m){
         .def("get_nested_state", [](const NestedLabelGraphPrior& self){ return self.getNestedState(); } )
         .def("get_nested_state", [](const NestedLabelGraphPrior& self, Level level){ return self.getNestedState(level); }, py::arg("level"))
         .def("set_nested_state", &NestedLabelGraphPrior::setNestedState, py::arg("state"))
-        .def("get_nested_block_prior", &NestedLabelGraphPrior::getNestedBlockPrior)
+        .def("get_nested_block_prior", &NestedLabelGraphPrior::getNestedBlockPrior, py::return_value_policy::reference_internal)
         .def("set_nested_block_prior", &NestedLabelGraphPrior::setNestedBlockPrior, py::arg("prior"))
         .def("get_nested_block_count", [](const NestedLabelGraphPrior& self){ return self.getNestedBlockCount(); } )
         .def("get_nested_block_count", [](const NestedLabelGraphPrior& self, Level level){ return self.getNestedBlockCount(level); }, py::arg("level"))

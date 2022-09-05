@@ -15,7 +15,7 @@ template<typename Label>
 py::class_<VertexLabeledRandomGraph<Label>, RandomGraph, PyVertexLabeledRandomGraph<Label>> declareVertexLabeledRandomGraph(py::module& m, std::string pyName){
     return py::class_<VertexLabeledRandomGraph<Label>, RandomGraph, PyVertexLabeledRandomGraph<Label>>(m, pyName.c_str())
         .def(py::init<size_t, bool, bool>(), py::arg("size"), py::arg("with_self_loops")=true, py::arg("with_parallel_edges")=true)
-        .def("get_label_proposer", &VertexLabeledRandomGraph<Label>::getLabelProposer)
+        .def("get_label_proposer", &VertexLabeledRandomGraph<Label>::getLabelProposer, py::return_value_policy::reference_internal)
         .def("set_label_proposer", &VertexLabeledRandomGraph<Label>::setLabelProposer, py::arg("proposer"))
         .def("get_labels", &VertexLabeledRandomGraph<Label>::getLabels)
         .def("get_label_count", &VertexLabeledRandomGraph<Label>::getLabelCount)
@@ -41,7 +41,7 @@ template<typename Label>
 py::class_<NestedVertexLabeledRandomGraph<Label>, VertexLabeledRandomGraph<Label>, PyNestedVertexLabeledRandomGraph<Label>> declareNestedVertexLabeledRandomGraph(py::module& m, std::string pyName){
     return py::class_<NestedVertexLabeledRandomGraph<Label>, VertexLabeledRandomGraph<Label>, PyNestedVertexLabeledRandomGraph<Label>>(m, pyName.c_str())
         .def(py::init<size_t, bool, bool>(), py::arg("size"), py::arg("with_self_loops")=true, py::arg("with_parallel_edges")=true)
-        .def("get_nested_label_proposer", &NestedVertexLabeledRandomGraph<Label>::getNestedLabelProposer)
+        .def("get_nested_label_proposer", &NestedVertexLabeledRandomGraph<Label>::getNestedLabelProposer, py::return_value_policy::reference_internal)
         .def("set_nested_label_proposer", &NestedVertexLabeledRandomGraph<Label>::setNestedLabelProposer, py::arg("proposer"))
         .def("set_nested_labels", &NestedVertexLabeledRandomGraph<Label>::setNestedLabels, py::arg("nested_labels"), py::arg("reduce")=false)
         .def("get_depth", &NestedVertexLabeledRandomGraph<Label>::getDepth)
@@ -69,7 +69,7 @@ void initRandomGraphBaseClass(py::module& m){
         .def("set_size", &RandomGraph::setSize)
         .def("get_edge_count", &RandomGraph::getEdgeCount)
         .def("get_average_degree", &RandomGraph::getAverageDegree)
-        .def("get_edge_proposer", &RandomGraph::getEdgeProposer)
+        .def("get_edge_proposer", &RandomGraph::getEdgeProposer, py::return_value_policy::reference_internal)
         .def("set_edge_proposer", &RandomGraph::setEdgeProposer, py::arg("proposer"))
         .def("with_self_loops", [](const RandomGraph& self) { return self.withSelfLoops(); })
         .def("with_self_loops", [](RandomGraph& self, bool condition) { return self.withSelfLoops(condition); })

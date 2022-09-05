@@ -22,7 +22,7 @@ void initNestedBlockPrior(py::module& m){
         .def("get_nested_state", [](const NestedBlockPrior& self, Level level){ return self.getNestedState(level); }, py::arg("level"))
         .def("set_nested_state", [](NestedBlockPrior& self, std::vector<std::vector<BlockIndex>> state){ self.setNestedState(state); })
         .def("get_depth", &NestedBlockPrior::getDepth)
-        .def("get_nested_block_count_prior", &NestedBlockPrior::getNestedBlockCountPrior)
+        .def("get_nested_block_count_prior", &NestedBlockPrior::getNestedBlockCountPrior, py::return_value_policy::reference_internal)
         .def("set_nested_block_count_prior", &NestedBlockPrior::setNestedBlockCountPrior, py::arg("prior"))
         .def("get_nested_block_count", [](const NestedBlockPrior& self){ return self.getNestedBlockCount(); })
         .def("get_nested_block_count", [](const NestedBlockPrior& self, Level level){ return self.getNestedBlockCount(level); })

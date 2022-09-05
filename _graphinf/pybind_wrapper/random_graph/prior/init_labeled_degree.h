@@ -25,7 +25,7 @@ void initLabeledDegreePrior(py::module& m){
         .def("get_degree_counts", &VertexLabeledDegreePrior::getDegreeCounts)
         .def("get_block_prior", &VertexLabeledDegreePrior::getBlockPrior)
         .def("set_block_prior", &VertexLabeledDegreePrior::setBlockPrior, py::arg("block_prior"))
-        .def("get_label_graph_prior", &VertexLabeledDegreePrior::getLabelGraphPrior)
+        .def("get_label_graph_prior", &VertexLabeledDegreePrior::getLabelGraphPrior, py::return_value_policy::reference_internal)
         .def("set_label_graph_prior", &VertexLabeledDegreePrior::setLabelGraphPrior, py::arg("label_graph_prior"))
         ;
 

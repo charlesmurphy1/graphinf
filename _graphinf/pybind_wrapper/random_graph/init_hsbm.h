@@ -19,7 +19,7 @@ void initNestedStochasticBlockModel(py::module& m){
         //     py::arg("with_self_loops")=true,
         //     py::arg("with_parallel_edges")=true
         // )
-        .def("get_nested_label_graph_prior", &NestedStochasticBlockModelBase::getNestedLabelGraphPrior)
+        .def("get_nested_label_graph_prior", &NestedStochasticBlockModelBase::getNestedLabelGraphPrior, py::return_value_policy::reference_internal)
         ;
 
     py::class_<NestedStochasticBlockModelFamily, NestedStochasticBlockModelBase>(m, "NestedStochasticBlockModelFamily")

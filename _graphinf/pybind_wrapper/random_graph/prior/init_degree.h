@@ -22,7 +22,7 @@ void initDegreePrior(py::module& m){
         .def("get_edge_count", &DegreePrior::getEdgeCount)
         .def("get_degree_of_idx", &DegreePrior::getDegreeOfIdx)
         .def("get_degree_counts", &DegreePrior::getDegreeCounts)
-        .def("get_edge_count_prior", &DegreePrior::getEdgeCountPrior)
+        .def("get_edge_count_prior", &DegreePrior::getEdgeCountPrior, py::return_value_policy::reference_internal)
         .def("set_edge_count_prior", &DegreePrior::setEdgeCountPrior, py::arg("edge_count_prior"))
         ;
 

@@ -13,7 +13,7 @@ void initConfiguration(py::module& m){
     py::class_<ConfigurationModelBase, RandomGraph>(m, "ConfigurationModelBase")
         // .def(py::init<size_t>(), py::arg("size"))
         // .def(py::init<size_t, DegreePrior&>(), py::arg("size"), py::arg("degree_prior"))
-        .def("get_degree_prior", &ConfigurationModelBase::getDegreePrior)
+        .def("get_degree_prior", &ConfigurationModelBase::getDegreePrior, py::return_value_policy::reference_internal)
         .def("set_degree_prior", &ConfigurationModelBase::setDegreePrior, py::arg("prior"))
         ;
 
