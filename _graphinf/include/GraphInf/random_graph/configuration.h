@@ -114,7 +114,7 @@ public:
             m_degreePriorUPtr = std::unique_ptr<DegreePrior>(makeDegreePrior(size, *m_edgeCountPriorUPtr, useDegreeHyperPrior));
             setDegreePrior(*m_degreePriorUPtr);
 
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer(edgeProposerType, canonical, true, true, true));
+            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer(edgeProposerType, canonical, false, true, true));
             setEdgeProposer(*m_edgeProposerUPtr);
 
             checkSafety();

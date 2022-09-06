@@ -28,7 +28,6 @@ class DataModelWrapper(_Wrapper):
         self.nested = graph_prior.nested
         data_model = self.constructors[self.dtype](graph_prior.wrap, **kwargs)
         super().__init__(data_model, graph_prior=graph_prior, params=kwargs)
-        self.__wrapped__.sample()
 
     @property
     def dtype(self):
