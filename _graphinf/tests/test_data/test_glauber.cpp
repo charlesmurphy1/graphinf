@@ -173,8 +173,8 @@ TEST(ExtraGlauberTest2, pastLength){
     size_t N=100, M=250, T=55, L=10;
     ErdosRenyiModel g = {100, 250};
     GlauberDynamics<RandomGraph> m = {g, T, 0, L};
-
     m.sample();
+
     double logP = m.getLogLikelihood();
     EXPECT_NEAR(-logP / log(2), N * (T - L), 1e-6);
 
