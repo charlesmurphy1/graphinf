@@ -130,8 +130,8 @@ public:
 
 class DummyDynamics: public Dynamics<RandomGraph>{
 public:
-    DummyDynamics(RandomGraph& graphPrior, size_t numStates=2, double numSteps = 10):
-    Dynamics<RandomGraph>(graphPrior, numStates, numSteps, false, false){}
+    DummyDynamics(RandomGraph& graphPrior, size_t numStates=2, size_t length = 10, size_t pastLength=0, size_t initialBurn=0):
+    Dynamics<RandomGraph>(graphPrior, numStates, length, pastLength, initialBurn, false, false){}
 
     const double getTransitionProb(
         const VertexState& prevVertexState,
@@ -149,20 +149,20 @@ public:
 
 class DummySISDynamics: public SISDynamics<RandomGraph>{
 public:
-    DummySISDynamics(RandomGraph& graphPrior, size_t numSteps=10, double infection = 0.1):
-    SISDynamics<RandomGraph>(graphPrior, numSteps, infection){}
+    DummySISDynamics(RandomGraph& graphPrior, size_t length=10, double infection = 0.1):
+    SISDynamics<RandomGraph>(graphPrior, length, infection){}
 };
 
 class DummyLabeledSISDynamics: public SISDynamics<VertexLabeledRandomGraph<BlockIndex>>{
 public:
-    DummyLabeledSISDynamics(VertexLabeledRandomGraph<BlockIndex>& graphPrior, size_t numSteps=10, double infection = 0.1):
-    SISDynamics<VertexLabeledRandomGraph<BlockIndex>>(graphPrior, numSteps, infection){}
+    DummyLabeledSISDynamics(VertexLabeledRandomGraph<BlockIndex>& graphPrior, size_t length=10, double infection = 0.1):
+    SISDynamics<VertexLabeledRandomGraph<BlockIndex>>(graphPrior, length, infection){}
 };
 
 class DummyNestedSISDynamics: public SISDynamics<NestedVertexLabeledRandomGraph<BlockIndex>>{
 public:
-    DummyNestedSISDynamics(NestedVertexLabeledRandomGraph<BlockIndex>& graphPrior, size_t numSteps=10, double infection = 0.1):
-    SISDynamics<NestedVertexLabeledRandomGraph<BlockIndex>>(graphPrior, numSteps, infection){}
+    DummyNestedSISDynamics(NestedVertexLabeledRandomGraph<BlockIndex>& graphPrior, size_t length=10, double infection = 0.1):
+    SISDynamics<NestedVertexLabeledRandomGraph<BlockIndex>>(graphPrior, length, infection){}
 };
 
 

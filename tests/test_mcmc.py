@@ -29,7 +29,7 @@ data_models = {
 def test_graph_reconstruction(graph, data):
     N, E, T = (10, 25, 5)
     g = graph(N, E)
-    d = data(g, num_steps=T)
+    d = data(g, length=T)
     mcmc = graphinf.mcmc.GraphReconstructionMCMC(d)
     mcmc.do_MH_sweep(100)
 

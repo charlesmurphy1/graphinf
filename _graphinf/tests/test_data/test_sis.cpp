@@ -21,7 +21,7 @@ public:
     ErdosRenyiModel randomGraph = ErdosRenyiModel(10, 10);
 
     GraphInf::SISDynamics<RandomGraph> dynamics = GraphInf::SISDynamics<RandomGraph>(
-        randomGraph, NUM_STEPS, INFECTION_PROB, RECOVERY_PROB,
+        randomGraph, NUM_STEPS, INFECTION_PROB, RECOVERY_PROB, 0, 0,
         AUTO_ACTIVATION_PROB, AUTO_DEACTIVATION_PROB,
         NORMALIZE_COUPLING, ASYNC, NUM_INITIAL_ACTIVE);
 };
@@ -61,7 +61,7 @@ TEST_F(TestSISDynamics, getLogLikelihood_returnCorrectLogLikelikehood){
 
     double expected = dynamics.getLogLikelihood();
     double actual = 0;
-    for(size_t t=0; t<dynamics.getNumSteps(); ++t){
+    for(size_t t=0; t<dynamics.getLength(); ++t){
         for (auto vertex : dynamics.getGraph()){
             actual += log(dynamics.getTransitionProb(past[vertex][t], future[vertex][t], neighborState[vertex][t]));
         }

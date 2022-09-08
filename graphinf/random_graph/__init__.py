@@ -31,6 +31,9 @@ class RandomGraphWrapper(_Wrapper):
         self.nested = nested
         super().__init__(graph_model, params=kwargs)
 
+    def post_init(self):
+        self.wrap.sample()
+
 
 class ErdosRenyiModel(RandomGraphWrapper):
     def __init__(

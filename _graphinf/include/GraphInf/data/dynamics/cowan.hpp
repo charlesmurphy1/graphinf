@@ -25,6 +25,8 @@ public:
             double a=1,
             double mu=1,
             double eta=0.5,
+            size_t pastLength=0,
+            size_t initialBurn=0,
             double autoActivationProb=1e-6,
             double autoDeactivationProb=0,
             bool async=true,
@@ -32,6 +34,8 @@ public:
             size_t numInitialActive=1):
         BaseClass(
             numSteps,
+            pastLength,
+            initialBurn,
             autoActivationProb,
             autoDeactivationProb,
             async,
@@ -48,6 +52,8 @@ public:
             double a=1,
             double mu=1,
             double eta=0.5,
+            size_t pastLength=0,
+            size_t initialBurn=0,
             double autoActivationProb=1e-6,
             double autoDeactivationProb=0,
             bool async=false,
@@ -56,6 +62,8 @@ public:
         BaseClass(
             graphPrior,
             numSteps,
+            pastLength,
+            initialBurn,
             autoActivationProb,
             autoDeactivationProb,
             async,

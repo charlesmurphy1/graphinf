@@ -18,14 +18,18 @@ namespace GraphInf{
 template <typename GraphPriorType>
 py::class_<Dynamics<GraphPriorType>, DataModel<GraphPriorType>, PyDynamics<GraphPriorType>> declareDynamicsBaseClass(py::module& m, std::string pyName){
     return py::class_<Dynamics<GraphPriorType>, DataModel<GraphPriorType>, PyDynamics<GraphPriorType>>(m, pyName.c_str())
-        .def(py::init<size_t, size_t, bool, bool>(),
+        .def(py::init<size_t, size_t, size_t, bool, bool>(),
             py::arg("num_states"),
-            py::arg("num_steps"),
+            py::arg("length"),
+            py::arg("past_length")=0,
             py::arg("normalize")=true,
             py::arg("async_mode")=false)
-        .def(py::init<GraphPriorType&, size_t, size_t, bool, bool>(),
-            py::arg("graph_prior"), py::arg("num_states"),
-            py::arg("num_steps"), py::arg("normalize")=true,
+        .def(py::init<GraphPriorType&, size_t, size_t, size_t, bool, bool>(),
+            py::arg("graph_prior"),
+            py::arg("num_states"),
+            py::arg("length"),
+            py::arg("past_length")=0,
+            py::arg("normalize")=true,
             py::arg("async_mode")=false)
         .def("get_state", &Dynamics<GraphPriorType>::getState)
         .def("set_state", &Dynamics<GraphPriorType>::setState, py::arg("state"))
@@ -34,8 +38,10 @@ py::class_<Dynamics<GraphPriorType>, DataModel<GraphPriorType>, PyDynamics<Graph
         .def("get_past_neighbors_states", &Dynamics<GraphPriorType>::getNeighborsPastStates)
         .def("get_future_states", &Dynamics<GraphPriorType>::getFutureStates)
         .def("get_num_states", &Dynamics<GraphPriorType>::getNumStates)
-        .def("get_num_steps", &Dynamics<GraphPriorType>::getNumSteps)
-        .def("set_num_steps", &Dynamics<GraphPriorType>::setNumSteps)
+        .def("get_length", &Dynamics<GraphPriorType>::getLength)
+        .def("set_length", &Dynamics<GraphPriorType>::setLength)
+        .def("get_past_length", &Dynamics<GraphPriorType>::getPastLength)
+        .def("set_past_length", &Dynamics<GraphPriorType>::setPastLength)
         .def("get_random_state", &Dynamics<GraphPriorType>::getRandomState)
         .def("normalizeCoupling", &Dynamics<GraphPriorType>::normalizeCoupling)
         .def("accept_selfloops", [](Dynamics<GraphPriorType>& self){ return self.acceptSelfLoops(); })
@@ -55,13 +61,13 @@ py::class_<Dynamics<GraphPriorType>, DataModel<GraphPriorType>, PyDynamics<Graph
 template <typename GraphPriorType>
 py::class_<BinaryDynamics<GraphPriorType>, Dynamics<GraphPriorType>, PyBinaryDynamics<GraphPriorType>> declareBinaryDynamicsBaseClass(py::module& m, std::string pyName){
     return py::class_<BinaryDynamics<GraphPriorType>, Dynamics<GraphPriorType>, PyBinaryDynamics<GraphPriorType>>(m, pyName.c_str())
-        .def(py::init<GraphPriorType&, size_t, double, double, bool, bool, int>(),
-             py::arg("random_graph"), py::arg("num_steps"),
+        .def(py::init<GraphPriorType&, size_t, size_t, double, double, bool, bool, int>(),
+             py::arg("random_graph"), py::arg("length"), py::arg("past_length")=0,
              py::arg("auto_activation_prob")=0., py::arg("auto_deactivation_prob")=0.,
              py::arg("normalize")=true, py::arg("async_mode")=false,
              py::arg("num_inital_active")=-1)
-        .def(py::init<size_t, double, double, bool, bool, int>(),
-             py::arg("num_steps"),
+        .def(py::init<size_t, size_t, double, double, bool, bool, int>(),
+             py::arg("length"), py::arg("past_length")=0,
              py::arg("auto_activation_prob")=0., py::arg("auto_deactivation_prob")=0.,
              py::arg("normalize")=true, py::arg("async_mode")=false,
              py::arg("num_inital_active")=-1)
@@ -79,16 +85,16 @@ py::class_<BinaryDynamics<GraphPriorType>, Dynamics<GraphPriorType>, PyBinaryDyn
 template<typename GraphPriorType>
 py::class_<CowanDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>> declareCowanDynamicsBaseClass(py::module& m, std::string pyName){
     return py::class_<CowanDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>>(m, pyName.c_str())
-        .def(py::init<size_t, double, double, double, double, double, double, bool, bool, int>(),
-            py::arg("num_steps"), py::arg("nu"),
+        .def(py::init<size_t, double, double, double, double, size_t, double, double, bool, bool, int>(),
+            py::arg("length"), py::arg("nu"),
             py::arg("a")=1, py::arg("mu")=1, py::arg("eta")=0.5,
-            py::arg("auto_activation_prob")=1e-6, py::arg("auto_deactivation_prob")=0.,
+            py::arg("past_length")=0, py::arg("auto_activation_prob")=1e-6, py::arg("auto_deactivation_prob")=0.,
             py::arg("normalize")=true, py::arg("async_mode")=false,
             py::arg("num_active")=1)
-        .def(py::init<GraphPriorType&, size_t, double, double, double, double, double, double, bool, bool, int>(),
-            py::arg("random_graph"), py::arg("num_steps"), py::arg("nu"),
+        .def(py::init<GraphPriorType&, size_t, double, double, double, double, size_t, double, double, bool, bool, int>(),
+            py::arg("random_graph"), py::arg("length"), py::arg("nu"),
             py::arg("a")=1, py::arg("mu")=1, py::arg("eta")=0.5,
-            py::arg("auto_activation_prob")=1e-6, py::arg("auto_deactivation_prob")=0.,
+            py::arg("past_length")=0, py::arg("auto_activation_prob")=1e-6, py::arg("auto_deactivation_prob")=0.,
             py::arg("normalize")=true, py::arg("async_mode")=false,
             py::arg("num_active")=1)
         .def("get_a", &CowanDynamics<GraphPriorType>::getA)
@@ -105,9 +111,9 @@ template<typename GraphPriorType>
 py::class_<DegreeDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>> declareDegreeDynamicsBaseClass(py::module& m, std::string pyName){
     return py::class_<DegreeDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>>(m, pyName.c_str())
         .def(py::init<size_t, double>(),
-            py::arg("num_steps"), py::arg("C"))
+            py::arg("length"), py::arg("C"))
         .def(py::init<GraphPriorType&, size_t, double>(),
-            py::arg("random_graph"), py::arg("num_steps"), py::arg("C"))
+            py::arg("random_graph"), py::arg("length"), py::arg("C"))
         .def("get_c", &DegreeDynamics<GraphPriorType>::getC)
         .def("set_c", &DegreeDynamics<GraphPriorType>::setC, py::arg("c"));
 }
@@ -115,14 +121,14 @@ py::class_<DegreeDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>> decla
 template<typename GraphPriorType>
 py::class_<GlauberDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>> declareGlauberDynamicsBaseClass(py::module& m, std::string pyName){
     return py::class_<GlauberDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>>(m, pyName.c_str())
-        .def(py::init<size_t, double, double, double, bool, bool, int>(),
-            py::arg("num_steps"), py::arg("coupling"),
-            py::arg("auto_activation_prob")=0., py::arg("auto_deactivation_prob")=0.,
+        .def(py::init<size_t, double, size_t, double, double, bool, bool, int>(),
+            py::arg("length"), py::arg("coupling"),
+            py::arg("past_length")=0, py::arg("auto_activation_prob")=0., py::arg("auto_deactivation_prob")=0.,
             py::arg("normalize")=true, py::arg("async_mode")=false,
             py::arg("num_active")=-1)
-        .def(py::init<GraphPriorType&, size_t, double, double, double, bool, bool, int>(),
-            py::arg("random_graph"), py::arg("num_steps"), py::arg("coupling"),
-            py::arg("auto_activation_prob")=0., py::arg("auto_deactivation_prob")=0.,
+        .def(py::init<GraphPriorType&, size_t, double, size_t, double, double, bool, bool, int>(),
+            py::arg("random_graph"), py::arg("length"), py::arg("coupling"),
+            py::arg("past_length")=0, py::arg("auto_activation_prob")=0., py::arg("auto_deactivation_prob")=0.,
             py::arg("normalize")=true, py::arg("async_mode")=false,
             py::arg("num_active")=-1)
         .def("get_coupling", &GlauberDynamics<GraphPriorType>::getCoupling)
@@ -132,14 +138,14 @@ py::class_<GlauberDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>> decl
 template<typename GraphPriorType>
 py::class_<SISDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>> declareSISDynamicsBaseClass(py::module& m, std::string pyName){
     return py::class_<SISDynamics<GraphPriorType>, BinaryDynamics<GraphPriorType>>(m, pyName.c_str())
-        .def(py::init<size_t, double, double, double, double, bool, bool, int>(),
-            py::arg("num_steps"), py::arg("infection_prob"), py::arg("recovery_prob")=0.5,
-            py::arg("auto_activation_prob")=1e-6, py::arg("auto_deactivation_prob")=0.,
+        .def(py::init<size_t, double, double, size_t, double, double, bool, bool, int>(),
+            py::arg("length"), py::arg("infection_prob"), py::arg("recovery_prob")=0.5,
+            py::arg("past_length")=0, py::arg("auto_activation_prob")=1e-6, py::arg("auto_deactivation_prob")=0.,
             py::arg("normalize")=true, py::arg("async_mode")=false,
             py::arg("num_active")=1)
-        .def(py::init<GraphPriorType&, size_t, double, double, double, double, bool, bool, int>(),
-            py::arg("random_graph"), py::arg("num_steps"), py::arg("infection_prob"), py::arg("recovery_prob")=0.5,
-            py::arg("auto_activation_prob")=1e-6, py::arg("auto_deactivation_prob")=0.,
+        .def(py::init<GraphPriorType&, size_t, double, double, size_t, double, double, bool, bool, int>(),
+            py::arg("random_graph"), py::arg("length"), py::arg("infection_prob"), py::arg("recovery_prob")=0.5,
+            py::arg("past_length")=0, py::arg("auto_activation_prob")=1e-6, py::arg("auto_deactivation_prob")=0.,
             py::arg("normalize")=true, py::arg("async_mode")=false,
             py::arg("num_active")=1)
         .def("get_infection_prob", &SISDynamics<GraphPriorType>::getInfectionProb)

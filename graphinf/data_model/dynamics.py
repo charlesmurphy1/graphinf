@@ -28,9 +28,10 @@ class SISDynamics(_DataModelWrapper):
     def __init__(
         self,
         graph_prior: Union[RandomGraph, Wrapper] = None,
-        num_steps: int = 10,
+        length: int = 10,
         infection_prob: float = 1,
         recovery_prob: float = 0.5,
+        past_length: int = 0,
         auto_activation_prob: float = 1e-06,
         auto_deactivation_prob: float = 0.0,
         normalize: bool = True,
@@ -39,9 +40,10 @@ class SISDynamics(_DataModelWrapper):
     ):
         super().__init__(
             graph_prior=graph_prior,
-            num_steps=num_steps,
+            length=length,
             infection_prob=infection_prob,
             recovery_prob=recovery_prob,
+            past_length=past_length,
             auto_activation_prob=auto_activation_prob,
             auto_deactivation_prob=auto_deactivation_prob,
             normalize=normalize,
@@ -60,8 +62,9 @@ class GlauberDynamics(_DataModelWrapper):
     def __init__(
         self,
         graph_prior: RandomGraph = None,
-        num_steps: int = 10,
+        length: int = 10,
         coupling: float = 1,
+        past_length: int = 0,
         auto_activation_prob: float = 0.0,
         auto_deactivation_prob: float = 0.0,
         normalize: bool = True,
@@ -70,8 +73,9 @@ class GlauberDynamics(_DataModelWrapper):
     ):
         super().__init__(
             graph_prior=graph_prior,
-            num_steps=num_steps,
+            length=length,
             coupling=coupling,
+            past_length=past_length,
             auto_activation_prob=auto_activation_prob,
             auto_deactivation_prob=auto_deactivation_prob,
             normalize=normalize,
@@ -90,11 +94,12 @@ class CowanDynamics(_DataModelWrapper):
     def __init__(
         self,
         graph_prior: RandomGraph = None,
-        num_steps: int = 10,
+        length: int = 10,
         nu: float = 1,
         a: float = 1,
         mu: float = 1,
         eta: float = 0.5,
+        past_length: int = 0,
         auto_activation_prob: float = 0.0,
         auto_deactivation_prob: float = 0.0,
         normalize: bool = True,
@@ -103,11 +108,12 @@ class CowanDynamics(_DataModelWrapper):
     ):
         super().__init__(
             graph_prior=graph_prior,
-            num_steps=num_steps,
+            length=length,
             nu=nu,
             a=a,
             mu=mu,
             eta=eta,
+            past_length=past_length,
             auto_activation_prob=auto_activation_prob,
             auto_deactivation_prob=auto_deactivation_prob,
             normalize=normalize,
@@ -124,6 +130,6 @@ class DegreeDynamics(_DataModelWrapper):
     }
 
     def __init__(
-        self, graph_prior: RandomGraph = None, num_steps: int = 10, C: float = 10
+        self, graph_prior: RandomGraph = None, length: int = 10, C: float = 10
     ):
-        super().__init__(graph_prior=graph_prior, num_steps=num_steps, C=C)
+        super().__init__(graph_prior=graph_prior, length=length, C=C)

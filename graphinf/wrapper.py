@@ -1,6 +1,9 @@
+from dataclasses import dataclass
+
 __all__ = ("Wrapper",)
 
 
+@dataclass
 class Wrapper:
     def __init__(self, wrapped, setup_func=None, **others):
         self.__wrapped__ = wrapped

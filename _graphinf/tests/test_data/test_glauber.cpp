@@ -13,11 +13,11 @@ class TestGlauberDynamics: public::testing::Test{
 public:
     const double COUPLING_CONSTANT = 0.0001;
     const std::list<std::vector<VertexState>> NEIGHBOR_STATES = {{1, 3}, {2, 2}, {3, 1}};
-    const size_t NUM_STEPS=20;
+    const size_t LENGTH=20;
     double avgk = 5;
     ErdosRenyiModel randomGraph = ErdosRenyiModel(100, 250);
     GlauberDynamics<RandomGraph> dynamics = GraphInf::GlauberDynamics<RandomGraph>(
-        randomGraph, NUM_STEPS, COUPLING_CONSTANT, 0, 0, false, true, -1
+        randomGraph, LENGTH, COUPLING_CONSTANT, 0, 0, 0, 0, false, true, -1
     );
 
     void SetUp(){
@@ -90,7 +90,7 @@ TEST_F(TestGlauberDynamics, getLogLikelihood_returnCorrectLogLikelikehood){
 
     double expected = dynamics.getLogLikelihood();
     double actual = 0;
-    for(size_t t=0; t<dynamics.getNumSteps(); ++t){
+    for(size_t t=0; t<dynamics.getLength(); ++t){
         for (auto vertex : dynamics.getGraph()){
             actual += log(dynamics.getTransitionProb(past[vertex][t], future[vertex][t], neighborState[vertex][t]));
         }
@@ -157,29 +157,27 @@ TEST(ExtraGlauberTest, testing_tests){
             s[t].push_back(m.getPastStates()[v][t]);
         }
     }
-    displayMatrix(s, "s", true);
+    // displayMatrix(s, "s", true);
 
     m.setState(s[0]);
     auto p = m.getTransitionProbs(0);
-    std::cout<< displayVector(s[0], "s0") << "-> " << displayVector(s[1], "s1") << std::endl;
-    for (auto v : m.getGraph()){
-        std::cout << "\t" << displayVector(m.getTransitionProbs(v), "p[" + std::to_string(v) + "]") << std::endl;
-    }
+    // std::cout<< displayVector(s[0], "s0") << "-> " << displayVector(s[1], "s1") << std::endl;
+    // for (auto v : m.getGraph()){
+    //     std::cout << "\t" << displayVector(m.getTransitionProbs(v), "p[" + std::to_string(v) + "]") << std::endl;
+    // }
 
 }
 
-/*
 
-[0 1 0 1 1] -> [0 0 0 0 0] : [1e-15, 0.999999999999999], n=[0, 4]
-Undirected graph of size: 5
-Neighbours of:
-0: (1, 2)(3, 1)(4, 1)
-1: (0, 2)
-2: (3, 1)
-3: (0, 1)(2, 1)
-4: (0, 1)
+TEST(ExtraGlauberTest2, pastLength){
+    size_t N=100, M=250, T=55, L=10;
+    ErdosRenyiModel g = {100, 250};
+    GlauberDynamics<RandomGraph> m = {g, T, 0, L};
 
+    m.sample();
+    double logP = m.getLogLikelihood();
+    EXPECT_NEAR(-logP / log(2), N * (T - L), 1e-6);
 
-*/
+}
 
 }

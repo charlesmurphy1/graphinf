@@ -19,6 +19,8 @@ class GlauberDynamics: public BinaryDynamics<GraphPriorType> {
         GlauberDynamics(
                 size_t numSteps,
                 double couplingConstant,
+                size_t pastLength=0,
+                size_t initialBurn=0,
                 double autoActivationProb=0,
                 double autoDeactivationProb=0,
                 bool async=false,
@@ -26,6 +28,8 @@ class GlauberDynamics: public BinaryDynamics<GraphPriorType> {
                 int numInitialActive=-1):
             BaseClass(
                 numSteps,
+                pastLength,
+                initialBurn,
                 autoActivationProb,
                 autoDeactivationProb,
                 async,
@@ -36,6 +40,8 @@ class GlauberDynamics: public BinaryDynamics<GraphPriorType> {
                 GraphPriorType& graphPrior,
                 size_t numSteps,
                 double couplingConstant,
+                size_t pastLength=0,
+                size_t initialBurn=0,
                 double autoActivationProb=0,
                 double autoDeactivationProb=0,
                 bool async=false,
@@ -44,6 +50,8 @@ class GlauberDynamics: public BinaryDynamics<GraphPriorType> {
             BaseClass(
                 graphPrior,
                 numSteps,
+                pastLength,
+                initialBurn,
                 autoActivationProb,
                 autoDeactivationProb,
                 async,

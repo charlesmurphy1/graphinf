@@ -15,10 +15,11 @@ using namespace GraphInf;
 namespace GraphInf {
 
 
-class TestDynamicsBaseClass: public::testing::Test{
+class DynamicsParametrizedTest: public::testing::TestWithParam<size_t>{
     public:
         const int NUM_VERTICES = 7;
-        const int NUM_STEPS = 20;
+        const int LENGTH = 20;
+        const int PAST_LENGTH = GetParam();
         const int NUM_STATES = 3;
         const vector<int> ALL_VERTEX_STATES = {0, 1, 2};
         const State STATE = {0, 0, 0, 1, 1, 2, 0};
@@ -28,7 +29,7 @@ class TestDynamicsBaseClass: public::testing::Test{
         const GraphMove GRAPH_MOVE = {{{0, 2}}, {{0, 5}}};
         MultiGraph GRAPH = getUndirectedHouseMultiGraph();
         DummyRandomGraph randomGraph = DummyRandomGraph(NUM_VERTICES);
-        DummyDynamics dynamics = DummyDynamics(randomGraph, NUM_STATES, NUM_STEPS);
+        DummyDynamics dynamics = DummyDynamics(randomGraph, NUM_STATES, LENGTH, PAST_LENGTH);
         MultiGraph graph = GRAPH;
         State state = STATE;
         bool expectConsistencyError = true;
@@ -44,34 +45,34 @@ class TestDynamicsBaseClass: public::testing::Test{
         }
 };
 
-TEST_F(TestDynamicsBaseClass, getState_returnState){
+TEST_P(DynamicsParametrizedTest, getState_returnState){
     auto x = dynamics.getState();
     EXPECT_EQ(x, STATE);
 }
 
-TEST_F(TestDynamicsBaseClass, getNeighborsState_returnState){
+TEST_P(DynamicsParametrizedTest, getNeighborsState_returnState){
 
     auto n = dynamics.getNeighborsState();
     EXPECT_EQ(n, dynamics.computeNeighborsState(STATE));
 }
 
-TEST_F(TestDynamicsBaseClass, getGraph_returnGraph){
+TEST_P(DynamicsParametrizedTest, getGraph_returnGraph){
     auto g = dynamics.getGraph();
     EXPECT_EQ(g, GRAPH);
 }
 
-TEST_F(TestDynamicsBaseClass, getSize_returnGraphSize){
+TEST_P(DynamicsParametrizedTest, getSize_returnGraphSize){
     auto n = dynamics.getSize();
     EXPECT_EQ(n, STATE.size());
     EXPECT_EQ(n, NUM_VERTICES);
 }
 
-TEST_F(TestDynamicsBaseClass, getNumStates_returnNumStates){
+TEST_P(DynamicsParametrizedTest, getNumStates_returnNumStates){
     auto s = dynamics.getNumStates();
     EXPECT_EQ(s, NUM_STATES);
 }
 
-TEST_F(TestDynamicsBaseClass, getRandomState_returnRandomState){
+TEST_P(DynamicsParametrizedTest, getRandomState_returnRandomState){
     auto x = dynamics.getRandomState();
     EXPECT_EQ(x.size(), NUM_VERTICES);
     for (auto xx : x){
@@ -81,7 +82,7 @@ TEST_F(TestDynamicsBaseClass, getRandomState_returnRandomState){
     }
 }
 
-TEST_F(TestDynamicsBaseClass, computeNeighborsState_forSomeState_returnThatNeighborState){
+TEST_P(DynamicsParametrizedTest, computeNeighborsState_forSomeState_returnThatNeighborState){
     auto neighborsState = dynamics.computeNeighborsState(STATE);
     EXPECT_EQ(neighborsState.size(), NUM_VERTICES);
     int i = 0, j = 0;
@@ -96,7 +97,7 @@ TEST_F(TestDynamicsBaseClass, computeNeighborsState_forSomeState_returnThatNeigh
     }
 }
 
-TEST_F(TestDynamicsBaseClass, getTransitionProbs_forEachVertexState_returnTransitionProbVector){
+TEST_P(DynamicsParametrizedTest, getTransitionProbs_forEachVertexState_returnTransitionProbVector){
     vector<double> probs;
     for (auto in_state : ALL_VERTEX_STATES){
         probs = dynamics.getTransitionProbs(in_state, NEIGHBORS_STATE[3]);
@@ -107,38 +108,38 @@ TEST_F(TestDynamicsBaseClass, getTransitionProbs_forEachVertexState_returnTransi
     }
 }
 
-TEST_F(TestDynamicsBaseClass, sampleState_forSomeNumSteps_returnNothing){
+TEST_P(DynamicsParametrizedTest, sampleState_forSomeNumSteps_returnNothing){
     dynamics.sampleState();
     auto n = dynamics.getNeighborsState();
     EXPECT_EQ(n, dynamics.computeNeighborsState(dynamics.getState()));
 
 }
 
-TEST_F(TestDynamicsBaseClass, getPastStates_returnPastStates){
+TEST_P(DynamicsParametrizedTest, getPastStates_returnPastStates){
     dynamics.sampleState();
     StateSequence past_states = dynamics.getPastStates();
     EXPECT_EQ(past_states.size(), NUM_VERTICES) ;
     for (auto state : past_states){
-        EXPECT_EQ(state.size(), NUM_STEPS) ;
+        EXPECT_EQ(state.size(), LENGTH) ;
     }
 }
 
-TEST_F(TestDynamicsBaseClass, getFutureStates_returnFutureStates){
+TEST_P(DynamicsParametrizedTest, getFutureStates_returnFutureStates){
     dynamics.sampleState();
     StateSequence future_states = dynamics.getFutureStates();
     EXPECT_EQ(future_states.size(), NUM_VERTICES) ;
     for (auto state : future_states){
-        EXPECT_EQ(state.size(), NUM_STEPS) ;
+        EXPECT_EQ(state.size(), LENGTH) ;
     }
 }
 
-TEST_F(TestDynamicsBaseClass, getLogJointRatio_forSomeGraphMove_returnLogJointRatio){
+TEST_P(DynamicsParametrizedTest, getLogJointRatio_forSomeGraphMove_returnLogJointRatio){
     dynamics.sampleState();
     double ratio = dynamics.getLogJointRatioFromGraphMove(GRAPH_MOVE);
     EXPECT_EQ(ratio, 0.);
 }
 
-TEST_F(TestDynamicsBaseClass, applyMove_forSomeGraphMove_expectChangesInTheGraph){
+TEST_P(DynamicsParametrizedTest, applyMove_forSomeGraphMove_expectChangesInTheGraph){
     dynamics.sampleState();
     auto past = dynamics.getPastStates();
     dynamics.applyGraphMove(GRAPH_MOVE);
@@ -146,7 +147,7 @@ TEST_F(TestDynamicsBaseClass, applyMove_forSomeGraphMove_expectChangesInTheGraph
     auto graph = dynamics.getGraph();
     EXPECT_EQ(graph.getEdgeMultiplicityIdx(0, 2), 2);
     EXPECT_EQ(graph.getEdgeMultiplicityIdx(0, 5), 1);
-    for(size_t t=0; t<dynamics.getNumSteps(); ++t){
+    for(size_t t=0; t<dynamics.getLength(); ++t){
         for(const auto vertex: graph){
             std::vector<size_t> actual(dynamics.getNumStates(), 0);
             for(auto neighbor: graph.getNeighboursOfIdx(vertex)){
@@ -168,7 +169,7 @@ TEST_F(TestDynamicsBaseClass, applyMove_forSomeGraphMove_expectChangesInTheGraph
     EXPECT_EQ(dynamics.getNeighborsState(), dynamics.computeNeighborsState(dynamics.getState()));
 }
 
-TEST_F(TestDynamicsBaseClass, updateNeighborsStateFromEdgeMove_fromAddedEdge_expectCorrectionInNeighborState){
+TEST_P(DynamicsParametrizedTest, updateNeighborsStateFromEdgeMove_fromAddedEdge_expectCorrectionInNeighborState){
     dynamics.sampleState();
     BaseGraph::Edge edge = GRAPH_MOVE.addedEdges[0];
     map<BaseGraph::VertexIndex, VertexNeighborhoodStateSequence> actualBefore, actualAfter;
@@ -180,17 +181,17 @@ TEST_F(TestDynamicsBaseClass, updateNeighborsStateFromEdgeMove_fromAddedEdge_exp
     auto expectedAfter = dynamics.getNeighborsPastStates();
 
     for (auto actual : actualBefore)
-        for (size_t t=0; t<dynamics.getNumSteps(); ++t)
+        for (size_t t=0; t<dynamics.getLength(); ++t)
             for (size_t s=0; s<dynamics.getNumStates(); ++s)
                 EXPECT_EQ(expectedBefore[actual.first][t][s], actual.second[t][s]);
 
     for (auto actual : actualAfter)
-        for (size_t t=0; t<dynamics.getNumSteps(); ++t)
+        for (size_t t=0; t<dynamics.getLength(); ++t)
             for (size_t s=0; s<dynamics.getNumStates(); ++s)
                 EXPECT_EQ(expectedAfter[actual.first][t][s], actual.second[t][s]);
 }
 
-TEST_F(TestDynamicsBaseClass, updateNeighborsStateFromEdgeMove_fromRemovedEdge_expectCorrectionInNeighborState){
+TEST_P(DynamicsParametrizedTest, updateNeighborsStateFromEdgeMove_fromRemovedEdge_expectCorrectionInNeighborState){
     dynamics.sampleState();
     BaseGraph::Edge edge = GRAPH_MOVE.removedEdges[0];
     map<BaseGraph::VertexIndex, VertexNeighborhoodStateSequence> actualBefore, actualAfter;
@@ -202,15 +203,22 @@ TEST_F(TestDynamicsBaseClass, updateNeighborsStateFromEdgeMove_fromRemovedEdge_e
     auto expectedAfter = dynamics.getNeighborsPastStates();
 
     for (auto actual : actualBefore)
-        for (size_t t=0; t<dynamics.getNumSteps(); ++t)
+        for (size_t t=0; t<dynamics.getLength(); ++t)
             for (size_t s=0; s<dynamics.getNumStates(); ++s)
                 EXPECT_EQ(expectedBefore[actual.first][t][s], actual.second[t][s]);
 
     for (auto actual : actualAfter)
-        for (size_t t=0; t<dynamics.getNumSteps(); ++t)
+        for (size_t t=0; t<dynamics.getLength(); ++t)
             for (size_t s=0; s<dynamics.getNumStates(); ++s)
                 EXPECT_EQ(expectedAfter[actual.first][t][s], actual.second[t][s]);
 }
+
+INSTANTIATE_TEST_CASE_P(
+        DynamicsBaseClassTests,
+        DynamicsParametrizedTest,
+        ::testing::Values( 0, 10 )
+    );
+
 
 
 } /* GraphInf */

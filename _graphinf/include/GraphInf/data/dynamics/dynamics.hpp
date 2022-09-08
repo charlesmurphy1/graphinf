@@ -26,7 +26,9 @@ template<typename GraphPriorType=RandomGraph>
 class Dynamics: public DataModel<GraphPriorType>{
 protected:
     size_t m_numStates;
-    size_t m_numSteps;
+    size_t m_length;
+    size_t m_pastLength;
+    size_t m_initialBurn;
     bool m_async;
     std::vector<VertexState> m_state;
     Matrix<VertexState> m_neighborsState;
@@ -54,17 +56,21 @@ protected:
     void checkConsistencyOfNeighborsPastStateSequence() const ;
     void computeConsistentState() override ;
 public:
-    explicit Dynamics(size_t numStates, size_t numSteps, bool async=false, bool normalizeCoupling=true):
+    explicit Dynamics(size_t numStates, size_t length, size_t pastLength=0, size_t initialBurn=0, bool async=false, bool normalizeCoupling=true):
         BaseClass(),
         m_numStates(numStates),
-        m_numSteps(numSteps),
+        m_length(length),
+        m_pastLength(pastLength),
+        m_initialBurn(initialBurn),
         m_async(async),
         m_normalizeCoupling(normalizeCoupling)
         { }
-    explicit Dynamics(GraphPriorType& graphPrior, size_t numStates, size_t numSteps, bool async=false, bool normalizeCoupling=true):
+    explicit Dynamics(GraphPriorType& graphPrior, size_t numStates, size_t length, size_t pastLength=0, size_t initialBurn=0, bool async=false, bool normalizeCoupling=true):
         BaseClass(graphPrior),
         m_numStates(numStates),
-        m_numSteps(numSteps),
+        m_length(length),
+        m_pastLength(pastLength),
+        m_initialBurn(initialBurn),
         m_async(async),
         m_normalizeCoupling(normalizeCoupling)
         { }
@@ -85,8 +91,10 @@ public:
     const Matrix<std::vector<VertexState>>& getNeighborsPastStates() const { return m_neighborsPastStateSequence; }
     const bool normalizeCoupling() const { return m_normalizeCoupling; }
     const size_t getNumStates() const { return m_numStates; }
-    const size_t getNumSteps() const { return m_numSteps; }
-    void setNumSteps(size_t numSteps) { m_numSteps = numSteps; }
+    const size_t getLength() const { return m_length; }
+    void setLength(size_t length) { m_length = length; }
+    const size_t getPastLength() const { return m_pastLength; }
+    void setPastLength(size_t length) { m_pastLength = length; }
 
     void sampleState(const std::vector<VertexState>& initialState);
     void sampleState() override { sampleState(getRandomState()); }
@@ -142,7 +150,14 @@ void Dynamics<GraphPriorType>::sampleState(const State& x0){
     StateSequence reversedPastState;
     StateSequence reversedFutureState;
     NeighborsStateSequence reversedNeighborsPastState;
-    for (size_t t = 0; t < m_numSteps; t++) {
+
+    for (size_t t = 0; t<m_initialBurn; t++){
+        if (m_async) { asyncUpdateState(BaseClass::getSize()); }
+        else { syncUpdateState(); }
+    }
+
+
+    for (size_t t = 0; t < m_length; t++) {
         reversedPastState.push_back(m_state);
         reversedNeighborsPastState.push_back(m_neighborsState);
         if (m_async) { asyncUpdateState(BaseClass::getSize()); }
@@ -159,10 +174,10 @@ void Dynamics<GraphPriorType>::sampleState(const State& x0){
     m_neighborsPastStateSequence.clear();
     m_neighborsPastStateSequence.resize(N);
     for (const auto& idx : graph){
-        m_pastStateSequence[idx].resize(m_numSteps);
-        m_futureStateSequence[idx].resize(m_numSteps);
-        m_neighborsPastStateSequence[idx].resize(m_numSteps);
-        for (size_t t = 0; t < m_numSteps; t++){
+        m_pastStateSequence[idx].resize(m_length);
+        m_futureStateSequence[idx].resize(m_length);
+        m_neighborsPastStateSequence[idx].resize(m_length);
+        for (size_t t = 0; t < m_length; t++){
             m_pastStateSequence[idx][t] = reversedPastState[t][idx];
             m_futureStateSequence[idx][t] = reversedFutureState[t][idx];
             m_neighborsPastStateSequence[idx][t] = reversedNeighborsPastState[t][idx];
@@ -216,8 +231,8 @@ const NeighborsStateSequence Dynamics<GraphPriorType>::computeNeighborsStateSequ
     const auto& graph = BaseClass::getGraph();
     NeighborsStateSequence neighborsStateSequence(N);
     for ( const auto& idx: graph ){
-        neighborsStateSequence[idx].resize(m_numSteps);
-        for (size_t t=0; t<m_numSteps; t++){
+        neighborsStateSequence[idx].resize(m_length);
+        for (size_t t=0; t<m_length; t++){
             neighborsStateSequence[idx][t].resize(m_numStates);
             for ( const auto& neighbor: graph.getNeighboursOfIdx(idx) ){
                 size_t edgeMult = neighbor.label;
@@ -295,7 +310,7 @@ const double Dynamics<GraphPriorType>::getLogLikelihood() const {
     double logLikelihood = 0;
     std::vector<int> neighborsState(getNumStates(), 0);
     const auto& graph = BaseClass::getGraph();
-    for (size_t t = 0; t < m_numSteps; t++){
+    for (size_t t = m_pastLength; t < m_length; t++){
         for (auto idx: graph){
             logLikelihood += log(getTransitionProb(
                 m_pastStateSequence[idx][t],
@@ -345,7 +360,7 @@ void Dynamics<GraphPriorType>::updateNeighborsStateFromEdgeMove(
     }
 
     VertexState vState, uState;
-    for (size_t t = 0; t < m_numSteps; t++) {
+    for (size_t t = 0; t < m_length; t++) {
         uState = m_pastStateSequence[u][t];
         vState = m_pastStateSequence[v][t];
         nextNeighborMap[u][t][vState] += counter;
@@ -375,7 +390,7 @@ const double Dynamics<GraphPriorType>::getLogLikelihoodRatioFromGraphMove(const 
     }
 
     for (const auto& idx: verticesAffected){
-        for (size_t t = 0; t < m_numSteps; t++) {
+        for (size_t t = m_pastLength; t < m_length; t++) {
             logLikelihoodRatio += log(
                 getTransitionProb(m_pastStateSequence[idx][t], m_futureStateSequence[idx][t], nextNeighborMap[idx][t])
             );
@@ -393,7 +408,7 @@ template<typename GraphPriorType>
 void Dynamics<GraphPriorType>::applyGraphMoveToSelf(const GraphMove& move) {
     std::set<BaseGraph::VertexIndex> verticesAffected;
     std::map<BaseGraph::VertexIndex, VertexNeighborhoodStateSequence> prevNeighborMap, nextNeighborMap;
-    VertexNeighborhoodStateSequence neighborsState(m_numSteps);
+    VertexNeighborhoodStateSequence neighborsState(m_length);
     size_t v, u;
 
     for (const auto& edge : move.addedEdges){
@@ -420,7 +435,7 @@ void Dynamics<GraphPriorType>::applyGraphMoveToSelf(const GraphMove& move) {
     }
 
     for (const auto& idx: verticesAffected){
-        for (size_t t = 0; t < m_numSteps; t++) {
+        for (size_t t = 0; t < m_length; t++) {
             m_neighborsPastStateSequence[idx][t] = nextNeighborMap[idx][t];
         }
     }
@@ -440,14 +455,14 @@ void Dynamics<GraphPriorType>::checkConsistencyOfNeighborsPastStateSequence() co
     const auto& actual = m_neighborsPastStateSequence;
     const auto expected = computeNeighborsStateSequence(m_pastStateSequence);
     for (size_t v=0; v<N; ++v){
-        if (actual[v].size() != getNumSteps())
+        if (actual[v].size() != getLength())
             throw ConsistencyError(
                 "Dynamics",
-                "m_numSteps", "value=" + std::to_string(getNumSteps()),
+                "m_length", "value=" + std::to_string(getLength()),
                 "m_neighborsPastStateSequence", "size=" + std::to_string(actual[v].size()),
                 "vertex=" + std::to_string(v)
             );
-        for (size_t t=0; t<m_numSteps; ++t){
+        for (size_t t=0; t<m_length; ++t){
             if (actual[v][t].size() != getNumStates())
                 throw ConsistencyError(
                     "Dynamics",

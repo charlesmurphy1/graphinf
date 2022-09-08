@@ -22,24 +22,28 @@ public:
     using BaseClass = Dynamics<GraphPriorType>;
     explicit BinaryDynamics(
             size_t numSteps,
+            size_t pastLength=0,
+            size_t initialBurn=0,
             double autoActivationProb=0.0,
             double autoDeactivationProb=0.0,
             bool async=false,
             bool normalizeCoupling=true,
             int numInitialActive=-1):
-        BaseClass(2, numSteps, async, normalizeCoupling),
+        BaseClass(2, numSteps, pastLength, initialBurn, async, normalizeCoupling),
         m_autoActivationProb(autoActivationProb),
         m_autoDeactivationProb(autoDeactivationProb),
         m_numInitialActive(numInitialActive) { }
     explicit BinaryDynamics(
             GraphPriorType& randomGraph,
             size_t numSteps,
+            size_t pastLength=0,
+            size_t initialBurn=0,
             double autoActivationProb=0.0,
             double autoDeactivationProb=0.0,
             bool async=false,
             bool normalizeCoupling=true,
             int numInitialActive=-1):
-        BaseClass(randomGraph, 2, numSteps, async, normalizeCoupling),
+        BaseClass(randomGraph, 2, numSteps, pastLength, initialBurn, async, normalizeCoupling),
         m_autoActivationProb(autoActivationProb),
         m_autoDeactivationProb(autoDeactivationProb),
         m_numInitialActive(numInitialActive) { }

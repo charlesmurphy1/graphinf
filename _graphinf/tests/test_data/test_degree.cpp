@@ -47,7 +47,7 @@ TEST_F(TestDegreeDynamics, getLogLikelihood_returnCorrectLogLikelikehood){
 
     double expected = dynamics.getLogLikelihood();
     double actual = 0;
-    for(size_t t=0; t<dynamics.getNumSteps(); ++t){
+    for(size_t t=0; t<dynamics.getLength(); ++t){
         for (auto vertex : dynamics.getGraph()){
             actual += log(dynamics.getTransitionProb(past[vertex][t], future[vertex][t], neighborState[vertex][t]));
         }
