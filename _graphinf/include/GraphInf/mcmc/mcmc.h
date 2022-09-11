@@ -44,9 +44,9 @@ public:
         m_betaLikelihood = m_betaPrior = beta;
     }
 
-    virtual void sample() = 0;
-    virtual void sampleState() = 0;
-    virtual void samplePrior() = 0;
+    // virtual void sample() = 0;
+    // virtual void sampleState() = 0;
+    // virtual void samplePrior() = 0;
     virtual const double getLogLikelihood() const = 0 ;
     virtual const double getLogPrior() const = 0 ;
     virtual const double getLogJoint() const = 0 ;

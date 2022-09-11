@@ -17,7 +17,8 @@ public:
     const size_t LENGTH=20;
     const std::list<std::vector<VertexState>> NEIGHBOR_STATES = {{1, 3}, {2, 2}, {3, 1}, {2, 0}};
     ErdosRenyiModel randomGraph = ErdosRenyiModel(10, 10);
-    GraphInf::CowanDynamics<RandomGraph> dynamics = GraphInf::CowanDynamics<RandomGraph>(randomGraph, LENGTH, NU, A, MU, ETA, 0, 0, 0, 0, false, false, -1);
+    GraphInf::CowanDynamics<RandomGraph> dynamics = GraphInf::CowanDynamics<RandomGraph>(
+        randomGraph, LENGTH, NU, A, MU, ETA, 0, 0);
 };
 
 

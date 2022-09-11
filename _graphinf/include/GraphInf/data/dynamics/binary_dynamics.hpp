@@ -15,45 +15,31 @@ namespace GraphInf{
 template <typename GraphPriorType=RandomGraph>
 class BinaryDynamics: public Dynamics<GraphPriorType>{
 private:
-    int m_numInitialActive;
     double m_autoActivationProb;
     double m_autoDeactivationProb;
 public:
     using BaseClass = Dynamics<GraphPriorType>;
     explicit BinaryDynamics(
             size_t numSteps,
-            size_t pastLength=0,
-            size_t initialBurn=0,
             double autoActivationProb=0.0,
-            double autoDeactivationProb=0.0,
-            bool async=false,
-            bool normalizeCoupling=true,
-            int numInitialActive=-1):
-        BaseClass(2, numSteps, pastLength, initialBurn, async, normalizeCoupling),
+            double autoDeactivationProb=0.0):
+        BaseClass(2, numSteps),
         m_autoActivationProb(autoActivationProb),
-        m_autoDeactivationProb(autoDeactivationProb),
-        m_numInitialActive(numInitialActive) { }
+        m_autoDeactivationProb(autoDeactivationProb){ }
     explicit BinaryDynamics(
             GraphPriorType& randomGraph,
             size_t numSteps,
-            size_t pastLength=0,
-            size_t initialBurn=0,
             double autoActivationProb=0.0,
-            double autoDeactivationProb=0.0,
-            bool async=false,
-            bool normalizeCoupling=true,
-            int numInitialActive=-1):
-        BaseClass(randomGraph, 2, numSteps, pastLength, initialBurn, async, normalizeCoupling),
+            double autoDeactivationProb=0.0):
+        BaseClass(randomGraph, 2, numSteps),
         m_autoActivationProb(autoActivationProb),
-        m_autoDeactivationProb(autoDeactivationProb),
-        m_numInitialActive(numInitialActive) { }
+        m_autoDeactivationProb(autoDeactivationProb){ }
     const double getTransitionProb(
         const VertexState& prevVertexState, const VertexState& nextVertexState, const VertexNeighborhoodState& neighborhoodState
     ) const override;
 
-    const int getNumInitialActive() const { return m_numInitialActive; }
-    void setNumInitialActive(int numInitialActive) {m_numInitialActive = numInitialActive; }
-    const State getRandomState() const override;
+    const State getRandomState(int initialActive) const;
+    const State getRandomState() const override { return getRandomState(-1); }
     virtual const double getActivationProb(const VertexNeighborhoodState& neighborState) const = 0;
     virtual const double getDeactivationProb(const VertexNeighborhoodState& neighborState) const = 0;
 
@@ -65,13 +51,13 @@ public:
 };
 
 template <typename GraphPriorType>
-const State BinaryDynamics<GraphPriorType>::getRandomState() const {
+const State BinaryDynamics<GraphPriorType>::getRandomState(int initialActive) const {
     size_t N = BaseClass::m_graphPriorPtr->getSize();
     State randomState(N);
-    if (m_numInitialActive < 0 or m_numInitialActive > N)
+    if (initialActive < 0 or initialActive > N)
         return Dynamics<GraphPriorType>::getRandomState();
 
-    auto indices = sampleUniformlySequenceWithoutReplacement(N, m_numInitialActive);
+    auto indices = sampleUniformlySequenceWithoutReplacement(N, initialActive);
     for (auto i: indices)
         randomState[i] = 1;
     return randomState;

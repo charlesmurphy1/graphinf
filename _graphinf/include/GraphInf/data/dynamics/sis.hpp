@@ -18,48 +18,28 @@ public:
     using BaseClass = BinaryDynamics<GraphPriorType>;
     explicit SISDynamics(
             size_t numSteps,
-            double infectionProb,
+            double infectionProb=0.5,
             double recoveryProb=0.5,
-            size_t pastLength=0,
-            size_t initialBurn=0,
             double autoActivationProb=1e-6,
-            double autoDeactivationProb=0,
-            bool async=false,
-            bool normalizeCoupling=true,
-            size_t numInitialActive=1) :
+            double autoDeactivationProb=0) :
         BaseClass(
             numSteps,
-            pastLength,
-            initialBurn,
             autoActivationProb,
-            autoDeactivationProb,
-            async,
-            normalizeCoupling,
-            numInitialActive),
+            autoDeactivationProb),
         m_infectionProb(infectionProb),
         m_recoveryProb(recoveryProb){ }
     explicit SISDynamics(
             GraphPriorType& graphPrior,
             size_t numSteps,
-            double infectionProb,
+            double infectionProb=0.5,
             double recoveryProb=0.5,
-            size_t pastLength=0,
-            size_t initialBurn=0,
             double autoActivationProb=1e-6,
-            double autoDeactivationProb=0,
-            bool async=false,
-            bool normalizeCoupling=true,
-            size_t numInitialActive=1) :
+            double autoDeactivationProb=0) :
         BaseClass(
             graphPrior,
             numSteps,
-            pastLength,
-            initialBurn,
             autoActivationProb,
-            autoDeactivationProb,
-            async,
-            normalizeCoupling,
-            numInitialActive),
+            autoDeactivationProb),
         m_infectionProb(infectionProb),
         m_recoveryProb(recoveryProb){ }
 
@@ -70,16 +50,7 @@ public:
         return m_recoveryProb;
     }
 
-    const double getInfectionProb() const {
-        if (not BaseClass::m_normalizeCoupling)
-            return m_infectionProb;
-        double infProb = m_infectionProb / (2 * BaseClass::m_graphPriorPtr->getEdgeCount() / BaseClass::m_graphPriorPtr->getSize());
-        if (infProb > 1 - EPSILON)
-            return 1 - EPSILON;
-        if (infProb < 0)
-            return 0;
-        return infProb;
-    }
+    const double getInfectionProb() const { return m_infectionProb; }
     void setInfectionProb(double infectionProb) { m_infectionProb = infectionProb; }
     const double getRecoveryProb() const { return m_recoveryProb; }
     void setRecoveryProb(double recoveryProb) { m_recoveryProb = recoveryProb; }

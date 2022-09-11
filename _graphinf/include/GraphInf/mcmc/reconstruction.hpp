@@ -48,15 +48,15 @@ public:
     const MultiGraph& getGraph() const { return m_dataModelPtr->getGraph(); }
     void setGraph(const MultiGraph& graph) { m_dataModelPtr->setGraph(graph); }
 
-    void sample() override {
-        m_dataModelPtr->sample();
-    }
-    void sampleState() override {
-        m_dataModelPtr->sampleState();
-    }
-    void samplePrior() override {
-        m_dataModelPtr->samplePrior();
-    }
+    // void sample() override {
+    //     m_dataModelPtr->sample();
+    // }
+    // void sampleState() override {
+    //     m_dataModelPtr->sampleState();
+    // }
+    // void samplePrior() override {
+    //     m_dataModelPtr->samplePrior();
+    // }
     const double getLogLikelihood() const override { return m_dataModelPtr->getLogLikelihood(); }
     const double getLogPrior() const override { return m_dataModelPtr->getLogPrior(); }
     const double getLogJoint() const override { return m_dataModelPtr->getLogJoint(); }

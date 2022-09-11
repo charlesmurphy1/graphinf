@@ -15,32 +15,21 @@ private:
     double m_nu;
     double m_mu;
     double m_eta;
-    bool m_normalizeCoupling;
 
 public:
     using BaseClass = BinaryDynamics<GraphPriorType>;
     CowanDynamics(
             size_t numSteps,
-            double nu,
+            double nu=1,
             double a=1,
             double mu=1,
             double eta=0.5,
-            size_t pastLength=0,
-            size_t initialBurn=0,
             double autoActivationProb=1e-6,
-            double autoDeactivationProb=0,
-            bool async=true,
-            bool normalizeCoupling=true,
-            size_t numInitialActive=1):
+            double autoDeactivationProb=0):
         BaseClass(
             numSteps,
-            pastLength,
-            initialBurn,
             autoActivationProb,
-            autoDeactivationProb,
-            async,
-            normalizeCoupling,
-            numInitialActive),
+            autoDeactivationProb),
         m_a(a),
         m_nu(nu),
         m_mu(mu),
@@ -48,27 +37,17 @@ public:
     CowanDynamics(
             GraphPriorType& graphPrior,
             size_t numSteps,
-            double nu,
+            double nu=1,
             double a=1,
             double mu=1,
             double eta=0.5,
-            size_t pastLength=0,
-            size_t initialBurn=0,
             double autoActivationProb=1e-6,
-            double autoDeactivationProb=0,
-            bool async=false,
-            bool normalizeCoupling=true,
-            size_t numInitialActive=1):
+            double autoDeactivationProb=0):
         BaseClass(
             graphPrior,
             numSteps,
-            pastLength,
-            initialBurn,
             autoActivationProb,
-            autoDeactivationProb,
-            async,
-            normalizeCoupling,
-            numInitialActive),
+            autoDeactivationProb),
         m_a(a),
         m_nu(nu),
         m_mu(mu),
@@ -82,13 +61,7 @@ public:
     }
     const double getA() const { return m_a; }
     void setA(double a) { m_a = a; }
-    const double getNu() const {
-        if (BaseClass::m_normalizeCoupling)
-            return m_nu / (2 * BaseClass::m_graphPriorPtr->getEdgeCount() / BaseClass::m_graphPriorPtr->getSize());
-        else
-            return m_nu;
-
-    }
+    const double getNu() const { return m_nu; }
     void setNu(double nu) { m_nu = nu; }
     const double getMu() const { return m_mu; }
     void setMu(double mu) { m_mu = mu; }

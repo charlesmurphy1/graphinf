@@ -21,15 +21,13 @@ public:
     ErdosRenyiModel randomGraph = ErdosRenyiModel(10, 10);
 
     GraphInf::SISDynamics<RandomGraph> dynamics = GraphInf::SISDynamics<RandomGraph>(
-        randomGraph, NUM_STEPS, INFECTION_PROB, RECOVERY_PROB, 0, 0,
-        AUTO_ACTIVATION_PROB, AUTO_DEACTIVATION_PROB,
-        NORMALIZE_COUPLING, ASYNC, NUM_INITIAL_ACTIVE);
+        randomGraph, NUM_STEPS, INFECTION_PROB, RECOVERY_PROB
+    );
 };
 
 TEST_F(TestSISDynamics, getRandomState_forGivenInitialActives_returnCorrectState) {
     for (size_t numActive = 1; numActive < 10; numActive++){
-        dynamics.setNumInitialActive(numActive);
-        auto state = dynamics.getRandomState();
+        auto state = dynamics.getRandomState(numActive);
         size_t expectedNumActive = 0;
         for (auto s : state)
             expectedNumActive += s;

@@ -42,9 +42,9 @@ public:
     void setLabels(const std::vector<Label>& labels, bool reduce=false) { m_graphPriorPtr->setLabels(labels, reduce); }
 
 
-    void sample() override { m_graphPriorPtr->sample(); }
-    void sampleState() override { m_graphPriorPtr->sampleState(); }
-    void samplePrior() override { m_graphPriorPtr->sampleOnlyLabels(); }
+    // void sample() override { m_graphPriorPtr->sample(); }
+    // void sampleState() override { m_graphPriorPtr->sampleState(); }
+    // void samplePrior() override { m_graphPriorPtr->sampleOnlyLabels(); }
     const double getLogLikelihood() const override { return m_graphPriorPtr->getLogLikelihood(); }
     const double getLogPrior() const override { return m_graphPriorPtr->getLogPrior(); }
     const double getLogJoint() const override { return m_graphPriorPtr->getLogJoint(); }
@@ -173,9 +173,9 @@ public:
     void setNestedLabels(const std::vector<std::vector<Label>>& labels, bool reduce=false) { m_graphPriorPtr->setNestedLabels(labels, reduce); }
 
 
-    void sample() override { m_graphPriorPtr->sample(); }
-    void sampleState() override { m_graphPriorPtr->sampleState(); }
-    void samplePrior() override { m_graphPriorPtr->sampleOnlyLabels(); }
+    // void sample() override { m_graphPriorPtr->sample(); }
+    // void sampleState() override { m_graphPriorPtr->sampleState(); }
+    // void samplePrior() override { m_graphPriorPtr->sampleOnlyLabels(); }
     const double getLogLikelihood() const override { return m_graphPriorPtr->getLogLikelihood(); }
     const double getLogPrior() const override { return m_graphPriorPtr->getLogPrior(); }
     const double getLogJoint() const override { return m_graphPriorPtr->getLogJoint(); }

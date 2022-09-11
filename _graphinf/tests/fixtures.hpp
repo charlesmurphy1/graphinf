@@ -130,8 +130,8 @@ public:
 
 class DummyDynamics: public Dynamics<RandomGraph>{
 public:
-    DummyDynamics(RandomGraph& graphPrior, size_t numStates=2, size_t length = 10, size_t pastLength=0, size_t initialBurn=0):
-    Dynamics<RandomGraph>(graphPrior, numStates, length, pastLength, initialBurn, false, false){}
+    DummyDynamics(RandomGraph& graphPrior, size_t numStates=2, size_t length = 10):
+    Dynamics<RandomGraph>(graphPrior, numStates, length){}
 
     const double getTransitionProb(
         const VertexState& prevVertexState,
@@ -180,9 +180,9 @@ public:
         return m_isLastAccepted;
 
     }
-    void sample() override { }
-    void sampleState() override { }
-    void samplePrior() override { }
+    // void sample() override { }
+    // void sampleState() override { }
+    // void samplePrior() override { }
     const double getLogLikelihood() const override { return 1; }
     const double getLogPrior() const override { return 2; }
     const double getLogJoint() const override { return getLogLikelihood() + getLogPrior(); }

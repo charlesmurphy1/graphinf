@@ -29,7 +29,7 @@ class DynamicsParametrizedTest: public::testing::TestWithParam<size_t>{
         const GraphMove GRAPH_MOVE = {{{0, 2}}, {{0, 5}}};
         MultiGraph GRAPH = getUndirectedHouseMultiGraph();
         DummyRandomGraph randomGraph = DummyRandomGraph(NUM_VERTICES);
-        DummyDynamics dynamics = DummyDynamics(randomGraph, NUM_STATES, LENGTH, PAST_LENGTH);
+        DummyDynamics dynamics = DummyDynamics(randomGraph, NUM_STATES, LENGTH);
         MultiGraph graph = GRAPH;
         State state = STATE;
         bool expectConsistencyError = true;

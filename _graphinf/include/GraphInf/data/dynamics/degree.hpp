@@ -15,9 +15,9 @@ class DegreeDynamics: public BinaryDynamics<GraphPriorType> {
         using BaseClass = BinaryDynamics<GraphPriorType>;
 
         DegreeDynamics(size_t numSteps, double C):
-                BaseClass(numSteps, 0, 0, false, -1), m_C(C) {}
+                BaseClass(numSteps, 0, 0), m_C(C) {}
         DegreeDynamics(GraphPriorType& graphPrior, size_t numSteps, double C):
-                BaseClass(graphPrior, numSteps, 0, 0, false, false, -1), m_C(C) { }
+                BaseClass(graphPrior, numSteps, 0, 0), m_C(C) { }
 
         const double getActivationProb(const VertexNeighborhoodState& vertexNeighborState) const override {
             return (vertexNeighborState[0] + vertexNeighborState[1]) / m_C;

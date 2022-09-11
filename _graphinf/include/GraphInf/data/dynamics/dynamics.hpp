@@ -28,11 +28,8 @@ protected:
     size_t m_numStates;
     size_t m_length;
     size_t m_pastLength;
-    size_t m_initialBurn;
-    bool m_async;
     std::vector<VertexState> m_state;
     Matrix<VertexState> m_neighborsState;
-    const bool m_normalizeCoupling;
     bool m_acceptSelfLoops=false;
     Matrix<VertexState> m_pastStateSequence;
     Matrix<VertexState> m_futureStateSequence;
@@ -56,23 +53,17 @@ protected:
     void checkConsistencyOfNeighborsPastStateSequence() const ;
     void computeConsistentState() override ;
 public:
-    explicit Dynamics(size_t numStates, size_t length, size_t pastLength=0, size_t initialBurn=0, bool async=false, bool normalizeCoupling=true):
+    explicit Dynamics(size_t numStates, size_t length):
         BaseClass(),
         m_numStates(numStates),
         m_length(length),
-        m_pastLength(pastLength),
-        m_initialBurn(initialBurn),
-        m_async(async),
-        m_normalizeCoupling(normalizeCoupling)
+        m_pastLength(0)
         { }
-    explicit Dynamics(GraphPriorType& graphPrior, size_t numStates, size_t length, size_t pastLength=0, size_t initialBurn=0, bool async=false, bool normalizeCoupling=true):
+    explicit Dynamics(GraphPriorType& graphPrior, size_t numStates, size_t length):
         BaseClass(graphPrior),
         m_numStates(numStates),
         m_length(length),
-        m_pastLength(pastLength),
-        m_initialBurn(initialBurn),
-        m_async(async),
-        m_normalizeCoupling(normalizeCoupling)
+        m_pastLength(0)
         { }
 
     const std::vector<VertexState>& getState() const { return m_state; }
@@ -89,15 +80,21 @@ public:
     const Matrix<VertexState>& getPastStates() const { return m_pastStateSequence; }
     const Matrix<VertexState>& getFutureStates() const { return m_futureStateSequence; }
     const Matrix<std::vector<VertexState>>& getNeighborsPastStates() const { return m_neighborsPastStateSequence; }
-    const bool normalizeCoupling() const { return m_normalizeCoupling; }
     const size_t getNumStates() const { return m_numStates; }
     const size_t getLength() const { return m_length; }
     void setLength(size_t length) { m_length = length; }
     const size_t getPastLength() const { return m_pastLength; }
     void setPastLength(size_t length) { m_pastLength = length; }
 
-    void sampleState(const std::vector<VertexState>& initialState);
-    void sampleState() override { sampleState(getRandomState()); }
+    void sampleState(const std::vector<VertexState>& initialState={}, bool asyncMode=false, size_t initialBurn=0);
+    void sample(const std::vector<VertexState>& initialState={}, bool asyncMode=false, size_t initialBurn=0){
+        BaseClass::m_graphPriorPtr->sample();
+        sampleState(initialState, asyncMode, initialBurn);
+        BaseClass::computationFinished();
+        #if DEBUG
+        checkConsistency();
+        #endif
+    }
     virtual const State getRandomState() const;
     const NeighborsState computeNeighborsState(const State& state) const;
     const NeighborsStateSequence computeNeighborsStateSequence(const StateSequence& stateSequence) const;
@@ -143,16 +140,20 @@ void Dynamics<GraphPriorType>::computeConsistentState() {
 }
 
 template<typename GraphPriorType>
-void Dynamics<GraphPriorType>::sampleState(const State& x0){
-    m_state = x0;
+void Dynamics<GraphPriorType>::sampleState(const State& x0, bool asyncMode, size_t initialBurn){
+    if (x0.size() == 0)
+        m_state = getRandomState();
+    else
+        m_state = x0;
+
     m_neighborsState = computeNeighborsState(m_state);
 
     StateSequence reversedPastState;
     StateSequence reversedFutureState;
     NeighborsStateSequence reversedNeighborsPastState;
 
-    for (size_t t = 0; t<m_initialBurn; t++){
-        if (m_async) { asyncUpdateState(BaseClass::getSize()); }
+    for (size_t t = 0; t<initialBurn; t++){
+        if (asyncMode) { asyncUpdateState(BaseClass::getSize()); }
         else { syncUpdateState(); }
     }
 
@@ -160,7 +161,7 @@ void Dynamics<GraphPriorType>::sampleState(const State& x0){
     for (size_t t = 0; t < m_length; t++) {
         reversedPastState.push_back(m_state);
         reversedNeighborsPastState.push_back(m_neighborsState);
-        if (m_async) { asyncUpdateState(BaseClass::getSize()); }
+        if (asyncMode) { asyncUpdateState(BaseClass::getSize()); }
         else { syncUpdateState(); }
         reversedFutureState.push_back(m_state);
     }

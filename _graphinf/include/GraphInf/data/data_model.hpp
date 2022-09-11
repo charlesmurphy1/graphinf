@@ -29,15 +29,15 @@ public:
         computeConsistentState();
     }
     const size_t getSize() const { return m_graphPriorPtr->getSize(); }
-    virtual void sampleState() = 0;
-    void sample(){
-        m_graphPriorPtr->sample();
-        sampleState();
-        computationFinished();
-        #if DEBUG
-        checkConsistency();
-        #endif
-    }
+    // virtual void sampleState() = 0;
+    // void sample(){
+    //     m_graphPriorPtr->sample();
+    //     sampleState();
+    //     computationFinished();
+    //     #if DEBUG
+    //     checkConsistency();
+    //     #endif
+    // }
     void samplePrior() {
         m_graphPriorPtr->sample();
         computeConsistentState();

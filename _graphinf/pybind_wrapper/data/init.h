@@ -22,8 +22,6 @@ py::class_<DataModel<GraphPriorType>, NestedRandomVariable, PyDataModel<GraphPri
         .def("set_graph", &DataModel<GraphPriorType>::setGraph, py::arg("graph"))
         .def("get_graph_prior", &DataModel<GraphPriorType>::getGraphPrior, py::return_value_policy::reference_internal)
         .def("set_graph_prior", &DataModel<GraphPriorType>::setGraphPrior, py::arg("prior"))
-        .def("sample", &DataModel<GraphPriorType>::sample)
-        .def("sample_state", &DataModel<GraphPriorType>::sampleState)
         .def("sample_prior", &DataModel<GraphPriorType>::samplePrior)
         .def("get_log_likelihood", &DataModel<GraphPriorType>::getLogLikelihood)
         .def("get_log_prior", &DataModel<GraphPriorType>::getLogPrior)
@@ -38,14 +36,6 @@ py::class_<DataModel<GraphPriorType>, NestedRandomVariable, PyDataModel<GraphPri
             py::arg("move"))
         ;
 }
-
-template<typename GraphPriorType>
-py::class_<Dynamics<GraphPriorType>, DataModel<GraphPriorType>, PyDynamics<GraphPriorType>> declareDynamics(py::module& m, std::string pyName){
-    return py::class_<Dynamics<GraphPriorType>, DataModel<GraphPriorType>, PyDynamics<GraphPriorType>>(m, pyName.c_str())
-        .def(py::init<GraphPriorType&, size_t, size_t, bool, bool>())
-        ;
-}
-
 
 
 void initDataModels(py::module& m){
