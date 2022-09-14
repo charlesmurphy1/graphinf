@@ -38,6 +38,7 @@ class DataModelWrapper(_Wrapper):
             return "labeled"
         return "normal"
 
+    @_Wrapper.rebuild
     def set_graph_prior(self, graph_prior: _RandomGraphWrapper):
         self.labeled = graph_prior.labeled
         self.nested = graph_prior.nested

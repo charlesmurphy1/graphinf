@@ -77,23 +77,24 @@ py::class_<BinaryDynamics<GraphPriorType>, Dynamics<GraphPriorType>, PyBinaryDyn
         .def("set_auto_deactivation_prob", &BinaryDynamics<GraphPriorType>::setAutoDeactivationProb, py::arg("auto_deactivation_prob"))
         .def("get_auto_activation_prob", &BinaryDynamics<GraphPriorType>::getAutoActivationProb)
         .def("get_auto_deactivation_prob", &BinaryDynamics<GraphPriorType>::getAutoDeactivationProb)
+        .def("get_random_state", [](const BinaryDynamics<GraphPriorType>& self){ return self.getRandomState(); })
         .def("get_random_state", [](const BinaryDynamics<GraphPriorType>& self, int initial){ return self.getRandomState(initial); },
             py::arg("initial_active"))
-        .def("sample_state", [](BinaryDynamics<GraphPriorType>& self, const State& initial, bool asyncMode=false, size_t initialBurn=0){
-            self.sampleState(initial, asyncMode, initialBurn);
-        }, py::arg("initial"), py::arg("async_mode")=false, py::arg("initial_burn")=0)
-        .def("sample_state", [](BinaryDynamics<GraphPriorType>& self, int initialActives, bool asyncMode=false, size_t initialBurn=0){
-            self.sampleState(self.getRandomState(initialActives), asyncMode, initialBurn);
-        }, py::arg("initial_actives"), py::arg("async_mode")=false, py::arg("initial_burn")=0)
         .def("sample_state", [](BinaryDynamics<GraphPriorType>& self, bool asyncMode=false, size_t initialBurn=0){
             self.sampleState({}, asyncMode, initialBurn);
         }, py::arg("async_mode")=false, py::arg("initial_burn")=0)
-        .def("sample", [](BinaryDynamics<GraphPriorType>& self, const State& initial, bool asyncMode=false, size_t initialBurn=0){
-            self.sample(initial, asyncMode, initialBurn);
+        .def("sample_state", [](BinaryDynamics<GraphPriorType>& self, int initialActives, bool asyncMode=false, size_t initialBurn=0){
+            self.sampleState(self.getRandomState(initialActives), asyncMode, initialBurn);
+        }, py::arg("initial_actives"), py::arg("async_mode")=false, py::arg("initial_burn")=0)
+        .def("sample_state", [](BinaryDynamics<GraphPriorType>& self, const State& initial, bool asyncMode=false, size_t initialBurn=0){
+            self.sampleState(initial, asyncMode, initialBurn);
         }, py::arg("initial"), py::arg("async_mode")=false, py::arg("initial_burn")=0)
         .def("sample", [](BinaryDynamics<GraphPriorType>& self, bool asyncMode=false, size_t initialBurn=0){
             self.sample({}, asyncMode, initialBurn);
         }, py::arg("async_mode")=false, py::arg("initial_burn")=0)
+        .def("sample", [](BinaryDynamics<GraphPriorType>& self, const State& initial, bool asyncMode=false, size_t initialBurn=0){
+            self.sample(initial, asyncMode, initialBurn);
+        }, py::arg("initial"), py::arg("async_mode")=false, py::arg("initial_burn")=0)
         .def("sample", [](BinaryDynamics<GraphPriorType>& self, int initialActives, bool asyncMode=false, size_t initialBurn=0){
             self.sample(self.getRandomState(initialActives), asyncMode, initialBurn);
         }, py::arg("initial_actives"), py::arg("async_mode")=false, py::arg("initial_burn")=0)
