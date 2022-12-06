@@ -9,19 +9,19 @@ from setuptools.config import read_configuration
 
 import importlib
 
-if importlib.util.find_spec("pybind11") is None:
-    from setuptools.command.build_ext import build_ext
-    from setuptools import Extension
-else:
-    from pybind11.setup_helpers import (
-        ParallelCompile,
-        naive_recompile,
-        Pybind11Extension,
-        build_ext,
-    )
+# if importlib.util.find_spec("pybind11") is None:
+#     from setuptools.command.build_ext import build_ext
+#     from setuptools import Extension
+# else:
+#     from pybind11.setup_helpers import (
+#         ParallelCompile,
+#         naive_recompile,
+#         Pybind11Extension,
+#         build_ext,
+#     )
 
-    Extension = Pybind11Extension
-    ParallelCompile("NPY_NUM_BUILD_JOBS", needs_recompile=naive_recompile).install()
+#     Extension = Pybind11Extension
+#     ParallelCompile("NPY_NUM_BUILD_JOBS", needs_recompile=naive_recompile).install()
 
 
 class get_pybind_include(object):
@@ -45,7 +45,9 @@ def find_compiled_basegraph(build_path):
         raise RuntimeError("Submodule BaseGraph was not compiled.")
     lib_path = None
     for extension in [".a"]:
-        if os.path.isfile(os.path.join(build_path, "libBaseGraph" + extension)):
+        if os.path.isfile(
+            os.path.join(build_path, "libBaseGraph" + extension)
+        ):
             lib_path = os.path.join(build_path, "libBaseGraph" + extension)
             break
 
@@ -110,7 +112,9 @@ def cpp_flag(compiler):
         if has_flag(compiler, flag):
             return flag
 
-    raise RuntimeError("Unsupported compiler -- at least C++11 support " "is needed!")
+    raise RuntimeError(
+        "Unsupported compiler -- at least C++11 support " "is needed!"
+    )
 
 
 class BuildExt(build_ext):
@@ -135,19 +139,25 @@ class BuildExt(build_ext):
         opts = self.c_opts.get(ct, [])
         link_opts = self.l_opts.get(ct, [])
         if ct == "unix":
-            opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
+            opts.append(
+                '-DVERSION_INFO="%s"' % self.distribution.get_version()
+            )
             opts.append(cpp_flag(self.compiler))
             if has_flag(self.compiler, "-fvisibility=hidden"):
                 opts.append("-fvisibility=hidden")
         elif ct == "msvc":
-            opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
+            opts.append(
+                '/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version()
+            )
         for ext in self.extensions:
             ext.extra_compile_args = opts
             ext.extra_link_args = link_opts
         build_ext.build_extensions(self)
 
 
-description = "Package for the analysis of stochastic processes on random graphs."
+description = (
+    "Package for the analysis of stochastic processes on random graphs."
+)
 
 
 def compile_from_cmake(path_to_cmake):
@@ -217,7 +227,10 @@ ext_modules = [
 ]
 
 
-if importlib.util.find_spec("SamplableSet") is None or "--reinstall" in sys.argv:
+if (
+    importlib.util.find_spec("SamplableSet") is None
+    or "--reinstall" in sys.argv
+):
     print("Installing SamplableSet")
     install_from_setup("_graphinf/SamplableSet")
 
