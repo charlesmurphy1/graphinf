@@ -34,7 +34,7 @@ jobs:
             - name: Installing basegraph==1.0.0
               shell: bash
               run: |
-                    cd _graphinf/base_graph
+                    cd graphinf_cpp/base_graph
                     [ ! -d "./build" ] && mkdir build
                     cd build
                     cmake ..
@@ -44,7 +44,7 @@ jobs:
               shell: bash
               run: |
                     echo Installing SamplableSet==2.2.0
-                    cd _graphinf/SamplableSet/src
+                    cd graphinf_cpp/SamplableSet/src
                     [ ! -d "./build" ] && mkdir build
                     cd build
                     cmake ..
@@ -54,7 +54,7 @@ jobs:
               shell: bash
               run: |
                     echo Build backend and tests
-                    cd _graphinf
+                    cd graphinf_cpp
                     [ ! -d "./build" ] && mkdir build
                     cd build
                     cmake ..
