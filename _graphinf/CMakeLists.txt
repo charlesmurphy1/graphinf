@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-project(GraphInf)
+project(GraphInf CXX)
+set(CXX_STANDARD 11)
+set(CXX_STANDARD_REQUIRED on)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 option(DEBUG_MODE "check consistency of objects at runtime" OFF)
 option(BUILD_TESTS "build gtest unit tests" OFF)
@@ -22,5 +25,3 @@ if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
-
-set(CMAKE_CXX_STANDARD 11)

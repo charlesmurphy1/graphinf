@@ -8,20 +8,19 @@ from setuptools.command.build_ext import build_ext
 from setuptools.config import read_configuration
 
 import importlib
+from setuptools.command.build_ext import build_ext
+from setuptools import Extension
 
-if importlib.util.find_spec("pybind11") is None:
-    from setuptools.command.build_ext import build_ext
-    from setuptools import Extension
-else:
-    from pybind11.setup_helpers import (
-        ParallelCompile,
-        naive_recompile,
-        Pybind11Extension,
-        build_ext,
-    )
+# if importlib.util.find_spec("pybind11") is not None:
+#     from pybind11.setup_helpers import (
+#         ParallelCompile,
+#         naive_recompile,
+#         Pybind11Extension,
+#         build_ext,
+#     )
 
-    Extension = Pybind11Extension
-    ParallelCompile("NPY_NUM_BUILD_JOBS", needs_recompile=naive_recompile).install()
+#     Extension = Pybind11Extension
+#     ParallelCompile("NPY_NUM_BUILD_JOBS", needs_recompile=naive_recompile).install()
 
 
 class get_pybind_include(object):
@@ -105,7 +104,6 @@ def cpp_flag(compiler):
     The newer version is prefered over c++11 (when it is available).
     """
     flags = ["-std=c++17", "-std=c++11"]
-
     for flag in flags:
         if has_flag(compiler, flag):
             return flag
