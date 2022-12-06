@@ -1,6 +1,6 @@
 [submodule "_graphinf/SamplableSet"]
-	path = _graphinf/SamplableSet
+	path = graphinf_cpp/SamplableSet
 	url = https://github.com/gstonge/SamplableSet.git
 [submodule "_graphinf/base_graph"]
-	path = _graphinf/base_graph
+	path = graphinf_cpp/base_graph
 	url = https://github.com/antoineallard/base_graph.git

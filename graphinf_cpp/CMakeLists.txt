@@ -39,9 +39,9 @@ if(SKBUILD)
     pybind11_add_module(_graphinf ${CMAKE_SOURCE_DIR}/pybind_wrapper/pybind_main.cpp)
     set_target_properties(_graphinf PROPERTIES CXX_STANDARD 14)
 
-    if (SKBUILD)
-        install(TARGETS _graphinf DESTINATION ./graphinf)
-    endif()
+    set_target_properties(graphinf PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+    target_link_libraries(_graphinf PRIVATE ${BASEGRAPH} ${SAMPLABLESET} graphinf)
+    install(TARGETS _graphinf DESTINATION _graphinf)
 endif()
 
 if (BUILD_TESTS)
