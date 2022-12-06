@@ -42,7 +42,8 @@ def test_nbinom():
         pytest.param(b, e, l, id=f"{b}-{e}-{l}")
         for (b, e, l) in product(
             ["uniform", "hyper"],
-            ["uniform", "planted", "nested"],
+            # ["uniform", "planted", "nested"],
+            ["uniform", "nested"],
             ["uniform", "stub_labeled"],
         )
     ],
@@ -68,7 +69,8 @@ def test_stochastic_block_model(
         pytest.param(b, e, id=f"{b}-{e}")
         for (b, e) in product(
             ["uniform", "hyper"],
-            ["uniform", "planted", "nested"],
+            ["uniform", "nested"],
+            # ["uniform", "planted", "nested"],
         )
     ],
 )
@@ -88,13 +90,17 @@ def test_degree_corrected_stochastic_block_model(
     assert g.get_edge_count() == E
 
 
-@pytest.mark.parametrize("stub_labeled", [pytest.param(s) for s in [True, False]])
-def test_planted_partition(stub_labeled):
-    N, E, B = 100, 250, 5
-    g = graphinf.random_graph.PlantedPartitionModel(N, E, B, stub_labeled=stub_labeled)
-    assert g.get_size() == N
-    assert g.get_edge_count() == E
-    assert g.get_label_count() == B
+# @pytest.mark.parametrize(
+#     "stub_labeled", [pytest.param(s) for s in [True, False]]
+# )
+# def test_planted_partition(stub_labeled):
+#     N, E, B = 100, 250, 5
+#     g = graphinf.random_graph.PlantedPartitionModel(
+#         N, E, B, stub_labeled=stub_labeled
+#     )
+#     assert g.get_size() == N
+#     assert g.get_edge_count() == E
+#     assert g.get_label_count() == B
 
 
 if __name__ == "__main__":

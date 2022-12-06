@@ -1,9 +1,9 @@
 from _graphinf import random_graph as _random_graph
 
-RandomGraph                   = _random_graph.RandomGraph
-BlockLabeledRandomGraph       = _random_graph.BlockLabeledRandomGraph
+RandomGraph = _random_graph.RandomGraph
+BlockLabeledRandomGraph = _random_graph.BlockLabeledRandomGraph
 NestedBlockLabeledRandomGraph = _random_graph.NestedBlockLabeledRandomGraph
-StochasticBlockModel          = _random_graph.StochasticBlockModel
+StochasticBlockModel = _random_graph.StochasticBlockModel
 
 from ..wrapper import Wrapper as _Wrapper
 from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
@@ -18,7 +18,6 @@ __all__ = (
     "ConfigurationModelFamily",
     "StochasticBlockModel",
     "StochasticBlockModelFamily",
-    "PlantedPartitionModel",
 )
 
 
@@ -73,7 +72,9 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         edge_proposer_type: str = "uniform",
     ):
         if degree_prior_type not in self.available_degree_prior_types:
-            raise OptionError(degree_prior_type, self.available_degree_prior_types)
+            raise OptionError(
+                degree_prior_type, self.available_degree_prior_types
+            )
         wrapped = _random_graph.ConfigurationModelFamily(
             size,
             edge_count,
@@ -109,42 +110,47 @@ class NegativeBinomialModel(ConfigurationModel):
         super().__init__(nbinom_degreeseq(size, avgk, heterogeneity))
 
 
-class PlantedPartitionModel(RandomGraphWrapper):
-    def __init__(
-        self,
-        size: int = 100,
-        edge_count: int = 250,
-        block_count: int = 3,
-        assortativity: float = 0.5,
-        stub_labeled: bool = False,
-        with_self_loops: bool = True,
-        with_parallel_edges: bool = True,
-    ):
-        wrapped = _random_graph.PlantedPartitionModel(
-            size,
-            edge_count,
-            block_count=block_count,
-            assortativity=assortativity,
-            stub_labeled=stub_labeled,
-            with_self_loops=with_self_loops,
-            with_parallel_edges=with_parallel_edges,
-        )
-        super().__init__(
-            wrapped,
-            size=size,
-            edge_count=edge_count,
-            block_count=block_count,
-            assortativity=assortativity,
-            stub_labeled=stub_labeled,
-            with_self_loops=with_self_loops,
-            with_parallel_edges=with_parallel_edges,
-        )
+# class PlantedPartitionModel(RandomGraphWrapper):
+#     def __init__(
+#         self,
+#         size: int = 100,
+#         edge_count: int = 250,
+#         block_count: int = 3,
+#         assortativity: float = 0.5,
+#         stub_labeled: bool = False,
+#         with_self_loops: bool = True,
+#         with_parallel_edges: bool = True,
+#     ):
+#         wrapped = _random_graph.PlantedPartitionModel(
+#             size,
+#             edge_count,
+#             block_count=block_count,
+#             assortativity=assortativity,
+#             stub_labeled=stub_labeled,
+#             with_self_loops=with_self_loops,
+#             with_parallel_edges=with_parallel_edges,
+#         )
+#         super().__init__(
+#             wrapped,
+#             size=size,
+#             edge_count=edge_count,
+#             block_count=block_count,
+#             assortativity=assortativity,
+#             stub_labeled=stub_labeled,
+#             with_self_loops=with_self_loops,
+#             with_parallel_edges=with_parallel_edges,
+#         )
 
 
 class StochasticBlockModelFamily(RandomGraphWrapper):
-    available_likelihood_types = ["uniform", "stub_labeled", "degree_corrected"]
+    available_likelihood_types = [
+        "uniform",
+        "stub_labeled",
+        "degree_corrected",
+    ]
     available_block_prior_types = ["uniform", "hyper"]
-    available_label_graph_prior_types = ["uniform", "planted", "nested"]
+    available_label_graph_prior_types = ["uniform", "nested"]
+    # available_label_graph_prior_types = ["uniform", "planted", "nested"]
     available_degree_prior_types = ["uniform", "hyper"]
 
     def __init__(
@@ -168,15 +174,24 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         labeled = True
         nested = False
         if likelihood_type not in self.available_likelihood_types:
-            raise OptionError(likelihood_type, self.available_likelihood_types)
+            raise OptionError(
+                likelihood_type, self.available_likelihood_types
+            )
         if block_prior_type not in self.available_block_prior_types:
-            raise OptionError(block_prior_type, self.available_block_prior_types)
-        if label_graph_prior_type not in self.available_label_graph_prior_types:
+            raise OptionError(
+                block_prior_type, self.available_block_prior_types
+            )
+        if (
+            label_graph_prior_type
+            not in self.available_label_graph_prior_types
+        ):
             raise OptionError(
                 label_graph_prior_type, self.available_label_graph_prior_types
             )
         if degree_prior_type not in self.available_degree_prior_types:
-            raise OptionError(degree_prior_type, self.available_degree_prior_types)
+            raise OptionError(
+                degree_prior_type, self.available_degree_prior_types
+            )
 
         if likelihood_type == "degree_corrected":
             if label_graph_prior_type == "nested":
@@ -199,7 +214,8 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                     block_count=block_count,
                     block_hyperprior=(block_prior_type == "hyper"),
                     degree_hyperprior=(degree_prior_type == "hyper"),
-                    planted=(label_graph_prior_type == "planted"),
+                    # planted=(label_graph_prior_type == "planted"),
+                    planted=False,
                     canonical=canonical,
                     edge_proposer_type=edge_proposer_type,
                     block_proposer_type=block_proposer_type,
@@ -229,7 +245,8 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                     edge_count,
                     block_count=block_count,
                     block_hyperprior=(block_prior_type == "hyper"),
-                    planted=(label_graph_prior_type == "planted"),
+                    # planted=(label_graph_prior_type == "planted"),
+                    planted=False,
                     stub_labeled=(likelihood_type == "stub_labeled"),
                     canonical=canonical,
                     with_self_loops=with_self_loops,
