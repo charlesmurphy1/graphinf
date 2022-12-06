@@ -1,13 +1,10 @@
 from _graphinf import random_graph as _random_graph
-from _graphinf.random_graph import (
-    RandomGraph,
-    BlockLabeledRandomGraph,
-    NestedBlockLabeledRandomGraph,
-    ErdosRenyiModel,
-    ConfigurationModelFamily,
-    StochasticBlockModel,
-    PlantedPartitionModel,
-)
+
+RandomGraph                   = _random_graph.RandomGraph
+BlockLabeledRandomGraph       = _random_graph.BlockLabeledRandomGraph
+NestedBlockLabeledRandomGraph = _random_graph.NestedBlockLabeledRandomGraph
+StochasticBlockModel          = _random_graph.StochasticBlockModel
+
 from ..wrapper import Wrapper as _Wrapper
 from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
 

@@ -6,8 +6,11 @@ from graphinf.random_graph import (
     ErdosRenyiModel as _ErdosRenyiModel,
 )
 from . import dynamics
-from _graphinf.data import DataModel, BlockLabeledDataModel, NestedBlockLabeledDataModel
 from _graphinf import data as _data
+
+DataModel                   = _data.DataModel
+BlockLabeledDataModel       = _data.BlockLabeledDataModel
+NestedBlockLabeledDataModel = _data.NestedBlockLabeledDataModel
 
 __all__ = (
     "DataModel",

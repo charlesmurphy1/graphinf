@@ -21,9 +21,9 @@ setup(
     description="Package for the analysis of stochastic processes on random graphs.",
 
     zip_safe=False,
-    packages=["graphinf"],
+    packages=find_packages(),
     cmake_args=[],
-    cmake_source_dir="_graphinf",
+    cmake_source_dir="graphinf_cpp",
     include_package_data=True,
     exclude_package_data={'': ["__pycache__"]},
     extras_require={"test": ["pytest"]},

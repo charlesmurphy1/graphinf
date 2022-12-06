@@ -1,11 +1,11 @@
 from __future__ import annotations
+from _graphinf import data
+_dynamics = data.dynamics
 
-from _graphinf.data import dynamics as _dynamics
-from _graphinf.data.dynamics import (
-    Dynamics,
-    BlockLabeledDynamics,
-    NestedBlockLabeledDynamics,
-)
+Dynamics                   = _dynamics.Dynamics
+BlockLabeledDynamics       = _dynamics.BlockLabeledDynamics
+NestedBlockLabeledDynamics = _dynamics.NestedBlockLabeledDynamics
+
 from .__init__ import DataModelWrapper as _DataModelWrapper
 
 __all__ = (
