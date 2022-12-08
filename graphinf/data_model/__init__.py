@@ -5,11 +5,10 @@ from graphinf.random_graph import (
     RandomGraphWrapper as _RandomGraphWrapper,
     ErdosRenyiModel as _ErdosRenyiModel,
 )
-from . import dynamics
 from _graphinf import data as _data
 
-DataModel                   = _data.DataModel
-BlockLabeledDataModel       = _data.BlockLabeledDataModel
+DataModel = _data.DataModel
+BlockLabeledDataModel = _data.BlockLabeledDataModel
 NestedBlockLabeledDataModel = _data.NestedBlockLabeledDataModel
 
 __all__ = (
@@ -26,7 +25,9 @@ class DataModelWrapper(_Wrapper):
     def __init__(self, graph_prior: _RandomGraphWrapper = None, **kwargs):
         if len(self.constructors) == 0:
             raise ValueError("`constructors` must not be empty.")
-        graph_prior = _ErdosRenyiModel(100, 250) if graph_prior is None else graph_prior
+        graph_prior = (
+            _ErdosRenyiModel(100, 250) if graph_prior is None else graph_prior
+        )
         self.labeled = graph_prior.labeled
         self.nested = graph_prior.nested
         data_model = self.constructors[self.dtype](graph_prior.wrap, **kwargs)

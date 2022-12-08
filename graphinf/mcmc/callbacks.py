@@ -1,10 +1,15 @@
-from _graphinf.mcmc import callbacks as cb
-from _graphinf.mcmc.callbacks import *
-from graphinf.wrapper import Wrapper
+from _graphinf import mcmc as _mcmc
 
+CallBack = _mcmc.callbacks.CallBack
+CollectLikelihoodOnSweep = _mcmc.callbacks.CollectLikelihoodOnSweep
+CollectPriorOnSweep = _mcmc.callbacks.CollectPriorOnSweep
+CollectJointOnSweep = _mcmc.callbacks.CollectJointOnSweep
+CheckConsistencyOnSweep = _mcmc.callbacks.CheckConsistencyOnSweep
+CheckSafetyOnSweep = _mcmc.callbacks.CheckSafetyOnSweep
+VerboseDisplay = _mcmc.callbacks.VerboseDisplay
+cb = _mcmc.callbacks
 
 __all__ = (
-    "CallBack",
     "CallBack",
     "CollectEdgesOnSweep",
     "CollectGraphOnSweep",
