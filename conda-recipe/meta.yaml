@@ -2,6 +2,22 @@ package:
   name: graphinf
   version: 0.1.0
 
+build:
+  script:
+    - cd $RECIPE_DIR/../graphinf_cpp/SamplableSet/src/
+    - mkdir -p build
+    - cd build
+    - cmake .. 
+    - make
+    - cd ../../../..
+    - cd $RECIPE_DIR/../graphinf_cpp/base_graph/
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make
+    - cd ../../..
+    - $PYTHON setup.py install
+
 requirements:
   build:
     - python>=3.10
@@ -13,11 +29,13 @@ requirements:
     - pybind11>=2.3
     - numpy>=1.20.3
     - scipy>=1.7.1
+    - psutil>=5.8.0
   run:
     - python==3.10
     - pybind11>=2.3
     - numpy>=1.20.3
     - scipy>=1.7.1
+    - psutil>=5.8.0
 test:
   commands:
     - python -c "import graphinf; import graphinf.data_model; import graphinf.mcmc; import graphinf.random_graph"
