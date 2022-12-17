@@ -23,3 +23,7 @@ dist/
 *.tox
 *.so
 CHANGELOG.md
+
+
+var
+tmp

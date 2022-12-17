@@ -1,0 +1,23 @@
+package:
+  name: graphinf
+  version: 0.1.0
+
+requirements:
+  build:
+    - python>=3.10
+    - pip
+    - setuptools
+    - wheel
+    - cmake
+    - make
+    - pybind11>=2.3
+    - numpy>=1.20.3
+    - scipy>=1.7.1
+  run:
+    - python==3.10
+    - pybind11>=2.3
+    - numpy>=1.20.3
+    - scipy>=1.7.1
+test:
+  commands:
+    - python -c "import graphinf; import graphinf.data_model; import graphinf.mcmc; import graphinf.random_graph"
