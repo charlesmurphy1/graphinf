@@ -16,7 +16,7 @@ build:
     - cmake ..
     - make
     - cd ../../..
-    - $PYTHON setup.py install
+    - $PYTHON -m pip install .
 
 requirements:
   build:
