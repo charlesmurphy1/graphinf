@@ -1,9 +1,12 @@
 from __future__ import annotations
 from _graphinf import data
+from graphinf.random_graph import RandomGraph
+from graphinf.wrapper import Wrapper
+
 _dynamics = data.dynamics
 
-Dynamics                   = _dynamics.Dynamics
-BlockLabeledDynamics       = _dynamics.BlockLabeledDynamics
+Dynamics = _dynamics.Dynamics
+BlockLabeledDynamics = _dynamics.BlockLabeledDynamics
 NestedBlockLabeledDynamics = _dynamics.NestedBlockLabeledDynamics
 
 from .__init__ import DataModelWrapper as _DataModelWrapper
@@ -27,7 +30,7 @@ class SISDynamics(_DataModelWrapper):
 
     def __init__(
         self,
-        graph_prior: Union[RandomGraph, Wrapper] = None,
+        graph_prior: RandomGraph | Wrapper = None,
         length: int = 10,
         infection_prob: float = 0.5,
         recovery_prob: float = 0.5,
