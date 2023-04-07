@@ -152,12 +152,13 @@ namespace GraphInf
     std::vector<size_t> sampleMultinomial(const size_t n, const std::vector<double> &p)
     {
         std::vector<size_t> output(p.size(), 0);
-
         std::vector<size_t> idx = argsortVector(p);
         std::vector<double> sorted = sortVector(p);
         double norm = 0;
         for (auto pp : p)
+        {
             norm += pp;
+        }
         if (abs(norm - 1) > 1e-10)
             throw std::invalid_argument(
                 "sampleMultinomial: `p` must be normalized, but summed to " + std::to_string(norm) + ".");
@@ -167,14 +168,16 @@ namespace GraphInf
         {
             norm = 0;
             std::set<size_t> s;
-            size_t j = 0;
             for (size_t j = 0; j < p.size(); ++j)
             {
                 norm += sorted[j];
                 if (dist(rng) <= norm)
                     s.insert(idx[j]);
             }
-            ++output[(s.size() != p.size()) ? *s.rend() : 0];
+            if (s.size() != p.size())
+                ++output[*s.begin()];
+            else
+                ++output[0];
         }
         return output;
     }

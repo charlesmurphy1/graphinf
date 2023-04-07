@@ -54,7 +54,6 @@ namespace GraphInf
 
     public:
         /* Constructors */
-
         BlockPrior() {}
         BlockPrior(size_t size, BlockCountPrior &blockCountPrior) : m_size(size) { setBlockCountPrior(blockCountPrior); }
         BlockPrior(const BlockPrior &other)
