@@ -124,6 +124,26 @@ namespace GraphInf
             EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), graph.getEdgeMultiplicityIdx(edge) - 1);
         expectInconsistency = true;
     }
+    TEST_F(TestHingeFlipUniformProposer, applyGraphMove_removeSelfLoop_edgeWeightDecreased)
+    {
+        BaseGraph::Edge edge;
+        size_t weight;
+        while (true)
+        {
+            SetUp();
+            edge = proposer.getEdgeSampler().sample();
+            weight = graph.getEdgeMultiplicityIdx(edge);
+            if (edge.first == edge.second)
+                break;
+        }
+
+        size_t edgeMult = graph.getEdgeMultiplicityIdx(edge);
+        GraphMove move = {{edge}, {}};
+        proposer.applyGraphMove(move);
+        if (edgeMult > 1)
+            EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), graph.getEdgeMultiplicityIdx(edge) - 1);
+        expectInconsistency = true;
+    }
 
     TEST_F(TestHingeFlipUniformProposer, getLogProposalProbRatio_forNormalMove_returnCorrectValue)
     {

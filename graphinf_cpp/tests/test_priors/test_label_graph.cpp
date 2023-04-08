@@ -220,7 +220,7 @@ namespace GraphInf
         MultiGraph graph = getUndirectedHouseMultiGraph();
         EdgeCountDeltaPrior edgeCountPrior = {10};
         BlockCountDeltaPrior blockCountPrior = {3};
-        BlockUniformPrior blockPrior = {graph.getSize(), blockCountPrior};
+        BlockUniformHyperPrior blockPrior = {graph.getSize(), blockCountPrior};
         LabelGraphErdosRenyiPrior prior = {edgeCountPrior, blockPrior};
 
         void SetUp()
@@ -340,7 +340,7 @@ namespace GraphInf
         MultiGraph graph = getUndirectedHouseMultiGraph();
         EdgeCountDeltaPrior edgeCountPrior = {11};
         BlockCountDeltaPrior blockCountPrior = {3};
-        BlockUniformPrior blockPrior = {graph.getSize(), blockCountPrior};
+        BlockUniformHyperPrior blockPrior = {graph.getSize(), blockCountPrior};
         LabelGraphPlantedPartitionPrior prior = {edgeCountPrior, blockPrior};
 
         bool expectConsistencyError = false;
