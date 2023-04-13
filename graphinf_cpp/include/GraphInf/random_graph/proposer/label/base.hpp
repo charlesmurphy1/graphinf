@@ -74,6 +74,10 @@ namespace GraphInf
         }
         virtual const LabelMove<Label> proposeLabelMove(const BaseGraph::VertexIndex &) const = 0;
         virtual const LabelMove<Label> proposeNewLabelMove(const BaseGraph::VertexIndex &) const = 0;
+        bool isTrivialMove(const LabelMove<Label> &move) const
+        {
+            return move.prevLabel == move.nextLabel;
+        }
         void checkSelfSafety() const override
         {
             if (m_graphPriorPtr == nullptr)

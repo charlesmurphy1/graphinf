@@ -131,6 +131,17 @@ namespace GraphInf
         {
             return {"none", 1, true};
         }
+        const int mcmcSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1)
+        {
+            int numSuccesses = 0;
+            for (size_t i = 0; i < numSteps; i++)
+            {
+                auto summary = metropolisStep(betaPrior, betaLikelihood);
+                if (summary.isAccepted)
+                    numSuccesses += 1;
+            }
+            return numSuccesses;
+        }
 
         const double getLogLikelihood() const
         {
@@ -254,6 +265,8 @@ namespace GraphInf
         const MCMCSummary metropolisStep(double m_betaPrior = 1, double m_betaLikelihood = 1) override
         {
             const auto move = proposeLabelMove();
+            if (m_labelProposerPtr->isTrivialMove(move))
+                return {"label", 1., true};
             double acceptProb = exp(getLogAcceptanceProbFromLabelMove(move));
             bool isAccepted = false;
             if (m_uniform(rng) < acceptProb)

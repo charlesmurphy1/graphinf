@@ -1,6 +1,6 @@
-#include "GraphInf/data/dynamics/cowan.hpp"
+#include "GraphInf/data/dynamics/cowan.h"
 
-
-namespace GraphInf{
+namespace GraphInf
+{
 
 } // GraphInf

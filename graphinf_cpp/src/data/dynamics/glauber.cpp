@@ -1,5 +1,6 @@
-#include "GraphInf/data/dynamics/glauber.hpp"
+#include "GraphInf/data/dynamics/glauber.h"
 
-namespace GraphInf{
+namespace GraphInf
+{
 
 } // GraphInf

@@ -1,5 +1,6 @@
-#include "GraphInf/data/dynamics/sis.hpp"
+#include "GraphInf/data/dynamics/sis.h"
 
-namespace GraphInf{
+namespace GraphInf
+{
 
 } // namespace GraphInf

@@ -1,6 +1,6 @@
-#include "GraphInf/data/dynamics/degree.hpp"
+#include "GraphInf/data/dynamics/degree.h"
 
-
-namespace GraphInf{
+namespace GraphInf
+{
 
 } // GraphInf
