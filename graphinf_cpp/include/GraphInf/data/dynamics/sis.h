@@ -15,16 +15,6 @@ namespace GraphInf
 
     public:
         explicit SISDynamics(
-            size_t numSteps,
-            double infectionProb = 0.5,
-            double recoveryProb = 0.5,
-            double autoActivationProb = 1e-6,
-            double autoDeactivationProb = 0) : BinaryDynamics(numSteps,
-                                                              autoActivationProb,
-                                                              autoDeactivationProb),
-                                               m_infectionProb(infectionProb),
-                                               m_recoveryProb(recoveryProb) {}
-        explicit SISDynamics(
             RandomGraph &graphPrior,
             size_t numSteps,
             double infectionProb = 0.5,

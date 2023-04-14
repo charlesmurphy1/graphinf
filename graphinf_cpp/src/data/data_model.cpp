@@ -3,7 +3,7 @@
 namespace GraphInf
 {
 
-    const double DataModel::getLogAcceptanceProbFromGraphMove(const GraphMove move, double betaPrior = 1, double betaLikelihood = 1) const
+    const double DataModel::getLogAcceptanceProbFromGraphMove(const GraphMove &move, double betaPrior, double betaLikelihood) const
     {
         double logLikelihoodRatio, logPriorRatio;
         if (betaLikelihood == 0)
@@ -21,7 +21,7 @@ namespace GraphInf
         return logProposalRatio + logJointRatio;
     }
 
-    const MCMCSummary DataModel::metropolisStep(const double samplePriorProb = 0.5, const double betaPrior = 1, const double betaLikelihood = 1)
+    const MCMCSummary DataModel::metropolisStep(const double samplePriorProb, const double betaPrior, const double betaLikelihood)
     {
         if (m_uniform(rng) < samplePriorProb)
             return m_graphPriorPtr->metropolisStep();
@@ -38,7 +38,7 @@ namespace GraphInf
         }
         return {"graph", acceptProb, isAccepted};
     }
-    const int DataModel::mcmcSweep(size_t numSteps, const double samplePriorProb = 0.5, const double betaPrior = 1, const double betaLikelihood = 1)
+    const int DataModel::mcmcSweep(size_t numSteps, const double samplePriorProb, const double betaPrior, const double betaLikelihood)
     {
         int numSuccesses = 0;
         for (size_t i = 0; i < numSteps; i++)

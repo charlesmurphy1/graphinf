@@ -50,18 +50,10 @@ namespace GraphInf
         void computeConsistentState() override;
 
     public:
-        explicit Dynamics(size_t numStates, size_t length) : DataModel(),
-                                                             m_numStates(numStates),
-                                                             m_length(length),
-                                                             m_pastLength(0)
-        {
-        }
         explicit Dynamics(RandomGraph &graphPrior, size_t numStates, size_t length) : DataModel(graphPrior),
                                                                                       m_numStates(numStates),
                                                                                       m_length(length),
-                                                                                      m_pastLength(0)
-        {
-        }
+                                                                                      m_pastLength(0) {}
 
         const std::vector<VertexState> &getState() const { return m_state; }
         void setState(std::vector<VertexState> &state)

@@ -5,7 +5,7 @@ namespace GraphInf
 
     const State BinaryDynamics::getRandomState(int initialActive) const
     {
-        size_t N = BaseClass::m_graphPriorPtr->getSize();
+        size_t N = m_graphPriorPtr->getSize();
         State randomState(N);
         if (initialActive < 0 or initialActive > N)
             return Dynamics::getRandomState();

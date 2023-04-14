@@ -15,21 +15,23 @@
 using namespace std;
 using namespace GraphInf;
 
-
-class HSBMParametrizedTest: public::testing::TestWithParam<bool>{
+class HSBMParametrizedTest : public ::testing::TestWithParam<bool>
+{
 public:
     const size_t NUM_VERTICES = 50, NUM_EDGES = 100;
     const bool canonical = false;
     NestedStochasticBlockModelFamily randomGraph = NestedStochasticBlockModelFamily(
-        NUM_VERTICES, NUM_EDGES, canonical, GetParam()
-    );
+        NUM_VERTICES, NUM_EDGES, canonical, GetParam());
 
-    BaseGraph::Edge findEdge(){
-        const auto& graph = randomGraph.getState();
+    BaseGraph::Edge findEdge()
+    {
+        const auto &graph = randomGraph.getState();
         BaseGraph::Edge edge;
         BaseGraph::VertexIndex neighborIdx;
-        for ( auto idx: graph ){
-            if (graph.getDegreeOfIdx(idx) > 0){
+        for (auto idx : graph)
+        {
+            if (graph.getDegreeOfIdx(idx) > 0)
+            {
                 auto neighbor = *graph.getNeighboursOfIdx(idx).begin();
                 neighborIdx = neighbor.vertexIndex;
                 edge = {idx, neighborIdx};
@@ -41,7 +43,8 @@ public:
 
     BaseGraph::VertexIndex vertex = 4;
 
-    void SetUp() {
+    void SetUp()
+    {
         while (randomGraph.getLabelCount() == 1 or randomGraph.getLabelCount() > 30)
             randomGraph.sample();
     }
@@ -49,13 +52,14 @@ public:
     BlockMove proposeNestedBlockMove(
         BaseGraph::VertexIndex id,
         Level level,
-        size_t depth=4,
-        bool creatingNewBlock=false,
-        bool destroyingBlock=false
-    ){
+        size_t depth = 4,
+        bool creatingNewBlock = false,
+        bool destroyingBlock = false)
+    {
 
         size_t it = 0;
-        while (it < 100){
+        while (it < 100)
+        {
             randomGraph.sample();
             if (randomGraph.getDepth() != depth)
                 continue;
@@ -64,11 +68,14 @@ public:
             r = randomGraph.getLabelOfIdx(id, level);
             if (randomGraph.getNestedVertexCounts(level)[r] == 1 and not destroyingBlock)
                 continue;
-            if (creatingNewBlock){
+            if (creatingNewBlock)
+            {
                 addedLabels = 1;
                 s = randomGraph.getNestedLabelCount(level);
-            } else{
-                s = sampleUniformly(0, (int) randomGraph.getNestedLabelCount(level) - 1);
+            }
+            else
+            {
+                s = sampleUniformly(0, (int)randomGraph.getNestedLabelCount(level) - 1);
                 if (randomGraph.getNestedVertexCounts(level)[r] == 1 and not destroyingBlock)
                     continue;
                 else if (randomGraph.getNestedVertexCounts(level)[r] != 1 and destroyingBlock)
@@ -85,9 +92,10 @@ public:
     }
 };
 
-
-TEST_P(HSBMParametrizedTest, sampleState_graphChanges){
-    for (size_t i = 0; i < 2; i++) {
+TEST_P(HSBMParametrizedTest, sampleState_graphChanges)
+{
+    for (size_t i = 0; i < 2; i++)
+    {
         auto prevGraph = randomGraph.getState();
 
         randomGraph.sample();
@@ -97,11 +105,13 @@ TEST_P(HSBMParametrizedTest, sampleState_graphChanges){
     }
 }
 
-TEST_P(HSBMParametrizedTest, getLogLikelihood_returnNonZeroValue){
+TEST_P(HSBMParametrizedTest, getLogLikelihood_returnNonZeroValue)
+{
     EXPECT_TRUE(randomGraph.getLogLikelihood() < 0);
 }
 
-TEST_P(HSBMParametrizedTest, applyGraphMove_forAddedEdge){
+TEST_P(HSBMParametrizedTest, applyGraphMove_forAddedEdge)
+{
     BaseGraph::Edge addedEdge = {0, 2};
     size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
     GraphInf::GraphMove move = {{}, {addedEdge}};
@@ -111,7 +121,8 @@ TEST_P(HSBMParametrizedTest, applyGraphMove_forAddedEdge){
     EXPECT_NO_THROW(randomGraph.checkConsistency());
 }
 
-TEST_P(HSBMParametrizedTest, applyGraphMove_forAddedSelfLoop){
+TEST_P(HSBMParametrizedTest, applyGraphMove_forAddedSelfLoop)
+{
     BaseGraph::Edge addedEdge = {0, 0};
     size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
     GraphInf::GraphMove move = {{}, {addedEdge}};
@@ -120,7 +131,8 @@ TEST_P(HSBMParametrizedTest, applyGraphMove_forAddedSelfLoop){
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);
 }
 
-TEST_P(HSBMParametrizedTest, applyGraphMove_forRemovedEdge){
+TEST_P(HSBMParametrizedTest, applyGraphMove_forRemovedEdge)
+{
     BaseGraph::Edge removedEdge = findEdge();
     size_t removedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(removedEdge);
     GraphInf::GraphMove move = {{removedEdge}, {}};
@@ -129,10 +141,11 @@ TEST_P(HSBMParametrizedTest, applyGraphMove_forRemovedEdge){
     EXPECT_EQ(removedEdgeMultAfter + 1, removedEdgeMultBefore);
 }
 
-TEST_P(HSBMParametrizedTest, applyGraphMove_forRemovedEdgeAndAddedEdge){
+TEST_P(HSBMParametrizedTest, applyGraphMove_forRemovedEdgeAndAddedEdge)
+{
     BaseGraph::Edge addedEdge = {0, 2};
     BaseGraph::Edge removedEdge = findEdge();
-    while(addedEdge == removedEdge)
+    while (addedEdge == removedEdge)
         removedEdge = findEdge();
     size_t removedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(removedEdge);
     size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
@@ -142,15 +155,16 @@ TEST_P(HSBMParametrizedTest, applyGraphMove_forRemovedEdgeAndAddedEdge){
     size_t addedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
     EXPECT_EQ(removedEdgeMultAfter + 1, removedEdgeMultBefore);
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);
-
 }
 
-TEST_P(HSBMParametrizedTest, applyGraphMove_forNoEdgesAddedOrRemoved){
+TEST_P(HSBMParametrizedTest, applyGraphMove_forNoEdgesAddedOrRemoved)
+{
     GraphInf::GraphMove move = {{}, {}};
     randomGraph.applyGraphMove(move);
 }
 
-TEST_P(HSBMParametrizedTest, applyLabelMove_forIdentityBlockMove_doNothing){
+TEST_P(HSBMParametrizedTest, applyLabelMove_forIdentityBlockMove_doNothing)
+{
     GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
     GraphInf::BlockIndex nextLabel = prevLabel;
 
@@ -158,7 +172,8 @@ TEST_P(HSBMParametrizedTest, applyLabelMove_forIdentityBlockMove_doNothing){
     randomGraph.applyLabelMove(move);
 }
 
-TEST_P(HSBMParametrizedTest, applyLabelMove_forBlockMoveWithNoBlockCreation_changeBlockIdx){
+TEST_P(HSBMParametrizedTest, applyLabelMove_forBlockMoveWithNoBlockCreation_changeBlockIdx)
+{
 
     GraphInf::BlockMove move = proposeNestedBlockMove(vertex, 0, 3);
     randomGraph.applyLabelMove(move);
@@ -186,7 +201,8 @@ TEST_P(HSBMParametrizedTest, applyLabelMove_forBlockMoveWithNoBlockCreation_chan
 //     EXPECT_NE(randomGraph.getLabelOfIdx(vertex), prevLabel);
 // }
 //
-TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forAddedSelfLoop_returnCorrectLogLikelihoodRatio){
+TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forAddedSelfLoop_returnCorrectLogLikelihoodRatio)
+{
     GraphInf::GraphMove move = {{}, {{0, 0}}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
     double logLikelihoodBefore = randomGraph.getLogLikelihood();
@@ -196,7 +212,8 @@ TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forAddedSelfLoop_returnCorrec
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedSelfLoop_returnCorrectLogLikelihoodRatio){
+TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedSelfLoop_returnCorrectLogLikelihoodRatio)
+{
     randomGraph.applyGraphMove({{}, {{0, 0}}});
     GraphInf::GraphMove move = {{{0, 0}}, {}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
@@ -207,7 +224,8 @@ TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedSelfLoop_returnCorr
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forAddedEdge_returnCorrectLogLikelihoodRatio){
+TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forAddedEdge_returnCorrectLogLikelihoodRatio)
+{
     GraphInf::GraphMove move = {{}, {{0, 2}}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
     double logLikelihoodBefore = randomGraph.getLogLikelihood();
@@ -217,7 +235,8 @@ TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forAddedEdge_returnCorrectLog
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedEdge_returnCorrectLogLikelihoodRatio){
+TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedEdge_returnCorrectLogLikelihoodRatio)
+{
     randomGraph.applyGraphMove({{}, {{0, 2}}});
     GraphInf::GraphMove move = {{{0, 2}}, {}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
@@ -228,9 +247,10 @@ TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedEdge_returnCorrectL
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedAndAddedEdges_returnCorrectLogLikelihoodRatio){
+TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedAndAddedEdges_returnCorrectLogLikelihoodRatio)
+{
     randomGraph.applyGraphMove({{}, {{0, 2}}});
-    GraphInf::GraphMove move = {{{0, 2}}, {{0,0}}};
+    GraphInf::GraphMove move = {{{0, 2}}, {{0, 0}}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
     double logLikelihoodBefore = randomGraph.getLogLikelihood();
     randomGraph.applyGraphMove(move);
@@ -239,17 +259,18 @@ TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forRemovedAndAddedEdges_retur
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forIdentityBlockMove_return0){
+TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forIdentityBlockMove_return0)
+{
 
     GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
     GraphInf::BlockIndex nextLabel = prevLabel;
     GraphInf::BlockMove move = {vertex, prevLabel, nextLabel};
 
-
     EXPECT_NEAR(randomGraph.getLogLikelihoodRatioFromLabelMove(move), 0, 1E-6);
 }
 
-TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forBlockMove_returnCorrectLogLikelihoodRatio){
+TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forBlockMove_returnCorrectLogLikelihoodRatio)
+{
     GraphInf::BlockMove move = proposeNestedBlockMove(vertex, 0, 3);
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromLabelMove(move);
     double logLikelihoodBefore = randomGraph.getLogLikelihood();
@@ -259,41 +280,41 @@ TEST_P(HSBMParametrizedTest, getLogLikelihoodRatio_forBlockMove_returnCorrectLog
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HSBMParametrizedTest, isCompatible_forGraphSampledFromSBM_returnTrue){
+TEST_P(HSBMParametrizedTest, isCompatible_forGraphSampledFromSBM_returnTrue)
+{
     randomGraph.sample();
     auto g = randomGraph.getState();
     EXPECT_TRUE(randomGraph.isCompatible(g));
 }
 
-TEST_P(HSBMParametrizedTest, isCompatible_forEmptyGraph_returnFalse){
+TEST_P(HSBMParametrizedTest, isCompatible_forEmptyGraph_returnFalse)
+{
     MultiGraph g(0);
     EXPECT_FALSE(randomGraph.isCompatible(g));
 }
 
-
-
-TEST_P(HSBMParametrizedTest, setLabels_forSomeRandomLabels_returnDepletedMethodError){
+TEST_P(HSBMParametrizedTest, setLabels_forSomeRandomLabels_returnDepletedMethodError)
+{
     size_t N = randomGraph.getSize();
     size_t B = randomGraph.getLabelCount();
     std::vector<BlockIndex> newLabels(N);
-    std::uniform_int_distribution<BlockIndex> dist(0, B-1);
-    for (size_t v=0; v<N; ++v)
+    std::uniform_int_distribution<BlockIndex> dist(0, B - 1);
+    for (size_t v = 0; v < N; ++v)
         newLabels[v] = dist(rng);
     EXPECT_THROW(randomGraph.setLabels(newLabels), DepletedMethodError);
 }
 
-
-TEST_P(HSBMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyError){
+TEST_P(HSBMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyError)
+{
     EXPECT_NO_THROW(doMetropolisHastingsSweepForGraph(randomGraph));
 }
 
-TEST_P(HSBMParametrizedTest, doingMetropolisHastingsWithLabels_expectNoConsistencyError){
+TEST_P(HSBMParametrizedTest, doingMetropolisHastingsWithLabels_expectNoConsistencyError)
+{
     EXPECT_NO_THROW(doMetropolisHastingsSweepForLabels(randomGraph));
 }
 
-
-INSTANTIATE_TEST_CASE_P(
-        NestedStochasticBlockModelFamilyTests,
-        HSBMParametrizedTest,
-        ::testing::Values( false, true )
-    );
+INSTANTIATE_TEST_SUITE_P(
+    NestedStochasticBlockModelFamilyTests,
+    HSBMParametrizedTest,
+    ::testing::Values(false, true));

@@ -16,46 +16,53 @@
 using namespace std;
 using namespace GraphInf;
 
+class HDCSBMParametrizedTest : public ::testing::TestWithParam<bool>
+{
+public:
+    const size_t NUM_VERTICES = 50, NUM_EDGES = 100;
+    const bool canonical = false;
+    NestedDegreeCorrectedStochasticBlockModelFamily randomGraph = NestedDegreeCorrectedStochasticBlockModelFamily(
+        NUM_VERTICES, NUM_EDGES, GetParam(), canonical);
+    BaseGraph::VertexIndex vertexIdx = 4;
 
-class HDCSBMParametrizedTest: public::testing::TestWithParam<bool>{
-    public:
-        const size_t NUM_VERTICES = 50, NUM_EDGES = 100;
-        const bool canonical = false;
-        NestedDegreeCorrectedStochasticBlockModelFamily randomGraph = NestedDegreeCorrectedStochasticBlockModelFamily(
-            NUM_VERTICES, NUM_EDGES, GetParam(), canonical
-        );
-        BaseGraph::VertexIndex vertexIdx = 4;
-
-        BaseGraph::Edge findEdge(){
-            const auto& graph = randomGraph.getState();
-            BaseGraph::Edge edge;
-            BaseGraph::VertexIndex neighborIdx;
-            for ( auto idx: graph ){
-                if (graph.getDegreeOfIdx(idx) > 0){
-                    auto neighbor = *graph.getNeighboursOfIdx(idx).begin();
-                    neighborIdx = neighbor.vertexIndex;
-                    edge = {idx, neighborIdx};
-                    return edge;
-                }
+    BaseGraph::Edge findEdge()
+    {
+        const auto &graph = randomGraph.getState();
+        BaseGraph::Edge edge;
+        BaseGraph::VertexIndex neighborIdx;
+        for (auto idx : graph)
+        {
+            if (graph.getDegreeOfIdx(idx) > 0)
+            {
+                auto neighbor = *graph.getNeighboursOfIdx(idx).begin();
+                neighborIdx = neighbor.vertexIndex;
+                edge = {idx, neighborIdx};
+                return edge;
             }
-            throw std::invalid_argument("State of randomGraph has no edge.");
         }
+        throw std::invalid_argument("State of randomGraph has no edge.");
+    }
 
-        GraphInf::BlockIndex findBlockMove(BaseGraph::VertexIndex idx){
-            GraphInf::BlockIndex blockIdx = randomGraph.getLabelOfIdx(idx);
-            if (blockIdx == randomGraph.getVertexCounts().size() - 1) return blockIdx - 1;
-            else return blockIdx + 1;
-        }
+    GraphInf::BlockIndex findBlockMove(BaseGraph::VertexIndex idx)
+    {
+        GraphInf::BlockIndex blockIdx = randomGraph.getLabelOfIdx(idx);
+        if (blockIdx == randomGraph.getVertexCounts().size() - 1)
+            return blockIdx - 1;
+        else
+            return blockIdx + 1;
+    }
 
-        void SetUp() {
-            while(randomGraph.getLabelCount() > 30)
-                randomGraph.sample();
-        }
+    void SetUp()
+    {
+        while (randomGraph.getLabelCount() > 30)
+            randomGraph.sample();
+    }
 };
 
-
-TEST_P(HDCSBMParametrizedTest, sampleState_graphChanges){
-    for (size_t i = 0; i < 10; i++) {
+TEST_P(HDCSBMParametrizedTest, sampleState_graphChanges)
+{
+    for (size_t i = 0; i < 10; i++)
+    {
         auto prevGraph = randomGraph.getState();
         randomGraph.sample();
         auto nextGraph = randomGraph.getState();
@@ -63,15 +70,19 @@ TEST_P(HDCSBMParametrizedTest, sampleState_graphChanges){
     }
 }
 
-TEST_P(HDCSBMParametrizedTest, getLogLikelihood_returnNonZeroValue){
+TEST_P(HDCSBMParametrizedTest, getLogLikelihood_returnNonZeroValue)
+{
     EXPECT_TRUE(randomGraph.getLogLikelihood() < 0);
 }
 
-TEST_P(HDCSBMParametrizedTest, applyGraphMove_forAddedEdge){
+TEST_P(HDCSBMParametrizedTest, applyGraphMove_forAddedEdge)
+{
     BaseGraph::Edge addedEdge = {0, 2};
     size_t addedEdgeMultBefore;
-    if ( randomGraph.getState().isEdgeIdx(addedEdge) ) addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
-    else addedEdgeMultBefore = 0;
+    if (randomGraph.getState().isEdgeIdx(addedEdge))
+        addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
+    else
+        addedEdgeMultBefore = 0;
 
     GraphInf::GraphMove move = {{}, {addedEdge}};
     randomGraph.applyGraphMove(move);
@@ -79,7 +90,8 @@ TEST_P(HDCSBMParametrizedTest, applyGraphMove_forAddedEdge){
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);
 }
 
-TEST_P(HDCSBMParametrizedTest, applyGraphMove_forAddedSelfLoop){
+TEST_P(HDCSBMParametrizedTest, applyGraphMove_forAddedSelfLoop)
+{
     BaseGraph::Edge addedEdge = {0, 0};
     size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
     GraphInf::GraphMove move = {{}, {addedEdge}};
@@ -88,7 +100,8 @@ TEST_P(HDCSBMParametrizedTest, applyGraphMove_forAddedSelfLoop){
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);
 }
 
-TEST_P(HDCSBMParametrizedTest, applyGraphMove_forRemovedEdge){
+TEST_P(HDCSBMParametrizedTest, applyGraphMove_forRemovedEdge)
+{
     BaseGraph::Edge removedEdge = findEdge();
     size_t removedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(removedEdge);
     GraphInf::GraphMove move = {{removedEdge}, {}};
@@ -97,7 +110,8 @@ TEST_P(HDCSBMParametrizedTest, applyGraphMove_forRemovedEdge){
     EXPECT_EQ(removedEdgeMultAfter + 1, removedEdgeMultBefore);
 }
 
-TEST_P(HDCSBMParametrizedTest, applyGraphMove_forRemovedEdgeAndAddedEdge){
+TEST_P(HDCSBMParametrizedTest, applyGraphMove_forRemovedEdgeAndAddedEdge)
+{
     BaseGraph::Edge removedEdge = findEdge();
     BaseGraph::Edge addedEdge = {20, 21};
     size_t removedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(removedEdge);
@@ -110,7 +124,8 @@ TEST_P(HDCSBMParametrizedTest, applyGraphMove_forRemovedEdgeAndAddedEdge){
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);
 }
 
-TEST_P(HDCSBMParametrizedTest, applyGraphMove_forNoEdgesAddedOrRemoved){
+TEST_P(HDCSBMParametrizedTest, applyGraphMove_forNoEdgesAddedOrRemoved)
+{
     GraphInf::GraphMove move = {{}, {}};
     randomGraph.applyGraphMove(move);
 }
@@ -155,7 +170,8 @@ TEST_P(HDCSBMParametrizedTest, applyGraphMove_forNoEdgesAddedOrRemoved){
 // //     EXPECT_EQ(randomGraph.getLabelOfIdx(vertexIdx), nextBlockIdx);
 // // }
 //
-TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forAddedSelfLoop_returnCorrectLogLikelihoodRatio){
+TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forAddedSelfLoop_returnCorrectLogLikelihoodRatio)
+{
     GraphInf::GraphMove move = {{}, {{0, 0}}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
 
@@ -166,7 +182,8 @@ TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forAddedSelfLoop_returnCorr
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedSelfLoop_returnCorrectLogLikelihoodRatio){
+TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedSelfLoop_returnCorrectLogLikelihoodRatio)
+{
     randomGraph.applyGraphMove({{}, {{0, 0}}});
     GraphInf::GraphMove move = {{{0, 0}}, {}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
@@ -177,7 +194,8 @@ TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedSelfLoop_returnCo
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forAddedEdge_returnCorrectLogLikelihoodRatio){
+TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forAddedEdge_returnCorrectLogLikelihoodRatio)
+{
     GraphInf::GraphMove move = {{}, {{0, 2}}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
     double logLikelihoodBefore = randomGraph.getLogLikelihood();
@@ -187,7 +205,8 @@ TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forAddedEdge_returnCorrectL
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedEdge_returnCorrectLogLikelihoodRatio){
+TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedEdge_returnCorrectLogLikelihoodRatio)
+{
     randomGraph.applyGraphMove({{}, {{0, 2}}});
     GraphInf::GraphMove move = {{{0, 2}}, {}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
@@ -198,9 +217,10 @@ TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedEdge_returnCorrec
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
 }
 
-TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedAndAddedEdges_returnCorrectLogLikelihoodRatio){
+TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedAndAddedEdges_returnCorrectLogLikelihoodRatio)
+{
     randomGraph.applyGraphMove({{}, {{0, 2}}});
-    GraphInf::GraphMove move = {{{0, 2}}, {{0,0}}};
+    GraphInf::GraphMove move = {{{0, 2}}, {{0, 0}}};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
     double logLikelihoodBefore = randomGraph.getLogLikelihood();
     randomGraph.applyGraphMove(move);
@@ -264,30 +284,31 @@ TEST_P(HDCSBMParametrizedTest, getLogLikelihoodRatio_forRemovedAndAddedEdges_ret
 // }
 //
 //
-TEST_P(HDCSBMParametrizedTest, isCompatible_forGraphSampledFromSBM_returnTrue){
+TEST_P(HDCSBMParametrizedTest, isCompatible_forGraphSampledFromSBM_returnTrue)
+{
     randomGraph.sample();
     EXPECT_NO_THROW(randomGraph.checkConsistency());
     auto g = randomGraph.getState();
     EXPECT_TRUE(randomGraph.isCompatible(g));
 }
 
-TEST_P(HDCSBMParametrizedTest, isCompatible_forEmptyGraph_returnFalse){
+TEST_P(HDCSBMParametrizedTest, isCompatible_forEmptyGraph_returnFalse)
+{
     MultiGraph g(0);
     EXPECT_FALSE(randomGraph.isCompatible(g));
 }
 
-
-TEST_P(HDCSBMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyError){
+TEST_P(HDCSBMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyError)
+{
     EXPECT_NO_THROW(doMetropolisHastingsSweepForGraph(randomGraph));
 }
 
-TEST_P(HDCSBMParametrizedTest, doingMetropolisHastingsWithLabels_expectNoConsistencyError){
+TEST_P(HDCSBMParametrizedTest, doingMetropolisHastingsWithLabels_expectNoConsistencyError)
+{
     EXPECT_NO_THROW(doMetropolisHastingsSweepForLabels(randomGraph));
 }
 
-
-INSTANTIATE_TEST_CASE_P(
-        NestedDegreeCorrectedStochasticBlockModelFamilyTests,
-        HDCSBMParametrizedTest,
-        ::testing::Values( false, true )
-    );
+INSTANTIATE_TEST_SUITE_P(
+    NestedDegreeCorrectedStochasticBlockModelFamilyTests,
+    HDCSBMParametrizedTest,
+    ::testing::Values(false, true));

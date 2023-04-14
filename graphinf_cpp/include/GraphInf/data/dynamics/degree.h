@@ -11,7 +11,6 @@ namespace GraphInf
         double m_C;
 
     public:
-        DegreeDynamics(size_t numSteps, double C) : BinaryDynamics(numSteps, 0, 0), m_C(C) {}
         DegreeDynamics(RandomGraph &graphPrior, size_t numSteps, double C) : BinaryDynamics(graphPrior, numSteps, 0, 0), m_C(C) {}
 
         const double getActivationProb(const VertexNeighborhoodState &vertexNeighborState) const override

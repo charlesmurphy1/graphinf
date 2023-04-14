@@ -17,20 +17,6 @@ namespace GraphInf
 
     public:
         CowanDynamics(
-            size_t numSteps,
-            double nu = 1,
-            double a = 1,
-            double mu = 1,
-            double eta = 0.5,
-            double autoActivationProb = 1e-6,
-            double autoDeactivationProb = 0) : BinaryDynamics(numSteps,
-                                                              autoActivationProb,
-                                                              autoDeactivationProb),
-                                               m_a(a),
-                                               m_nu(nu),
-                                               m_mu(mu),
-                                               m_eta(eta) {}
-        CowanDynamics(
             RandomGraph &graphPrior,
             size_t numSteps,
             double nu = 1,

@@ -13,14 +13,6 @@ namespace GraphInf
 
     public:
         GlauberDynamics(
-            size_t numSteps,
-            double coupling = 1,
-            double autoActivationProb = 0,
-            double autoDeactivationProb = 0) : BinaryDynamics(numSteps,
-                                                              autoActivationProb,
-                                                              autoDeactivationProb),
-                                               m_coupling(coupling) {}
-        GlauberDynamics(
             RandomGraph &graphPrior,
             size_t numSteps,
             double coupling = 1,

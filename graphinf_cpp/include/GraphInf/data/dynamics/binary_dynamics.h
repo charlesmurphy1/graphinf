@@ -18,18 +18,11 @@ namespace GraphInf
         double m_autoDeactivationProb;
 
     public:
-        using BaseClass = Dynamics;
-        explicit BinaryDynamics(
-            size_t numSteps,
-            double autoActivationProb = 0.0,
-            double autoDeactivationProb = 0.0) : BaseClass(2, numSteps),
-                                                 m_autoActivationProb(autoActivationProb),
-                                                 m_autoDeactivationProb(autoDeactivationProb) {}
         explicit BinaryDynamics(
             RandomGraph &randomGraph,
             size_t numSteps,
             double autoActivationProb = 0.0,
-            double autoDeactivationProb = 0.0) : BaseClass(randomGraph, 2, numSteps),
+            double autoDeactivationProb = 0.0) : Dynamics(randomGraph, 2, numSteps),
                                                  m_autoActivationProb(autoActivationProb),
                                                  m_autoDeactivationProb(autoDeactivationProb) {}
         const double getTransitionProb(

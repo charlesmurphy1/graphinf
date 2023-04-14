@@ -1,6 +1,7 @@
 #ifndef GRAPHINF_CALLBACK_H
 #define GRAPHINF_CALLBACK_H
 
+#include <string>
 namespace GraphInf
 {
 

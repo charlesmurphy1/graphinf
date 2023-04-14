@@ -15,25 +15,29 @@
 using namespace std;
 using namespace GraphInf;
 
-
-class CMParametrizedTest: public::testing::TestWithParam<bool>{
-    public:
-        const size_t NUM_VERTICES = 50, NUM_EDGES = 100;
-        ConfigurationModelFamily randomGraph = ConfigurationModelFamily(NUM_VERTICES, NUM_EDGES, GetParam());
-        void SetUp() {
-            randomGraph.sample();
-        }
+class CMParametrizedTest : public ::testing::TestWithParam<bool>
+{
+public:
+    const size_t NUM_VERTICES = 50, NUM_EDGES = 100;
+    ConfigurationModelFamily randomGraph = ConfigurationModelFamily(NUM_VERTICES, NUM_EDGES, GetParam());
+    void SetUp()
+    {
+        randomGraph.sample();
+    }
 };
 
-TEST_P(CMParametrizedTest, sample_getStateWithCorrectNumberOfEdges){
+TEST_P(CMParametrizedTest, sample_getStateWithCorrectNumberOfEdges)
+{
     EXPECT_EQ(randomGraph.getState().getTotalEdgeNumber(), randomGraph.getEdgeCount());
 }
 
-TEST_P(CMParametrizedTest, getLogLikelihood_returnNonPositiveValue){
+TEST_P(CMParametrizedTest, getLogLikelihood_returnNonPositiveValue)
+{
     EXPECT_LE(randomGraph.getLogLikelihood(), 0);
 }
 
-TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forAddedEdge_returnCorrectValue){
+TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forAddedEdge_returnCorrectValue)
+{
     GraphMove move = {{}, {{0, 1}}};
 
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
@@ -44,7 +48,8 @@ TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forAddedEdge_retur
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1e-6);
 }
 
-TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forAddedSelfLoop_returnCorrectValue){
+TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forAddedSelfLoop_returnCorrectValue)
+{
     GraphMove move = {{}, {{0, 0}}};
 
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
@@ -55,9 +60,8 @@ TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forAddedSelfLoop_r
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1e-6);
 }
 
-
-
-TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forRemovedEdge_returnCorrectValue){
+TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forRemovedEdge_returnCorrectValue)
+{
     GraphMove move = {{{0, 1}}, {}};
     randomGraph.applyGraphMove({{}, {{0, 1}}});
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
@@ -68,7 +72,8 @@ TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forRemovedEdge_ret
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1e-6);
 }
 
-TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forRemovedSelfLoop_returnCorrectValue){
+TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forRemovedSelfLoop_returnCorrectValue)
+{
     GraphMove move = {{{0, 0}}, {}};
     randomGraph.applyGraphMove({{}, {{0, 0}}});
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromGraphMove(move);
@@ -79,26 +84,31 @@ TEST_P(CMParametrizedTest, getLogLikelihoodRatioFromGraphMove_forRemovedSelfLoop
     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1e-6);
 }
 
-TEST_P(CMParametrizedTest, isCompatible_forGraphSampledFromSBM_returnTrue){
+TEST_P(CMParametrizedTest, isCompatible_forGraphSampledFromSBM_returnTrue)
+{
     randomGraph.sample();
     auto g = randomGraph.getState();
     EXPECT_TRUE(randomGraph.isCompatible(g));
 }
 
-TEST_P(CMParametrizedTest, isCompatible_forEmptyGraph_returnFalse){
+TEST_P(CMParametrizedTest, isCompatible_forEmptyGraph_returnFalse)
+{
     MultiGraph g(0);
     EXPECT_FALSE(randomGraph.isCompatible(g));
 }
 
-TEST_P(CMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyError){
+TEST_P(CMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyError)
+{
     EXPECT_NO_THROW(doMetropolisHastingsSweepForGraph(randomGraph));
 }
 
-TEST_P(CMParametrizedTest, enumeratingAllGraphs_likelihoodIsNormalized){
+TEST_P(CMParametrizedTest, enumeratingAllGraphs_likelihoodIsNormalized)
+{
     ConfigurationModelFamily g(3, 3, GetParam());
 
     std::list<double> s;
-    for (auto gg : enumerateAllGraphs(3, 3)){
+    for (auto gg : enumerateAllGraphs(3, 3))
+    {
         g.setState(gg);
         double logPrior = g.getLogPrior();
         if (GetParam()) // if GetParam() [using hyperprior], then compute logPrior with exact value of number of partitions
@@ -108,18 +118,15 @@ TEST_P(CMParametrizedTest, enumeratingAllGraphs_likelihoodIsNormalized){
     EXPECT_NEAR(logSumExp(s), 0, 1e-6);
 }
 
+INSTANTIATE_TEST_SUITE_P(
+    ConfigurationModelFamilyTests,
+    CMParametrizedTest,
+    ::testing::Values(false, true));
 
-INSTANTIATE_TEST_CASE_P(
-        ConfigurationModelFamilyTests,
-        CMParametrizedTest,
-        ::testing::Values( false, true )
-    );
-
-
-TEST(CMTests, instanciateConfigurationModel_forRegularSequence){
+TEST(CMTests, instanciateConfigurationModel_forRegularSequence)
+{
     std::vector<size_t> degrees(100, 5);
     ConfigurationModel graph(degrees);
     EXPECT_EQ(graph.getSize(), 100);
     EXPECT_EQ(graph.getDegrees(), degrees);
-
 }
