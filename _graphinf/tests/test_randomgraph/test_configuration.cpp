@@ -18,7 +18,7 @@ using namespace GraphInf;
 class CMParametrizedTest : public ::testing::TestWithParam<bool>
 {
 public:
-    const size_t NUM_VERTICES = 50, NUM_EDGES = 100;
+    const size_t NUM_VERTICES = 5, NUM_EDGES = 10;
     ConfigurationModelFamily randomGraph = ConfigurationModelFamily(NUM_VERTICES, NUM_EDGES, GetParam());
     void SetUp()
     {

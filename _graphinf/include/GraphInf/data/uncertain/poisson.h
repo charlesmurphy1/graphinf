@@ -1,18 +1,17 @@
-#ifndef GRAPH_INF_POISSON_UNCERTAIN_HPP
-#define GRAPH_INF_POISSON_UNCERTAIN_HPP
+#ifndef GRAPH_INF_POISSON_UNCERTAIN_H
+#define GRAPH_INF_POISSON_UNCERTAIN_H
 
 #include <random>
 #include <stdexcept>
 #include "GraphInf/rng.h"
 #include "GraphInf/types.h"
-#include "uncertain.hpp"
+#include "uncertain.h"
 
 namespace GraphInf
 {
 
     class UncertainPoissonModel : public UncertainGraphModel
     {
-        MultiGraph m_state;
         double m_averageNoEdge, m_averageEdge;
 
     protected:
@@ -29,11 +28,11 @@ namespace GraphInf
             {
                 for (size_t j = i + 1; j < n; j++)
                 {
-                    size_t multiplicity = graph.getEdgeMultiplicityIdx(i, j);
-                    double average = getAverage(graph.getEdgeMultiplicityIdx(i, j));
+                    size_t multiplicity = graph.getEdgeMultiplicity(i, j);
+                    double average = getAverage(graph.getEdgeMultiplicity(i, j));
 
-                    m_state.setEdgeMultiplicityIdx(i, j,
-                                                   std::poisson_distribution<size_t>(average)(rng));
+                    m_state.setEdgeMultiplicity(i, j,
+                                                std::poisson_distribution<size_t>(average)(rng));
                 }
             }
         }
@@ -47,8 +46,8 @@ namespace GraphInf
             {
                 for (size_t j = i + 1; j < n; j++)
                 {
-                    const auto &observation = m_state.getEdgeMultiplicityIdx(i, j);
-                    double average = getAverage(graph.getEdgeMultiplicityIdx(i, j));
+                    const auto &observation = m_state.getEdgeMultiplicity(i, j);
+                    double average = getAverage(graph.getEdgeMultiplicity(i, j));
 
                     logLikelihood += observation * log(average) - average - lgamma(observation + 1);
                 }
@@ -68,9 +67,9 @@ namespace GraphInf
 
         double computeLogLikelihoodRatioOfPair(size_t i, size_t j, bool addingEdge) const
         {
-            const auto &observation = m_state.getEdgeMultiplicityIdx(i, j);
+            const auto &observation = m_state.getEdgeMultiplicity(i, j);
             const auto &graph = m_graphPriorPtr->getState();
-            auto multiplicity = graph.getEdgeMultiplicityIdx(i, j);
+            auto multiplicity = graph.getEdgeMultiplicity(i, j);
 
             double currentAverage = getAverage(multiplicity);
             double newAverage = getAverage(multiplicity + 2 * addingEdge - 1);

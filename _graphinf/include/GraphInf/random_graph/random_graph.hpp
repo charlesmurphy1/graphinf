@@ -61,7 +61,16 @@ namespace GraphInf
 
         virtual void setState(const MultiGraph &state)
         {
+            if (state.getSize() != m_size)
+                throw std::invalid_argument("Cannot set state with graph of size " + std::to_string(state.getSize()) + " != " + std::to_string(m_size));
+            // m_state.clearEdges();
+            // for (const auto &edge : state.getEdges())
+            // {
+            //     auto mult = state.getEdgeMultiplicity(edge.first, edge.second);
+            //     m_state.addMultiedge(edge.first, edge.second, mult);
+            // }
             m_state = state;
+
             computeConsistentState();
             setUp();
         }
@@ -216,7 +225,7 @@ namespace GraphInf
         virtual const CounterMap<Label> &getVertexCounts() const = 0;
         virtual const CounterMap<Label> &getEdgeLabelCounts() const = 0;
         virtual const LabelGraph &getLabelGraph() const = 0;
-        const Label &getLabelOfIdx(BaseGraph::VertexIndex vertexIdx) const { return getLabels()[vertexIdx]; }
+        const Label &getLabel(BaseGraph::VertexIndex vertex) const { return getLabels()[vertex]; }
 
         virtual void setLabels(const std::vector<Label> &, bool reduce = false) = 0;
         virtual void sampleOnlyLabels() = 0;
@@ -316,8 +325,8 @@ namespace GraphInf
 
         virtual const size_t getDepth() const = 0;
 
-        virtual const Label getLabelOfIdx(BaseGraph::VertexIndex vertexIdx, Level level) const = 0;
-        virtual const Label getNestedLabelOfIdx(BaseGraph::VertexIndex vertexIdx, Level level) const = 0;
+        virtual const Label getLabel(BaseGraph::VertexIndex vertex, Level level) const = 0;
+        virtual const Label getNestedLabel(BaseGraph::VertexIndex vertex, Level level) const = 0;
         virtual const std::vector<std::vector<Label>> &getNestedLabels() const = 0;
         virtual const std::vector<Label> &getNestedLabels(Level) const = 0;
         virtual const std::vector<size_t> &getNestedLabelCount() const = 0;
@@ -344,7 +353,7 @@ namespace GraphInf
             return *m_nestedLabelProposerPtr;
         }
 
-        using VertexLabeledRandomGraph<Label>::getLabelOfIdx;
+        using VertexLabeledRandomGraph<Label>::getLabel;
         const std::vector<Label> &getLabels() const override { return getNestedLabels()[0]; }
         const size_t getLabelCount() const override { return getNestedLabelCount()[0]; }
         const CounterMap<Label> &getVertexCounts() const override { return getNestedVertexCounts()[0]; }

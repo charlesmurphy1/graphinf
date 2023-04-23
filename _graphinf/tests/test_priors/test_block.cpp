@@ -318,7 +318,7 @@ public:
     }
     BlockIndex findLabelMove(BaseGraph::VertexIndex idx)
     {
-        BlockIndex blockIdx = prior.getBlockOfIdx(idx);
+        BlockIndex blockIdx = prior.getBlock(idx);
         if (blockIdx == prior.getBlockCount() - 1)
             return blockIdx - 1;
         else
@@ -341,14 +341,14 @@ TEST_F(BlockUniformHyperPriorTest, getLogLikelihood_returnCorrectLogLikehood)
 
 TEST_F(BlockUniformHyperPriorTest, applyLabelMove_ForSomeLabelMove_getConsistentState)
 {
-    BlockMove move = {0, prior.getBlockOfIdx(0), findLabelMove(0)};
+    BlockMove move = {0, prior.getBlock(0), findLabelMove(0)};
     prior.applyLabelMove(move);
     EXPECT_NO_THROW(prior.checkSelfConsistency());
 }
 
 TEST_F(BlockUniformHyperPriorTest, getLogLikelihoodRatioFromLabelMove_forSomeLabelMove_returnCorrectLogLikelihoodRatio)
 {
-    BlockMove move = {0, prior.getBlockOfIdx(0), findLabelMove(0)};
+    BlockMove move = {0, prior.getBlock(0), findLabelMove(0)};
     double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromLabelMove(move);
     double logLikelihoodBefore = prior.getLogLikelihood();
 

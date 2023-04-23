@@ -77,7 +77,7 @@ namespace GraphInf
             m_labelGraphPriorPtr->isRoot(false);
         }
 
-        const size_t &getDegreeOfIdx(BaseGraph::VertexIndex idx) const { return m_state[idx]; }
+        const size_t &getDegree(BaseGraph::VertexIndex idx) const { return m_state[idx]; }
         virtual const VertexLabeledDegreeCountsMap &getDegreeCounts() const { return m_degreeCounts; }
         void reducePartition()
         {

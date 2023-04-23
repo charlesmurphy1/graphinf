@@ -74,7 +74,7 @@ namespace GraphInf
             m_edgeCountPriorPtr->isRoot(false);
         }
 
-        const size_t &getDegreeOfIdx(BaseGraph::VertexIndex idx) const { return m_state[idx]; }
+        const size_t &getDegree(BaseGraph::VertexIndex idx) const { return m_state[idx]; }
         virtual const DegreeCountsMap &getDegreeCounts() const { return m_degreeCounts; }
 
         virtual const double getLogLikelihoodRatioFromGraphMove(const GraphMove &) const override = 0;

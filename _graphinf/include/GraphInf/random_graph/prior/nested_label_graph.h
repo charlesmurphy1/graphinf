@@ -71,13 +71,28 @@ namespace GraphInf
         }
         void setNestedState(const std::vector<LabelGraph> &nestedState)
         {
+            // m_nestedState = std::vector<LabelGraph>(nestedState.size(), LabelGraph());
+            // size_t l = 0;
+            // for (const auto &state : nestedState)
+            // {
+            //     for (const auto &edge : state.getEdges())
+            //     {
+            //         const auto mult = state.getEdgeMultiplicity(edge.first, edge.second);
+            //         m_nestedState[l].addMultiedge(edge.first, edge.second, mult);
+            //     }
+            //     ++l;
+            // }
             m_nestedState = nestedState;
+
             m_nestedEdgeCounts = computeNestedEdgeCountsFromNestedState(nestedState);
-            m_state = nestedState[0];
+            m_state.clearEdges();
+            m_state.resize(nestedState[0].getSize());
+            for (const auto &rs : nestedState[0].edges())
+                m_state.addMultiedge(rs.first, rs.second, nestedState[0].getEdgeMultiplicity(rs.first, rs.second));
+
             m_edgeCounts = m_nestedEdgeCounts[0];
             m_edgeCountPriorPtr->setState(m_state.getTotalEdgeNumber());
         }
-        // void setGraph(const MultiGraph& graph) override;
 
         const NestedBlockPrior &getNestedBlockPrior() const { return *m_nestedBlockPriorPtr; }
         NestedBlockPrior &getNestedBlockPriorRef() const { return *m_nestedBlockPriorPtr; }
@@ -105,14 +120,14 @@ namespace GraphInf
         {
             return m_nestedBlockPriorPtr->getNestedState(level);
         }
-        using LabelGraphPrior::getBlockOfIdx;
-        const BlockIndex getBlockOfIdx(BaseGraph::VertexIndex vertex, Level level) const
+        using LabelGraphPrior::getBlock;
+        const BlockIndex getBlock(BaseGraph::VertexIndex vertex, Level level) const
         {
-            return m_nestedBlockPriorPtr->getBlockOfIdx(vertex, level);
+            return m_nestedBlockPriorPtr->getBlock(vertex, level);
         }
-        const BlockIndex getNestedBlockOfIdx(BaseGraph::VertexIndex vertex, Level level) const
+        const BlockIndex getNestedBlock(BaseGraph::VertexIndex vertex, Level level) const
         {
-            return m_nestedBlockPriorPtr->getNestedBlockOfIdx(vertex, level);
+            return m_nestedBlockPriorPtr->getNestedBlock(vertex, level);
         }
         size_t getDepth() const { return m_nestedBlockPriorPtr->getDepth(); }
 

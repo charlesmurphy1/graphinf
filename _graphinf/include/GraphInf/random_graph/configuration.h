@@ -59,7 +59,7 @@ namespace GraphInf
         }
 
         const size_t getEdgeCount() const override { return m_degreePriorPtr->getEdgeCount(); }
-        const size_t getDegreeOfIdx(BaseGraph::VertexIndex vertex) const { return m_degreePriorPtr->getDegreeOfIdx(vertex); }
+        const size_t getDegree(BaseGraph::VertexIndex vertex) const { return m_degreePriorPtr->getDegree(vertex); }
         const std::vector<size_t> &getDegrees() const { return m_degreePriorPtr->getState(); }
 
         void computationFinished() const override

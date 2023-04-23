@@ -39,11 +39,10 @@ public:
         BaseGraph::VertexIndex neighborIdx;
         for (auto idx : graph)
         {
-            if (graph.getDegreeOfIdx(idx) > 0)
+            if (graph.getDegree(idx) > 0)
             {
-                auto neighbor = *graph.getNeighboursOfIdx(idx).begin();
-                neighborIdx = neighbor.vertexIndex;
-                edge = {idx, neighborIdx};
+                auto neighbor = *graph.getOutNeighbours(idx).begin();
+                edge = {idx, neighbor};
                 return edge;
             }
         }
@@ -52,7 +51,7 @@ public:
 
     GraphInf::BlockIndex findBlockMove(BaseGraph::VertexIndex idx)
     {
-        GraphInf::BlockIndex blockIdx = randomGraph.getLabelOfIdx(idx);
+        GraphInf::BlockIndex blockIdx = randomGraph.getLabel(idx);
         if (blockIdx == randomGraph.getVertexCounts().size() - 1)
             return blockIdx - 1;
         else
@@ -92,30 +91,30 @@ TEST_P(SBMParametrizedTest, getLogLikelihood_returnNonZeroValue)
 TEST_P(SBMParametrizedTest, applyMove_forAddedEdge)
 {
     BaseGraph::Edge addedEdge = {0, 2};
-    size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
+    size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicity(addedEdge.first, addedEdge.second);
     GraphInf::GraphMove move = {{}, {addedEdge}};
     randomGraph.applyGraphMove(move);
-    size_t addedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
+    size_t addedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicity(addedEdge.first, addedEdge.second);
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);
 }
 
 TEST_P(SBMParametrizedTest, applyMove_forAddedSelfLoop)
 {
     BaseGraph::Edge addedEdge = {0, 0};
-    size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
+    size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicity(addedEdge.first, addedEdge.second);
     GraphInf::GraphMove move = {{}, {addedEdge}};
     randomGraph.applyGraphMove(move);
-    size_t addedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
+    size_t addedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicity(addedEdge.first, addedEdge.second);
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);
 }
 
 TEST_P(SBMParametrizedTest, applyMove_forRemovedEdge)
 {
     BaseGraph::Edge removedEdge = findEdge();
-    size_t removedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(removedEdge);
+    size_t removedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicity(removedEdge.first, removedEdge.second);
     GraphInf::GraphMove move = {{removedEdge}, {}};
     randomGraph.applyGraphMove(move);
-    size_t removedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicityIdx(removedEdge);
+    size_t removedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicity(removedEdge.first, removedEdge.second);
     EXPECT_EQ(removedEdgeMultAfter + 1, removedEdgeMultBefore);
 }
 
@@ -125,12 +124,12 @@ TEST_P(SBMParametrizedTest, applyMove_forRemovedEdgeAndAddedEdge)
     BaseGraph::Edge removedEdge = findEdge();
     while (addedEdge == removedEdge)
         removedEdge = findEdge();
-    size_t removedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(removedEdge);
-    size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
+    size_t removedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicity(removedEdge.first, removedEdge.second);
+    size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicity(addedEdge.first, addedEdge.second);
     GraphInf::GraphMove move = {{removedEdge}, {addedEdge}};
     randomGraph.applyGraphMove(move);
-    size_t removedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicityIdx(removedEdge);
-    size_t addedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicityIdx(addedEdge);
+    size_t removedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicity(removedEdge.first, removedEdge.second);
+    size_t addedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicity(addedEdge.first, addedEdge.second);
     EXPECT_EQ(removedEdgeMultAfter + 1, removedEdgeMultBefore);
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);
 }
@@ -143,7 +142,7 @@ TEST_P(SBMParametrizedTest, applyMove_forNoEdgesAddedOrRemoved)
 
 TEST_P(SBMParametrizedTest, applyMove_forIdentityBlockMove_doNothing)
 {
-    GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
+    GraphInf::BlockIndex prevLabel = randomGraph.getLabel(vertex);
     GraphInf::BlockIndex nextLabel = prevLabel;
 
     GraphInf::BlockMove move = {vertex, prevLabel, nextLabel};
@@ -152,35 +151,35 @@ TEST_P(SBMParametrizedTest, applyMove_forIdentityBlockMove_doNothing)
 
 TEST_P(SBMParametrizedTest, applyMove_forBlockMoveWithNoBlockCreation_changeBlockIdx)
 {
-    GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
+    GraphInf::BlockIndex prevLabel = randomGraph.getLabel(vertex);
     GraphInf::BlockIndex nextLabel = findBlockMove(vertex);
 
     GraphInf::BlockMove move = {vertex, prevLabel, nextLabel};
     randomGraph.applyLabelMove(move);
-    EXPECT_NE(randomGraph.getLabelOfIdx(vertex), prevLabel);
-    EXPECT_EQ(randomGraph.getLabelOfIdx(vertex), nextLabel);
+    EXPECT_NE(randomGraph.getLabel(vertex), prevLabel);
+    EXPECT_EQ(randomGraph.getLabel(vertex), nextLabel);
 }
 
 TEST_P(SBMParametrizedTest, applyMove_forBlockMoveWithBlockCreation_changeBlockIdxAndBlockCount)
 {
-    GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
+    GraphInf::BlockIndex prevLabel = randomGraph.getLabel(vertex);
     GraphInf::BlockIndex nextLabel = randomGraph.getVertexCounts().size();
     GraphInf::BlockMove move = {vertex, prevLabel, nextLabel};
     randomGraph.applyLabelMove(move);
-    EXPECT_NE(randomGraph.getLabelOfIdx(vertex), prevLabel);
-    EXPECT_EQ(randomGraph.getLabelOfIdx(vertex), nextLabel);
+    EXPECT_NE(randomGraph.getLabel(vertex), prevLabel);
+    EXPECT_EQ(randomGraph.getLabel(vertex), nextLabel);
 }
 
 TEST_P(SBMParametrizedTest, applyMove_forBlockMoveWithBlockDestruction_changeBlockIdxAndBlockCount)
 {
     GraphInf::BlockIndex prevLabel = randomGraph.getVertexCounts().size();
-    GraphInf::BlockIndex nextLabel = randomGraph.getLabelOfIdx(vertex);
+    GraphInf::BlockIndex nextLabel = randomGraph.getLabel(vertex);
     GraphInf::BlockMove move = {vertex, nextLabel, prevLabel};
     randomGraph.applyLabelMove(move); // creating block before destroying it
     move = {vertex, prevLabel, nextLabel};
     randomGraph.applyLabelMove(move);
-    EXPECT_EQ(randomGraph.getLabelOfIdx(vertex), nextLabel);
-    EXPECT_NE(randomGraph.getLabelOfIdx(vertex), prevLabel);
+    EXPECT_EQ(randomGraph.getLabel(vertex), nextLabel);
+    EXPECT_NE(randomGraph.getLabel(vertex), prevLabel);
 }
 
 TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forAddedSelfLoop_returnCorrectLogLikelihoodRatio)
@@ -244,7 +243,7 @@ TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forRemovedAndAddedEdges_return
 TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forIdentityBlockMove_return0)
 {
 
-    GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
+    GraphInf::BlockIndex prevLabel = randomGraph.getLabel(vertex);
     GraphInf::BlockIndex nextLabel = prevLabel;
 
     GraphInf::BlockMove move = {vertex, prevLabel, nextLabel};
@@ -254,7 +253,7 @@ TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forIdentityBlockMove_return0)
 
 TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forBlockMove_returnCorrectLogLikelihoodRatio)
 {
-    GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
+    GraphInf::BlockIndex prevLabel = randomGraph.getLabel(vertex);
     GraphInf::BlockIndex nextLabel = findBlockMove(vertex);
     GraphInf::BlockMove move = {vertex, prevLabel, nextLabel};
     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromLabelMove(move);
@@ -268,7 +267,7 @@ TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forBlockMove_returnCorrectLogL
 TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forBlockMoveWithBlockCreation_returnCorrectLogLikelihoodRatio)
 {
 
-    GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
+    GraphInf::BlockIndex prevLabel = randomGraph.getLabel(vertex);
     GraphInf::BlockIndex nextLabel = randomGraph.getVertexCounts().size();
 
     GraphInf::BlockMove move = {vertex, prevLabel, nextLabel, 1};
@@ -283,7 +282,7 @@ TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forBlockMoveWithBlockCreation_
 TEST_P(SBMParametrizedTest, getLogLikelihoodRatio_forBlockMoveWithBlockDestruction_returnCorrectLogLikelihoodRatio)
 {
 
-    GraphInf::BlockIndex prevLabel = randomGraph.getLabelOfIdx(vertex);
+    GraphInf::BlockIndex prevLabel = randomGraph.getLabel(vertex);
     GraphInf::BlockIndex nextLabel = randomGraph.getVertexCounts().size();
 
     GraphInf::BlockMove move = {vertex, prevLabel, nextLabel, -1};

@@ -25,15 +25,15 @@ namespace GraphInf
         //      */
         // k = {4, 3, 5, 5, 2, 3, 0}
         GraphInf::MultiGraph graph(7);
-        graph.addMultiedgeIdx(0, 2, 3);
-        graph.addEdgeIdx(0, 3);
-        graph.addEdgeIdx(1, 2);
-        graph.addEdgeIdx(1, 3);
-        graph.addEdgeIdx(1, 4);
-        graph.addEdgeIdx(2, 3);
-        graph.addEdgeIdx(3, 4);
-        graph.addEdgeIdx(3, 5);
-        graph.addEdgeIdx(5, 5);
+        graph.addMultiedge(0, 2, 3);
+        graph.addEdge(0, 3);
+        graph.addEdge(1, 2);
+        graph.addEdge(1, 3);
+        graph.addEdge(1, 4);
+        graph.addEdge(2, 3);
+        graph.addEdge(3, 4);
+        graph.addEdge(3, 5);
+        graph.addEdge(5, 5);
 
         return graph;
     }
@@ -83,9 +83,9 @@ namespace GraphInf
     TEST_F(LabelGraphPriorTest, setGraph_anyGraph_labelGraphCorrectlySet)
     {
         // EXPECT_EQ(prior.getState(), Matrix<size_t>({{8, 6}, {6, 2}}) );
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(0, 0), 4);
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(0, 1), 6);
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(1, 1), 1);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(0, 0), 4);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(0, 1), 6);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(1, 1), 1);
         EXPECT_EQ(prior.getEdgeCounts()[0], 14);
         EXPECT_EQ(prior.getEdgeCounts()[1], 8);
     }
@@ -113,17 +113,17 @@ namespace GraphInf
     {
         prior.applyLabelMoveToState({0, 0, 1});
         // EXPECT_EQ(prior.getState(), Matrix<size_t>({{6, 4}, {4, 8}}) );
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(0, 0), 3);
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(0, 1), 4);
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(1, 1), 4);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(0, 0), 3);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(0, 1), 4);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(1, 1), 4);
     }
 
     TEST_F(LabelGraphPriorTest, applyLabelMoveToState_vertexChangingBlockWithSelfloop_neighborsOfVertexChangedOfBlocks)
     {
         prior.applyLabelMoveToState({5, 1, 0});
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(0, 0), 6);
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(0, 1), 5);
-        EXPECT_EQ(prior.getState().getEdgeMultiplicityIdx(1, 1), 0);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(0, 0), 6);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(0, 1), 5);
+        EXPECT_EQ(prior.getState().getEdgeMultiplicity(1, 1), 0);
     }
     TEST_F(LabelGraphPriorTest, checkSelfConsistency_validData_noThrow)
     {
@@ -140,8 +140,8 @@ namespace GraphInf
 
     // TEST_F(LabelGraphPriorTest, checkSelfConsistency_labelGraphNotOfBlockNumberSize_throwConsistencyError) {
     //     MultiGraph labelGraph(3);
-    //     labelGraph.addEdgeIdx(0, 1);
-    //     labelGraph.addEdgeIdx(0, 2);
+    //     labelGraph.addEdge(0, 1);
+    //     labelGraph.addEdge(0, 2);
     //     prior.setState(labelGraph);
     //     EXPECT_THROW(prior.checkSelfConsistency(), ConsistencyError);
     //     expectConsistencyError = true;
@@ -149,9 +149,9 @@ namespace GraphInf
 
     // TEST_F(LabelGraphPriorTest, checkSelfConsistency_incorrectEdgeNumber_throwConsistencyError) {
     //     MultiGraph labelGraph(2);
-    //     labelGraph.addEdgeIdx(0, 1);
-    //     labelGraph.addEdgeIdx(1, 1);
-    //     labelGraph.addEdgeIdx(0, 0);
+    //     labelGraph.addEdge(0, 1);
+    //     labelGraph.addEdge(1, 1);
+    //     labelGraph.addEdge(0, 0);
     //     prior.setState(labelGraph);
     //     EXPECT_THROW(prior.checkSelfConsistency(), ConsistencyError);
     //     expectConsistencyError = true;
@@ -167,9 +167,9 @@ namespace GraphInf
 
         void SetUp()
         {
-            labelGraph.addMultiedgeIdx(0, 0, 10);
-            labelGraph.addMultiedgeIdx(0, 1, 2);
-            labelGraph.addMultiedgeIdx(1, 1, 10);
+            labelGraph.addMultiedge(0, 0, 10);
+            labelGraph.addMultiedge(0, 1, 2);
+            labelGraph.addMultiedge(1, 1, 10);
             prior.setGraph(graph);
             prior.checkSafety();
         }
@@ -204,12 +204,12 @@ namespace GraphInf
     }
 
     // TEST_F(LabelGraphDeltaPriorTest, getLogLikelihoodRatioFromLabelMove_forLabelMovePreservingLabelGraph_return0){
-    //     BlockMove move = {0, blockPrior.getBlockOfIdx(0), blockPrior.getBlockOfIdx(0)};
+    //     BlockMove move = {0, blockPrior.getBlockOf(0), blockPrior.getBlockOf(0)};
     //     EXPECT_EQ(prior.getLogLikelihoodRatioFromLabelMove(move), 0);
     // }
 
     // TEST_F(LabelGraphDeltaPriorTest, getLogLikelihoodRatioFromLabelMove_forLabelMoveNotPreservingLabelGraph_returnMinusInfinity){
-    //     BlockMove move = {0, blockPrior.getBlockOfIdx(0), blockPrior.getBlockOfIdx(0) + 1};
+    //     BlockMove move = {0, blockPrior.getBlockOf(0), blockPrior.getBlockOf(0) + 1};
     //     EXPECT_EQ(prior.getLogLikelihoodRatioFromLabelMove(move), -INFINITY);
     // }
 
@@ -285,13 +285,13 @@ namespace GraphInf
 
     TEST_F(LabelGraphErdosRenyiPriorTest, applyMove_forSomeLabelMove_changeLabelGraph)
     {
-        BlockMove move = {0, blockPrior.getBlockOfIdx(0), blockPrior.getBlockOfIdx(0) + 1};
+        BlockMove move = {0, blockPrior.getBlock(0), blockPrior.getBlock(0) + 1};
         prior.applyLabelMove(move);
     }
 
     TEST_F(LabelGraphErdosRenyiPriorTest, getLogLikelihoodRatio_forSomeLabelMove_returnCorrectLogLikelihoodRatio)
     {
-        BlockMove move = {0, blockPrior.getBlockOfIdx(0), blockPrior.getBlockOfIdx(0) + 1};
+        BlockMove move = {0, blockPrior.getBlock(0), blockPrior.getBlock(0) + 1};
         double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromLabelMove(move);
         double logLikelihoodBeforeMove = prior.getLogLikelihood();
         prior.applyLabelMove(move);
@@ -303,7 +303,7 @@ namespace GraphInf
 
     TEST_F(LabelGraphErdosRenyiPriorTest, getLogLikelihoodRatio_forSomeLabelMoveAddingNewBlock_returnCorrectLogLikelihoodRatio)
     {
-        BlockMove move = {0, blockPrior.getBlockOfIdx(0), (int)blockPrior.getBlockCount(), 1};
+        BlockMove move = {0, blockPrior.getBlock(0), (int)blockPrior.getBlockCount(), 1};
         double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromLabelMove(move);
         double logLikelihoodBeforeMove = prior.getLogLikelihood();
         prior.applyLabelMove(move);
@@ -388,10 +388,10 @@ namespace GraphInf
 
             for (size_t r = 0; r < prior.getState().getSize(); ++r)
             {
-                expectedLogLikelihood -= logFactorial(prior.getState().getEdgeMultiplicityIdx(r, r));
+                expectedLogLikelihood -= logFactorial(prior.getState().getEdgeMultiplicity(r, r));
                 for (size_t s = r + 1; s < prior.getState().getSize(); ++s)
                 {
-                    expectedLogLikelihood -= logFactorial(prior.getState().getEdgeMultiplicityIdx(r, s));
+                    expectedLogLikelihood -= logFactorial(prior.getState().getEdgeMultiplicity(r, s));
                 }
             }
             EXPECT_NEAR(actualLogLikelihood, expectedLogLikelihood, 1e-6);
@@ -403,8 +403,8 @@ namespace GraphInf
     {
         GraphMove move = {{{0, 2}}, {{0, 0}}};
         prior.applyGraphMove(move);
-        graph.removeEdgeIdx(0, 2);
-        graph.addEdgeIdx(0, 0);
+        graph.removeEdge(0, 2);
+        graph.addEdge(0, 0);
         EXPECT_NO_THROW(prior.checkSelfConsistency());
     }
 
@@ -414,8 +414,8 @@ namespace GraphInf
         double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromGraphMove(move);
         double logLikelihoodBeforeMove = prior.getLogLikelihood();
         prior.applyGraphMove(move);
-        graph.removeEdgeIdx(0, 2);
-        graph.addEdgeIdx(0, 0);
+        graph.removeEdge(0, 2);
+        graph.addEdge(0, 0);
         double logLikelihoodAfterMove = prior.getLogLikelihood();
         double expectedLogLikelihood = logLikelihoodAfterMove - logLikelihoodBeforeMove;
 
@@ -428,7 +428,7 @@ namespace GraphInf
         double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromGraphMove(move);
         double logLikelihoodBeforeMove = prior.getLogLikelihood();
         prior.applyGraphMove(move);
-        graph.addEdgeIdx(0, 0);
+        graph.addEdge(0, 0);
         double logLikelihoodAfterMove = prior.getLogLikelihood();
         double expectedLogLikelihood = logLikelihoodAfterMove - logLikelihoodBeforeMove;
 
@@ -437,13 +437,13 @@ namespace GraphInf
 
     TEST_F(LabelPlantedPartitionPriorTest, applyMove_forSomeLabelMove_changeLabelGraph)
     {
-        BlockMove move = {0, blockPrior.getBlockOfIdx(0), blockPrior.getBlockOfIdx(0) + 1};
+        BlockMove move = {0, blockPrior.getBlock(0), blockPrior.getBlock(0) + 1};
         prior.applyLabelMove(move);
     }
 
     TEST_F(LabelPlantedPartitionPriorTest, getLogLikelihoodRatio_forSomeLabelMove_returnCorrectLogLikelihoodRatio)
     {
-        BlockMove move = {0, blockPrior.getBlockOfIdx(0), blockPrior.getBlockOfIdx(0) + 1};
+        BlockMove move = {0, blockPrior.getBlock(0), blockPrior.getBlock(0) + 1};
         double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromLabelMove(move);
         double logLikelihoodBeforeMove = prior.getLogLikelihood();
         prior.applyLabelMove(move);
@@ -455,7 +455,7 @@ namespace GraphInf
 
     TEST_F(LabelPlantedPartitionPriorTest, getLogLikelihoodRatio_forSomeLabelMoveAddingNewBlock_returnCorrectLogLikelihoodRatio)
     {
-        BlockMove move = {0, blockPrior.getBlockOfIdx(0), (int)blockPrior.getBlockCount(), 1};
+        BlockMove move = {0, blockPrior.getBlock(0), (int)blockPrior.getBlockCount(), 1};
         double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromLabelMove(move);
         double logLikelihoodBeforeMove = prior.getLogLikelihood();
         prior.applyLabelMove(move);

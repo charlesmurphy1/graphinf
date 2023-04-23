@@ -94,21 +94,21 @@ namespace GraphInf
         const auto N = DataModel::getSize();
         const auto &graph = DataModel::getGraph();
         NeighborsState neighborsState(N);
-        for (auto idx : graph)
+        for (auto vertex : graph)
         {
-            neighborsState[idx].resize(m_numStates);
-            for (auto neighbor : graph.getNeighboursOfIdx(idx))
+            neighborsState[vertex].resize(m_numStates);
+            for (auto neighbor : graph.getOutNeighbours(vertex))
             {
-                size_t edgeMult = neighbor.label;
-                if (idx == neighbor.vertexIndex)
+                size_t mult = graph.getEdgeMultiplicity(vertex, neighbor);
+                if (vertex == neighbor)
                 {
                     if (m_acceptSelfLoops)
-                        edgeMult *= 2;
+                        mult *= 2;
                     else
                         continue;
                 }
 
-                neighborsState[idx][state[neighbor.vertexIndex]] += edgeMult;
+                neighborsState[vertex][state[neighbor]] += mult;
             }
         }
         return neighborsState;
@@ -120,23 +120,23 @@ namespace GraphInf
         const auto N = DataModel::getSize();
         const auto &graph = DataModel::getGraph();
         NeighborsStateSequence neighborsStateSequence(N);
-        for (const auto &idx : graph)
+        for (const auto &vertex : graph)
         {
-            neighborsStateSequence[idx].resize(m_length);
+            neighborsStateSequence[vertex].resize(m_length);
             for (size_t t = 0; t < m_length; t++)
             {
-                neighborsStateSequence[idx][t].resize(m_numStates);
-                for (const auto &neighbor : graph.getNeighboursOfIdx(idx))
+                neighborsStateSequence[vertex][t].resize(m_numStates);
+                for (const auto &neighbor : graph.getOutNeighbours(vertex))
                 {
-                    size_t edgeMult = neighbor.label;
-                    if (idx == neighbor.vertexIndex)
+                    size_t edgeMult = graph.getEdgeMultiplicity(vertex, neighbor);
+                    if (vertex == neighbor)
                     {
                         if (m_acceptSelfLoops)
                             edgeMult *= 2;
                         else
                             continue;
                     }
-                    neighborsStateSequence[idx][t][stateSequence[neighbor.vertexIndex][t]] += edgeMult;
+                    neighborsStateSequence[vertex][t][stateSequence[neighbor][t]] += edgeMult;
                 }
             }
         }
@@ -144,7 +144,7 @@ namespace GraphInf
     };
 
     void Dynamics::updateNeighborsStateInPlace(
-        BaseGraph::VertexIndex idx,
+        BaseGraph::VertexIndex vertex,
         VertexState prevVertexState,
         VertexState newVertexState,
         NeighborsState &neighborsState) const
@@ -152,18 +152,18 @@ namespace GraphInf
         const auto &graph = DataModel::getGraph();
         if (prevVertexState == newVertexState)
             return;
-        for (auto neighbor : graph.getNeighboursOfIdx(idx))
+        for (auto neighbor : graph.getOutNeighbours(vertex))
         {
-            size_t edgeMult = neighbor.label;
-            if (idx == neighbor.vertexIndex)
+            size_t mult = graph.getEdgeMultiplicity(vertex, neighbor);
+            if (vertex == neighbor)
             {
                 if (m_acceptSelfLoops)
-                    edgeMult *= 2;
+                    mult *= 2;
                 else
                     continue;
             }
-            neighborsState[neighbor.vertexIndex][prevVertexState] -= edgeMult;
-            neighborsState[neighbor.vertexIndex][newVertexState] += edgeMult;
+            neighborsState[neighbor][prevVertexState] -= mult;
+            neighborsState[neighbor][newVertexState] += mult;
         }
     };
 
@@ -242,7 +242,7 @@ namespace GraphInf
             return;
         const auto &graph = DataModel::getGraph();
 
-        if (graph.getEdgeMultiplicityIdx(edge) == 0 and counter < 0)
+        if (graph.getEdgeMultiplicity(edge.first, edge.second) == 0 and counter < 0)
             throw std::logic_error("Dynamics: Edge (" + std::to_string(edge.first) + ", " + std::to_string(edge.second) + ") " + "with multiplicity 0 cannot be removed.");
 
         if (prevNeighborMap.count(v) == 0)

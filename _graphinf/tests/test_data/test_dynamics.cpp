@@ -165,17 +165,17 @@ namespace GraphInf
         dynamics.applyGraphMove(GRAPH_MOVE);
         auto expected = dynamics.getNeighborsPastStates();
         auto graph = dynamics.getGraph();
-        EXPECT_EQ(graph.getEdgeMultiplicityIdx(0, 2), 2);
-        EXPECT_EQ(graph.getEdgeMultiplicityIdx(0, 5), 1);
+        EXPECT_EQ(graph.getEdgeMultiplicity(0, 2), 2);
+        EXPECT_EQ(graph.getEdgeMultiplicity(0, 5), 1);
         for (size_t t = 0; t < dynamics.getLength(); ++t)
         {
             for (const auto vertex : graph)
             {
                 std::vector<size_t> actual(dynamics.getNumStates(), 0);
-                for (auto neighbor : graph.getNeighboursOfIdx(vertex))
+                for (auto neighbor : graph.getOutNeighbours(vertex))
                 {
-                    size_t edgeMult = neighbor.label;
-                    if (neighbor.vertexIndex == vertex)
+                    size_t edgeMult = graph.getEdgeMultiplicity(vertex, neighbor);
+                    if (neighbor == vertex)
                     {
                         if (dynamics.acceptSelfLoops())
                             edgeMult *= 2;
@@ -183,7 +183,7 @@ namespace GraphInf
                             continue;
                     }
 
-                    actual[past[neighbor.vertexIndex][t]] += edgeMult;
+                    actual[past[neighbor][t]] += edgeMult;
                 }
                 for (size_t s = 0; s < dynamics.getNumStates(); ++s)
                 {
@@ -240,7 +240,7 @@ namespace GraphInf
                     EXPECT_EQ(expectedAfter[actual.first][t][s], actual.second[t][s]);
     }
 
-    INSTANTIATE_TEST_CASE_P(
+    INSTANTIATE_TEST_SUITE_P(
         DynamicsBaseClassTests,
         DynamicsParametrizedTest,
         ::testing::Values(0, 10));

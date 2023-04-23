@@ -105,9 +105,9 @@ namespace GraphInf
         const LabelMove<Label> proposeNewLabelMove(const BaseGraph::VertexIndex &vertex) const override
         {
             if (m_uniform01(rng) < m_labelCreationProb)
-                return {vertex, m_graphPriorPtr->getLabelOfIdx(vertex), (int)m_graphPriorPtr->getLabelCount(), 1};
+                return {vertex, m_graphPriorPtr->getLabel(vertex), (int)m_graphPriorPtr->getLabelCount(), 1};
             else
-                return {vertex, m_graphPriorPtr->getLabelOfIdx(vertex), m_graphPriorPtr->getLabelOfIdx(vertex), -1};
+                return {vertex, m_graphPriorPtr->getLabel(vertex), m_graphPriorPtr->getLabel(vertex), -1};
         }
     };
 
@@ -145,7 +145,7 @@ namespace GraphInf
         using LabelProposer<Label>::LabelProposer;
         const LabelMove<Label> proposeNewLabelMove(const BaseGraph::VertexIndex &vertex) const override
         {
-            Label prevLabel = m_graphPriorPtr->getLabelOfIdx(vertex);
+            Label prevLabel = m_graphPriorPtr->getLabel(vertex);
 
             Label nextLabel;
             if (m_emptyLabels.size() == 0)

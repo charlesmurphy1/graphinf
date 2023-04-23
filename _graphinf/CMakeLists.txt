@@ -37,7 +37,6 @@ endif()
 include_directories(include)
 include_directories(ext/base_graph/include)
 include_directories(ext/SamplableSet/src)
-set(BASEGRAPH "${CMAKE_CURRENT_SOURCE_DIR}/ext/base_graph/build/libBaseGraph.a")
 set(SAMPLABLESET "${CMAKE_CURRENT_SOURCE_DIR}/ext/SamplableSet/src/build/libsamplableset.a")
 
 add_subdirectory(src)

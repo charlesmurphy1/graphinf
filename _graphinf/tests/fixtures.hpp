@@ -37,14 +37,14 @@ namespace GraphInf
         // STATE = {0,0,0,1,1,1,2}
         // NEIGHBORS_STATE = {{3, 1, 0}, {1, 2, 0}, {4, 1, 0}, {3, 1, 1}, {1, 1, 0}, {0, 1, 0}, {0, 0, 0}}
         GraphInf::MultiGraph graph(7);
-        graph.addMultiedgeIdx(0, 2, 3);
-        graph.addEdgeIdx(0, 3);
-        graph.addEdgeIdx(1, 2);
-        graph.addEdgeIdx(1, 3);
-        graph.addEdgeIdx(1, 4);
-        graph.addEdgeIdx(2, 3);
-        graph.addEdgeIdx(3, 4);
-        graph.addEdgeIdx(3, 5);
+        graph.addMultiedge(0, 2, 3);
+        graph.addEdge(0, 3);
+        graph.addEdge(1, 2);
+        graph.addEdge(1, 3);
+        graph.addEdge(1, 4);
+        graph.addEdge(2, 3);
+        graph.addEdge(3, 4);
+        graph.addEdge(3, 5);
 
         return graph;
     }

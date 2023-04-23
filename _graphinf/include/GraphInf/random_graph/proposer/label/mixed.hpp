@@ -51,7 +51,7 @@ namespace GraphInf
     const Label MixedSampler<Label>::sampleNeighborLabel(BaseGraph::VertexIndex vertex) const
     {
         BaseGraph::VertexIndex neighbor = sampleRandomNeighbor((*m_graphPriorPtrPtr)->getState(), vertex);
-        Label label = (*m_graphPriorPtrPtr)->getLabelOfIdx(neighbor);
+        Label label = (*m_graphPriorPtrPtr)->getLabel(neighbor);
         return label;
     }
 
@@ -66,17 +66,17 @@ namespace GraphInf
     {
         const auto &B = getAvailableLabelCount();
 
-        if ((*m_graphPriorPtrPtr)->getState().getDegreeOfIdx(vertex) == 0)
-            return {vertex, (*m_graphPriorPtrPtr)->getLabelOfIdx(vertex), sampleLabelUniformly()};
+        if ((*m_graphPriorPtrPtr)->getState().getDegree(vertex) == 0)
+            return {vertex, (*m_graphPriorPtrPtr)->getLabel(vertex), sampleLabelUniformly()};
         Label neighborLabel = MixedSampler<Label>::sampleNeighborLabel(vertex);
-        const auto &Et = (*m_graphPriorPtrPtr)->getLabelGraph().getDegreeOfIdx(neighborLabel);
+        const auto &Et = (*m_graphPriorPtrPtr)->getLabelGraph().getDegree(neighborLabel);
         double probUniformSampling = m_shift * B / (Et + m_shift * B);
         Label nextLabel;
         if (m_uniform01(rng) < probUniformSampling)
             nextLabel = sampleLabelUniformly();
         else
             nextLabel = sampleLabelFromNeighborLabel(neighborLabel);
-        LabelMove<Label> move = {vertex, (*m_graphPriorPtrPtr)->getLabelOfIdx(vertex), nextLabel};
+        LabelMove<Label> move = {vertex, (*m_graphPriorPtrPtr)->getLabel(vertex), nextLabel};
         return move;
     }
 
@@ -88,19 +88,19 @@ namespace GraphInf
         const auto &labelGraph = (*m_graphPriorPtrPtr)->getLabelGraph();
 
         double weight = 0, degree = 0;
-        for (auto neighbor : graph.getNeighboursOfIdx(move.vertexIndex))
+        for (auto neighbor : graph.getOutNeighbours(move.vertexIndex))
         {
-            auto t = labels[neighbor.vertexIndex];
-            size_t edgeMult = neighbor.label;
-            if (move.vertexIndex == neighbor.vertexIndex)
+            auto t = labels[neighbor];
+            size_t edgeMult = graph.getEdgeMultiplicity(move.vertexIndex, neighbor);
+            if (move.vertexIndex == neighbor)
                 edgeMult *= 2;
             size_t Est = 0;
             if (move.nextLabel < labelGraph.getSize())
-                Est = labelGraph.getEdgeMultiplicityIdx(t, move.nextLabel);
+                Est = labelGraph.getEdgeMultiplicity(t, move.nextLabel);
 
             if (t == move.nextLabel)
                 Est *= 2;
-            size_t Et = (*m_graphPriorPtrPtr)->getLabelGraph().getDegreeOfIdx(t);
+            size_t Et = (*m_graphPriorPtrPtr)->getLabelGraph().getDegree(t);
             degree += edgeMult;
             weight += edgeMult * (Est + m_shift) / (Et + m_shift * getAvailableLabelCount());
         }
@@ -123,25 +123,25 @@ namespace GraphInf
         auto edgeCountsDiff = getEdgeCountsDiff(move);
 
         double weight = 0, degree = 0;
-        for (auto neighbor : graph.getNeighboursOfIdx(move.vertexIndex))
+        for (auto neighbor : graph.getOutNeighbours(move.vertexIndex))
         {
-            Label t = labels[neighbor.vertexIndex];
-            if (move.vertexIndex == neighbor.vertexIndex)
+            Label t = labels[neighbor];
+            if (move.vertexIndex == neighbor)
                 t = move.nextLabel;
-            size_t edgeMult = neighbor.label;
-            if (move.vertexIndex == neighbor.vertexIndex)
+            size_t edgeMult = graph.getEdgeMultiplicity(move.vertexIndex, neighbor);
+            if (move.vertexIndex == neighbor)
                 edgeMult *= 2;
             auto rt = getOrderedEdge({t, move.prevLabel});
 
             size_t Ert = 0;
             if (t < labelGraph.getSize() and move.prevLabel < labelGraph.getSize())
-                Ert = labelGraph.getEdgeMultiplicityIdx(rt);
+                Ert = labelGraph.getEdgeMultiplicity(rt.first, rt.second);
             Ert += edgeMatDiff.get(rt);
             if (t == move.prevLabel)
                 Ert *= 2;
             size_t Et = 0;
             if (t < labelGraph.getSize())
-                Et = labelGraph.getDegreeOfIdx(t);
+                Et = labelGraph.getDegree(t);
             Et += edgeCountsDiff.get(t);
             degree += edgeMult;
             weight += edgeMult * (Ert + m_shift) / (Et + m_shift * (getAvailableLabelCount() + move.addedLabels));
@@ -162,15 +162,16 @@ namespace GraphInf
 
         IntMap<std::pair<Label, Label>> edgeMatDiff;
         Label r = move.prevLabel, s = move.nextLabel;
-        for (auto neighbor : graph.getNeighboursOfIdx(move.vertexIndex))
+        for (auto neighbor : graph.getOutNeighbours(move.vertexIndex))
         {
-            Label t = labels[neighbor.vertexIndex];
-            if (move.vertexIndex == neighbor.vertexIndex)
+            Label t = labels[neighbor];
+            const auto mult = graph.getEdgeMultiplicity(move.vertexIndex, neighbor);
+            if (move.vertexIndex == neighbor)
                 t = move.prevLabel;
-            edgeMatDiff.decrement(getOrderedEdge({r, t}), neighbor.label);
-            if (move.vertexIndex == neighbor.vertexIndex)
+            edgeMatDiff.decrement(getOrderedEdge({r, t}), mult);
+            if (move.vertexIndex == neighbor)
                 t = move.nextLabel;
-            edgeMatDiff.increment(getOrderedEdge({s, t}), neighbor.label);
+            edgeMatDiff.increment(getOrderedEdge({s, t}), mult);
         }
         return edgeMatDiff;
     }
@@ -179,7 +180,7 @@ namespace GraphInf
     IntMap<Label> MixedSampler<Label>::getEdgeCountsDiff(const LabelMove<Label> &move) const
     {
         IntMap<Label> edgeCountsDiff;
-        size_t degree = (*m_graphPriorPtrPtr)->getState().getDegreeOfIdx(move.vertexIndex);
+        size_t degree = (*m_graphPriorPtrPtr)->getState().getDegree(move.vertexIndex);
         edgeCountsDiff.decrement(move.prevLabel, degree);
         edgeCountsDiff.increment(move.nextLabel, degree);
         return edgeCountsDiff;

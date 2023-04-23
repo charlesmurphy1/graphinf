@@ -2,163 +2,201 @@
 #include "BaseGraph/types.h"
 
 using namespace BaseGraph;
-namespace GraphInf{
-void DegreeCorrectedStochasticBlockModelLikelihood::getDiffEdgeMatMapFromEdgeMove(const BaseGraph::Edge& edge, int counter, IntMap<std::pair<BlockIndex, BlockIndex>>& diffEdgeMatMap) const{
-    const BlockSequence& blockSeq = (*m_degreePriorPtrPtr)->getBlockPrior().getState();
-    diffEdgeMatMap.increment(
-        getOrderedPair<BlockIndex>({blockSeq[edge.first], blockSeq[edge.second]}),
-        counter
-    );
-}
-
-void DegreeCorrectedStochasticBlockModelLikelihood::getDiffAdjMatMapFromEdgeMove(const Edge& edge, int counter, IntMap<std::pair<VertexIndex, VertexIndex>>& diffAdjMatMap) const{
-    Edge orderedEdge = getOrderedEdge(edge);
-    diffAdjMatMap.increment({orderedEdge.first, orderedEdge.second}, counter);
-}
-
-
-void DegreeCorrectedStochasticBlockModelLikelihood::getDiffEdgeMatMapFromBlockMove(
-    const BlockMove& move, IntMap<std::pair<BlockIndex, BlockIndex>>& diffEdgeMatMap
-) const {
-    const BlockSequence& blockSeq = (*m_degreePriorPtrPtr)->getBlockPrior().getState();
-    for (auto neighbor : m_statePtr->getNeighboursOfIdx(move.vertexIndex)){
-        BlockIndex blockIdx = blockSeq[neighbor.vertexIndex];
-        size_t edgeMult = neighbor.label;
-        std::pair<BlockIndex, BlockIndex> orderedBlockPair = getOrderedPair<BlockIndex> ({move.prevLabel, blockIdx});
-        diffEdgeMatMap.decrement(orderedBlockPair, neighbor.label);
-
-        if (neighbor.vertexIndex == move.vertexIndex) // handling self-loops
-            blockIdx = move.nextLabel;
-
-        orderedBlockPair = getOrderedPair<BlockIndex> ({move.nextLabel, blockIdx});
-        diffEdgeMatMap.increment(orderedBlockPair, neighbor.label);
+namespace GraphInf
+{
+    void DegreeCorrectedStochasticBlockModelLikelihood::getDiffEdgeMatMapFromEdgeMove(const BaseGraph::Edge &edge, int counter, IntMap<std::pair<BlockIndex, BlockIndex>> &diffEdgeMatMap) const
+    {
+        const BlockSequence &blockSeq = (*m_degreePriorPtrPtr)->getBlockPrior().getState();
+        diffEdgeMatMap.increment(
+            getOrderedPair<BlockIndex>({blockSeq[edge.first], blockSeq[edge.second]}),
+            counter);
     }
-}
 
-const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihood() const {
-    double logLikelihood = 0;
-    const MultiGraph& edgeMat = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getState() ;
+    void DegreeCorrectedStochasticBlockModelLikelihood::getDiffAdjMatMapFromEdgeMove(const Edge &edge, int counter, IntMap<std::pair<VertexIndex, VertexIndex>> &diffAdjMatMap) const
+    {
+        Edge orderedEdge = getOrderedEdge(edge);
+        diffAdjMatMap.increment({orderedEdge.first, orderedEdge.second}, counter);
+    }
 
-    const CounterMap<BlockIndex>& edgesInBlock = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getEdgeCounts();
-    for (auto r : edgeMat){
-        logLikelihood -= logFactorial(edgesInBlock[r]);
-        for (auto s : edgeMat.getNeighboursOfIdx(r)){
-            if (r <= s.vertexIndex)
-                logLikelihood += (r == s.vertexIndex) ? logDoubleFactorial(2 * s.label) : logFactorial(s.label) ;
+    void DegreeCorrectedStochasticBlockModelLikelihood::getDiffEdgeMatMapFromBlockMove(
+        const BlockMove &move, IntMap<std::pair<BlockIndex, BlockIndex>> &diffEdgeMatMap) const
+    {
+        const BlockSequence &blockSeq = (*m_degreePriorPtrPtr)->getBlockPrior().getState();
+        for (auto neighbor : m_statePtr->getOutNeighbours(move.vertexIndex))
+        {
+            BlockIndex blockIdx = blockSeq[neighbor];
+            size_t mult = m_statePtr->getEdgeMultiplicity(move.vertexIndex, neighbor);
+            std::pair<BlockIndex, BlockIndex> orderedBlockPair = getOrderedPair<BlockIndex>({move.prevLabel, blockIdx});
+            diffEdgeMatMap.decrement(orderedBlockPair, mult);
+
+            if (neighbor == move.vertexIndex) // handling self-loops
+                blockIdx = move.nextLabel;
+
+            orderedBlockPair = getOrderedPair<BlockIndex>({move.nextLabel, blockIdx});
+            diffEdgeMatMap.increment(orderedBlockPair, mult);
         }
     }
 
-    const DegreeSequence& degreeSeq = (*m_degreePriorPtrPtr)->getState();
-    for (auto v : *m_statePtr){
-        logLikelihood += logFactorial(degreeSeq[v]);
-        for (auto n : m_statePtr->getNeighboursOfIdx(v)){
-            if (v <= n.vertexIndex)
-                logLikelihood -= (v == n.vertexIndex) ? logDoubleFactorial(2 * n.label) : logFactorial(n.label);
+    const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihood() const
+    {
+        double logLikelihood = 0;
+        const MultiGraph &labelGraph = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getState();
+        for (auto r : labelGraph)
+        {
+            logLikelihood -= logFactorial(labelGraph.getDegree(r));
+            for (auto s : labelGraph.getOutNeighbours(r))
+            {
+                const auto ers = labelGraph.getEdgeMultiplicity(r, s);
+                if (r == s)
+                    logLikelihood += logDoubleFactorial(2 * ers);
+                else if (r < s)
+                    logLikelihood += logFactorial(ers);
+            }
         }
+
+        for (auto i : *m_statePtr)
+        {
+            logLikelihood += logFactorial(m_statePtr->getDegree(i));
+            for (auto j : m_statePtr->getOutNeighbours(i))
+            {
+                const auto mult = m_statePtr->getEdgeMultiplicity(i, j);
+                if (i == j)
+                    logLikelihood -= logDoubleFactorial(2 * mult);
+                else if (i < j)
+                    logLikelihood -= logFactorial(mult);
+            }
+        }
+
+        return logLikelihood;
     }
 
-    return logLikelihood;
-}
+    const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihoodRatioEdgeTerm(const GraphMove &move) const
+    {
+        const BlockSequence &blockSeq = (*m_degreePriorPtrPtr)->getBlockPrior().getState();
+        const LabelGraph &labelGraph = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getState();
+        double logLikelihoodRatioTerm = 0;
 
-const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihoodRatioEdgeTerm (const GraphMove& move) const {
-    const BlockSequence& blockSeq = (*m_degreePriorPtrPtr)->getBlockPrior().getState();
-    const MultiGraph& edgeMat = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getState();
-    const CounterMap<BlockIndex>& edgeCountsInBlocks = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getEdgeCounts();
-    const CounterMap<BlockIndex>& vertexCountsInBlocks = (*m_degreePriorPtrPtr)->getBlockPrior().getVertexCounts();
-    double logLikelihoodRatioTerm = 0;
+        IntMap<std::pair<BlockIndex, BlockIndex>> diffEdgeMatMap;
+        IntMap<BlockIndex> diffEdgeCountsInBlocksMap;
 
-    IntMap<std::pair<BlockIndex, BlockIndex>> diffEdgeMatMap;
-    IntMap<BlockIndex> diffEdgeCountsInBlocksMap;
+        for (auto edge : move.addedEdges)
+        {
+            const auto rs = OrderedPair<BlockIndex>({blockSeq[edge.first], blockSeq[edge.second]});
+            diffEdgeMatMap.increment(rs);
+            diffEdgeCountsInBlocksMap.increment(rs.first);
+            diffEdgeCountsInBlocksMap.increment(rs.second);
+        }
+        for (auto edge : move.removedEdges)
+        {
+            const auto rs = OrderedPair<BlockIndex>({blockSeq[edge.first], blockSeq[edge.second]});
+            diffEdgeMatMap.decrement(rs);
+            diffEdgeCountsInBlocksMap.decrement(rs.first);
+            diffEdgeCountsInBlocksMap.decrement(rs.second);
+        }
 
-    for (auto edge : move.addedEdges){
-        getDiffEdgeMatMapFromEdgeMove(edge, 1, diffEdgeMatMap);
-    }
-    for (auto edge : move.removedEdges){
-        getDiffEdgeMatMapFromEdgeMove(edge, -1, diffEdgeMatMap);
-    }
+        for (auto diff : diffEdgeMatMap)
+        {
+            auto r = diff.first.first, s = diff.first.second;
+            const auto ers = labelGraph.getEdgeMultiplicity(r, s);
+            if (r == s)
+                logLikelihoodRatioTerm += logDoubleFactorial(2 * (ers + diff.second)) - logDoubleFactorial(2 * ers);
+            else
+                logLikelihoodRatioTerm += logFactorial(ers + diff.second) - logFactorial(ers);
+        }
 
-    for (auto diff : diffEdgeMatMap){
-        auto r = diff.first.first, s = diff.first.second;
-        auto ers = edgeMat.getEdgeMultiplicityIdx(r, s);
-        diffEdgeCountsInBlocksMap.increment(r, diff.second);
-        diffEdgeCountsInBlocksMap.increment(s, diff.second);
-        logLikelihoodRatioTerm += (r == s)? logDoubleFactorial(2 * ers + 2 * diff.second) : logFactorial(ers + diff.second);
-        logLikelihoodRatioTerm -= (r == s)? logDoubleFactorial(2 * ers) : logFactorial(ers);
-    }
-
-    for (auto diff : diffEdgeCountsInBlocksMap){
-        logLikelihoodRatioTerm -= logFactorial(edgeCountsInBlocks[diff.first] + diff.second) ;
-        logLikelihoodRatioTerm -= -logFactorial(edgeCountsInBlocks[diff.first]);
-    }
-    return logLikelihoodRatioTerm;
-}
-
-const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihoodRatioAdjTerm (const GraphMove& move) const {
-    IntMap<std::pair<VertexIndex, VertexIndex>> diffAdjMatMap;
-    IntMap<VertexIndex> diffDegreeMap;
-    double logLikelihoodRatioTerm = 0;
-
-
-    for (auto edge : move.addedEdges){
-        getDiffAdjMatMapFromEdgeMove(edge, 1, diffAdjMatMap);
-        diffDegreeMap.increment(edge.first);
-        diffDegreeMap.increment(edge.second);
-    }
-    for (auto edge : move.removedEdges){
-        getDiffAdjMatMapFromEdgeMove(edge, -1, diffAdjMatMap);
-        diffDegreeMap.decrement(edge.first);
-        diffDegreeMap.decrement(edge.second);
+        for (auto diff : diffEdgeCountsInBlocksMap)
+        {
+            const auto er = labelGraph.getDegree(diff.first);
+            logLikelihoodRatioTerm -= logFactorial(er + diff.second) - logFactorial(er);
+        }
+        return logLikelihoodRatioTerm;
     }
 
-    for (auto diff : diffAdjMatMap){
-        auto u = diff.first.first, v = diff.first.second;
-        auto edgeMult = m_statePtr->getEdgeMultiplicityIdx(u, v);
-        logLikelihoodRatioTerm -= (u == v) ? logDoubleFactorial(2 * (edgeMult + diff.second)) : logFactorial(edgeMult + diff.second);
-        logLikelihoodRatioTerm += (u == v) ? logDoubleFactorial(2 * edgeMult) : logFactorial(edgeMult);
+    const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihoodRatioAdjTerm(const GraphMove &move) const
+    {
+        IntMap<std::pair<VertexIndex, VertexIndex>> diffAdjMatMap;
+        IntMap<VertexIndex> diffDegreeMap;
+        double logLikelihoodRatioTerm = 0;
+
+        for (auto edge : move.addedEdges)
+        {
+            diffAdjMatMap.increment(getOrderedEdge(edge));
+            diffDegreeMap.increment(edge.first);
+            diffDegreeMap.increment(edge.second);
+        }
+        for (auto edge : move.removedEdges)
+        {
+            diffAdjMatMap.decrement(getOrderedEdge(edge));
+            diffDegreeMap.decrement(edge.first);
+            diffDegreeMap.decrement(edge.second);
+        }
+
+        for (auto diff : diffAdjMatMap)
+        {
+            auto i = diff.first.first, j = diff.first.second;
+            auto mult = m_statePtr->getEdgeMultiplicity(i, j);
+            if (i == j)
+                logLikelihoodRatioTerm -= logDoubleFactorial(2 * (mult + diff.second)) - logDoubleFactorial(2 * mult);
+            else
+                logLikelihoodRatioTerm -= logFactorial(mult + diff.second) - logFactorial(mult);
+        }
+
+        const DegreeSequence &degreeSeq = (*m_degreePriorPtrPtr)->getState();
+        for (auto diff : diffDegreeMap)
+        {
+            const auto &k = m_statePtr->getDegree(diff.first);
+            logLikelihoodRatioTerm += logFactorial(k + diff.second) - logFactorial(k);
+        }
+        return logLikelihoodRatioTerm;
     }
 
-    const DegreeSequence& degreeSeq = (*m_degreePriorPtrPtr)->getState();
-    for (auto diff : diffDegreeMap){
-        logLikelihoodRatioTerm += logFactorial(degreeSeq[diff.first] + diff.second) - logFactorial(degreeSeq[diff.first]);
-    }
-    return logLikelihoodRatioTerm;
-}
-
-const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihoodRatioFromGraphMove (const GraphMove& move) const {
-    return getLogLikelihoodRatioEdgeTerm(move) + getLogLikelihoodRatioAdjTerm(move);
-}
-
-const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihoodRatioFromLabelMove (const BlockMove& move) const {
-    if (move.prevLabel == move.nextLabel or move.level > 0)
-        return 0;
-    const BlockSequence& blockSeq = (*m_degreePriorPtrPtr)->getBlockPrior().getState();
-    const MultiGraph& edgeMat = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getState();
-    const CounterMap<BlockIndex>& edgesInBlock = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getEdgeCounts();
-    double logLikelihoodRatio = 0;
-
-
-    IntMap<std::pair<BlockIndex, BlockIndex>> diffEdgeMatMap;
-    IntMap<BlockIndex> diffEdgesInBlockMap;
-    getDiffEdgeMatMapFromBlockMove(move, diffEdgeMatMap);
-    for (auto diff : diffEdgeMatMap){
-        size_t ers;
-        auto r = diff.first.first, s = diff.first.second;
-        auto dErs = diff.second;
-        diffEdgesInBlockMap.increment(r, dErs);
-        diffEdgesInBlockMap.increment(s, dErs);
-
-        ers = (r < edgeMat.getSize() and s < edgeMat.getSize()) ? edgeMat.getEdgeMultiplicityIdx(r, s) : 0;
-        logLikelihoodRatio += (r == s) ? logDoubleFactorial(2 * ers + 2 * dErs) : logFactorial(ers + dErs);
-        logLikelihoodRatio -= (r == s) ? logDoubleFactorial(2 * ers) : logFactorial(ers);
+    const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const
+    {
+        return getLogLikelihoodRatioEdgeTerm(move) + getLogLikelihoodRatioAdjTerm(move);
     }
 
-    for (auto diff : diffEdgesInBlockMap){
+    const double DegreeCorrectedStochasticBlockModelLikelihood::getLogLikelihoodRatioFromLabelMove(const BlockMove &move) const
+    {
+        if (move.prevLabel == move.nextLabel or move.level > 0)
+            return 0;
+        const BlockSequence &blockSeq = (*m_degreePriorPtrPtr)->getBlockPrior().getState();
+        const LabelGraph &labelGraph = (*m_degreePriorPtrPtr)->getLabelGraphPrior().getState();
+        double logLikelihoodRatio = 0;
+
+        IntMap<std::pair<BlockIndex, BlockIndex>> diffEdgeMatMap;
+        IntMap<BlockIndex> diffEdgesInBlockMap;
+        getDiffEdgeMatMapFromBlockMove(move, diffEdgeMatMap);
+        for (auto diff : diffEdgeMatMap)
+        {
+            size_t ers;
+            auto r = diff.first.first, s = diff.first.second;
+            auto dErs = diff.second;
+            diffEdgesInBlockMap.increment(r, dErs);
+            diffEdgesInBlockMap.increment(s, dErs);
+
+            if (r < labelGraph.getSize() and s < labelGraph.getSize())
+                ers = labelGraph.getEdgeMultiplicity(r, s);
+            else
+                ers = 0;
+
+            if (r == s)
+                logLikelihoodRatio += logDoubleFactorial(2 * ers + 2 * dErs) - logDoubleFactorial(2 * ers);
+            else
+                logLikelihoodRatio += logFactorial(ers + dErs) - logFactorial(ers);
+        }
+
+        for (auto diff : diffEdgesInBlockMap)
+        {
             auto r = diff.first;
             auto dEr = diff.second;
-            size_t er = edgesInBlock[r];
+            size_t er;
+            if (r < labelGraph.getSize())
+                er = labelGraph.getDegree(r);
+            else
+                er = 0;
             logLikelihoodRatio -= logFactorial(er + dEr) - logFactorial(er);
+        }
+        return logLikelihoodRatio;
     }
-    return logLikelihoodRatio;
-}
 
 }

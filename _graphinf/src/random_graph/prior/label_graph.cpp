@@ -19,16 +19,10 @@ namespace GraphInf
     void LabelGraphPrior::recomputeStateFromGraph()
     {
         MultiGraph state(m_blockPriorPtr->getMaxBlockCount());
-        for (const auto &vertex : *m_graphPtr)
+        for (const auto &edge : m_graphPtr->edges())
         {
-            for (const auto &neighbor : m_graphPtr->getNeighboursOfIdx(vertex))
-            {
-                if (vertex > neighbor.vertexIndex)
-                    continue;
-
-                state.addMultiedgeIdx(
-                    m_blockPriorPtr->getBlockOfIdx(vertex), m_blockPriorPtr->getBlockOfIdx(neighbor.vertexIndex), neighbor.label);
-            }
+            state.addMultiedge(
+                m_blockPriorPtr->getBlock(edge.first), m_blockPriorPtr->getBlock(edge.second), m_graphPtr->getEdgeMultiplicity(edge.first, edge.second));
         }
         setState(state);
     }
@@ -54,24 +48,25 @@ namespace GraphInf
     void LabelGraphPrior::applyLabelMoveToState(const BlockMove &move)
     {
         const auto &blockSeq = m_blockPriorPtr->getState();
-        const auto &degree = m_graphPtr->getDegreeOfIdx(move.vertexIndex);
+        const auto &degree = m_graphPtr->getDegree(move.vertexIndex);
 
         if (m_state.getSize() <= move.nextLabel)
             m_state.resize(move.nextLabel + 1);
 
         m_edgeCounts.decrement(move.prevLabel, degree);
         m_edgeCounts.increment(move.nextLabel, degree);
-        for (auto neighbor : m_graphPtr->getNeighboursOfIdx(move.vertexIndex))
+        for (auto neighbor : m_graphPtr->getOutNeighbours(move.vertexIndex))
         {
-            auto neighborBlock = blockSeq[neighbor.vertexIndex];
+            auto neighborBlock = blockSeq[neighbor];
+            const auto mult = m_graphPtr->getEdgeMultiplicity(move.vertexIndex, neighbor);
 
-            if (move.vertexIndex == neighbor.vertexIndex) // for self-loops
+            if (move.vertexIndex == neighbor) // for self-loops
                 neighborBlock = move.prevLabel;
-            m_state.removeMultiedgeIdx(move.prevLabel, neighborBlock, neighbor.label);
+            m_state.removeMultiedge(move.prevLabel, neighborBlock, mult);
 
-            if (move.vertexIndex == neighbor.vertexIndex) // for self-loops
+            if (move.vertexIndex == neighbor) // for self-loops
                 neighborBlock = move.nextLabel;
-            m_state.addMultiedgeIdx(move.nextLabel, neighborBlock, neighbor.label);
+            m_state.addMultiedge(move.nextLabel, neighborBlock, mult);
         }
     }
 
@@ -82,14 +77,14 @@ namespace GraphInf
         for (auto removedEdge : move.removedEdges)
         {
             const BlockIndex &r(blockSeq[removedEdge.first]), s(blockSeq[removedEdge.second]);
-            m_state.removeEdgeIdx(r, s);
+            m_state.removeEdge(r, s);
             m_edgeCounts.decrement(r);
             m_edgeCounts.decrement(s);
         }
         for (auto addedEdge : move.addedEdges)
         {
             const BlockIndex &r(blockSeq[addedEdge.first]), s(blockSeq[addedEdge.second]);
-            m_state.addEdgeIdx(r, s);
+            m_state.addEdge(r, s);
             m_edgeCounts.increment(r);
             m_edgeCounts.increment(s);
         }
@@ -102,10 +97,10 @@ namespace GraphInf
 
         for (BlockIndex r : m_state)
         {
-            if (m_state.getDegreeOfIdx(r) != m_edgeCounts[r])
+            if (m_state.getDegree(r) != m_edgeCounts[r])
                 throw ConsistencyError(
                     "LabelGraphPrior",
-                    "m_state.degree", std::to_string(m_state.getDegreeOfIdx(r)),
+                    "m_state.degree", std::to_string(m_state.getDegree(r)),
                     "m_edgeCounts", std::to_string(m_edgeCounts[r]),
                     "r=" + std::to_string(r));
         }
@@ -122,15 +117,15 @@ namespace GraphInf
 
         for (auto edge : move.addedEdges)
         {
-            BlockIndex r = m_blockPriorPtr->getBlockOfIdx(edge.first);
-            BlockIndex s = m_blockPriorPtr->getBlockOfIdx(edge.second);
+            BlockIndex r = m_blockPriorPtr->getBlock(edge.first);
+            BlockIndex s = m_blockPriorPtr->getBlock(edge.second);
             map.decrement({r, s});
             map.decrement({s, r});
         }
         for (auto edge : move.addedEdges)
         {
-            BlockIndex r = m_blockPriorPtr->getBlockOfIdx(edge.first);
-            BlockIndex s = m_blockPriorPtr->getBlockOfIdx(edge.second);
+            BlockIndex r = m_blockPriorPtr->getBlock(edge.first);
+            BlockIndex s = m_blockPriorPtr->getBlock(edge.second);
             map.increment({r, s});
             map.increment({s, r});
         }
@@ -176,7 +171,7 @@ namespace GraphInf
         for (auto m : edgeMultiplicities)
         {
             if (m != 0)
-                labelGraph.addMultiedgeIdx(allEdges[counter].first, allEdges[counter].second, m);
+                labelGraph.addMultiedge(allEdges[counter].first, allEdges[counter].second, m);
             ++counter;
         }
 
@@ -209,10 +204,10 @@ namespace GraphInf
         // }
         for (size_t r = 0; r < m_state.getSize(); ++r)
         {
-            m_edgeCountIn += m_state.getEdgeMultiplicityIdx(r, r);
+            m_edgeCountIn += m_state.getEdgeMultiplicity(r, r);
             for (size_t s = r + 1; s < m_state.getSize(); ++s)
             {
-                m_edgeCountOut += m_state.getEdgeMultiplicityIdx(r, s);
+                m_edgeCountOut += m_state.getEdgeMultiplicity(r, s);
             }
         }
     }
@@ -222,7 +217,7 @@ namespace GraphInf
         LabelGraphPrior::applyGraphMoveToState(move);
         for (auto edge : move.addedEdges)
         {
-            BlockIndex r = getBlockOfIdx(edge.first), s = getBlockOfIdx(edge.second);
+            BlockIndex r = getBlock(edge.first), s = getBlock(edge.second);
             if (r == s)
                 ++m_edgeCountIn;
             else
@@ -230,7 +225,7 @@ namespace GraphInf
         }
         for (auto edge : move.removedEdges)
         {
-            BlockIndex r = getBlockOfIdx(edge.first), s = getBlockOfIdx(edge.second);
+            BlockIndex r = getBlock(edge.first), s = getBlock(edge.second);
             if (r == s)
                 --m_edgeCountIn;
             else
@@ -241,19 +236,20 @@ namespace GraphInf
     void LabelGraphPlantedPartitionPrior::applyLabelMoveToState(const BlockMove &move)
     {
         LabelGraphPrior::applyLabelMoveToState(move);
-        for (auto neighbor : m_graphPtr->getNeighboursOfIdx(move.vertexIndex))
+        for (auto neighbor : m_graphPtr->getOutNeighbours(move.vertexIndex))
         {
-            BlockIndex t = getBlockOfIdx(neighbor.vertexIndex);
+            BlockIndex t = getBlock(neighbor);
 
-            if (move.prevLabel == t or move.vertexIndex == neighbor.vertexIndex)
-                m_edgeCountIn -= neighbor.label;
+            const auto mult = m_graphPtr->getEdgeMultiplicity(move.vertexIndex, neighbor);
+            if (move.prevLabel == t or move.vertexIndex == neighbor)
+                m_edgeCountIn -= mult;
             else
-                m_edgeCountOut -= neighbor.label;
+                m_edgeCountOut -= mult;
 
-            if (move.nextLabel == t or move.vertexIndex == neighbor.vertexIndex)
-                m_edgeCountIn += neighbor.label;
+            if (move.nextLabel == t or move.vertexIndex == neighbor)
+                m_edgeCountIn += mult;
             else
-                m_edgeCountOut += neighbor.label;
+                m_edgeCountOut += mult;
         }
     }
 
@@ -283,12 +279,12 @@ namespace GraphInf
         {
             if (m_blockPriorPtr->getVertexCounts().get(r) == 0)
                 continue;
-            labelGraph.addMultiedgeIdx(r, r, e_in[i++]);
+            labelGraph.addMultiedge(r, r, e_in[i++]);
             for (size_t s = r + 1; s < B; ++s)
             {
                 if (m_blockPriorPtr->getVertexCounts().get(s) == 0 or e_out.size() == 0)
                     continue;
-                labelGraph.addMultiedgeIdx(r, s, e_out[j++]);
+                labelGraph.addMultiedge(r, s, e_out[j++]);
             }
         }
         setState(labelGraph);
@@ -306,10 +302,10 @@ namespace GraphInf
 
         for (size_t r = 0; r < B; ++r)
         {
-            logLikelihood -= logFactorial(m_state.getEdgeMultiplicityIdx(r, r));
+            logLikelihood -= logFactorial(m_state.getEdgeMultiplicity(r, r));
             for (size_t s = r + 1; s < B; ++s)
             {
-                logLikelihood -= logFactorial(m_state.getEdgeMultiplicityIdx(r, s));
+                logLikelihood -= logFactorial(m_state.getEdgeMultiplicity(r, s));
             }
         }
         return logLikelihood;
@@ -324,7 +320,7 @@ namespace GraphInf
         IntMap<BaseGraph::Edge> edgeCountDiff;
         for (auto edge : move.addedEdges)
         {
-            BlockIndex r = getBlockOfIdx(edge.first), s = getBlockOfIdx(edge.second);
+            BlockIndex r = getBlock(edge.first), s = getBlock(edge.second);
             if (r == s)
                 ++dEin;
             else
@@ -333,7 +329,7 @@ namespace GraphInf
         }
         for (auto edge : move.removedEdges)
         {
-            BlockIndex r = getBlockOfIdx(edge.first), s = getBlockOfIdx(edge.second);
+            BlockIndex r = getBlock(edge.first), s = getBlock(edge.second);
             if (r == s)
                 --dEin;
             else
@@ -356,7 +352,8 @@ namespace GraphInf
 
         for (const auto &diff : edgeCountDiff)
         {
-            size_t ers = m_state.getEdgeMultiplicityIdx(diff.first.first, diff.first.second);
+            const auto &rs = diff.first;
+            size_t ers = m_state.getEdgeMultiplicity(rs.first, rs.second);
             ratio -= logFactorial(ers + diff.second) - logFactorial(ers);
         }
         return ratio;
@@ -367,22 +364,23 @@ namespace GraphInf
         size_t E = getEdgeCount(), B = getBlockCount();
         int dEin = 0, dEout = 0;
         IntMap<BaseGraph::Edge> edgeCountDiff;
-        for (auto neighbor : m_graphPtr->getNeighboursOfIdx(move.vertexIndex))
+        for (auto neighbor : m_graphPtr->getOutNeighbours(move.vertexIndex))
         {
-            BlockIndex t = getBlockOfIdx(neighbor.vertexIndex);
+            BlockIndex t = getBlock(neighbor);
+            const auto mult = m_graphPtr->getEdgeMultiplicity(move.vertexIndex, neighbor);
 
             if (move.prevLabel == t)
-                dEin -= neighbor.label;
+                dEin -= mult;
             else
-                dEout -= neighbor.label;
-            edgeCountDiff.decrement(getOrderedEdge({move.prevLabel, t}), neighbor.label);
+                dEout -= mult;
+            edgeCountDiff.decrement(getOrderedEdge({move.prevLabel, t}), mult);
 
-            t = (move.vertexIndex == neighbor.vertexIndex) ? move.nextLabel : t;
+            t = (move.vertexIndex == neighbor) ? move.nextLabel : t;
             if (move.nextLabel == t)
-                dEin += neighbor.label;
+                dEin += mult;
             else
-                dEout += neighbor.label;
-            edgeCountDiff.increment(getOrderedEdge({move.nextLabel, t}), neighbor.label);
+                dEout += mult;
+            edgeCountDiff.increment(getOrderedEdge({move.nextLabel, t}), mult);
         }
 
         double ratio = 0;
@@ -395,9 +393,12 @@ namespace GraphInf
 
         for (const auto &diff : edgeCountDiff)
         {
-            BlockIndex r = diff.first.first;
-            BlockIndex s = diff.first.second;
-            size_t ers = (diff.first.first >= m_state.getSize() or diff.first.second >= m_state.getSize()) ? 0 : m_state.getEdgeMultiplicityIdx(diff.first.first, diff.first.second);
+            const auto &rs = diff.first;
+            size_t ers;
+            if (rs.first < m_state.getSize() and rs.second < m_state.getSize())
+                ers = m_state.getEdgeMultiplicity(rs.first, rs.second);
+            else
+                ers = 0;
             ratio -= logFactorial(ers + diff.second) - logFactorial(ers);
         }
         return ratio;
@@ -414,17 +415,18 @@ namespace GraphInf
         size_t actualEdgeCountIn = 0, actualEdgeCountOut = 0;
         for (const auto vertex : *m_graphPtr)
         {
-            actualEdgeCountIn += m_graphPtr->getEdgeMultiplicityIdx(vertex, vertex);
+            actualEdgeCountIn += m_graphPtr->getEdgeMultiplicity(vertex, vertex);
 
-            for (const auto &neighbor : m_graphPtr->getNeighboursOfIdx(vertex))
+            for (const auto &neighbor : m_graphPtr->getOutNeighbours(vertex))
             {
-                if (vertex >= neighbor.vertexIndex)
+                if (vertex >= neighbor)
                     continue;
-                BlockIndex r = getBlockOfIdx(vertex), s = getBlockOfIdx(neighbor.vertexIndex);
+                BlockIndex r = getBlock(vertex), s = getBlock(neighbor);
+                const auto mult = m_graphPtr->getEdgeMultiplicity(vertex, neighbor);
                 if (r == s)
-                    actualEdgeCountIn += neighbor.label;
+                    actualEdgeCountIn += mult;
                 else
-                    actualEdgeCountOut += neighbor.label;
+                    actualEdgeCountOut += mult;
             }
         }
 
@@ -442,10 +444,10 @@ namespace GraphInf
         actualEdgeCountIn = actualEdgeCountOut = 0;
         for (size_t r = 0; r < m_state.getSize(); ++r)
         {
-            actualEdgeCountIn += m_state.getEdgeMultiplicityIdx(r, r);
+            actualEdgeCountIn += m_state.getEdgeMultiplicity(r, r);
             for (size_t s = r + 1; s < m_state.getSize(); ++s)
             {
-                actualEdgeCountOut += m_state.getEdgeMultiplicityIdx(r, s);
+                actualEdgeCountOut += m_state.getEdgeMultiplicity(r, s);
             }
         }
 

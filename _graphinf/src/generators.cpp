@@ -192,20 +192,20 @@ namespace GraphInf
     BaseGraph::VertexIndex sampleRandomNeighbor(
         const MultiGraph &graph, const BaseGraph::VertexIndex vertex, bool withMultiplicity)
     {
-        const size_t degree = (withMultiplicity) ? graph.getDegreeOfIdx(vertex) : graph.getNeighboursOfIdx(vertex).size();
+        const size_t degree = (withMultiplicity) ? graph.getDegree(vertex) : graph.getOutNeighbours(vertex).size();
         std::uniform_int_distribution<size_t> dist(0, degree - 1);
         BaseGraph::VertexIndex neighborIndex;
         int counter = dist(rng);
 
-        for (const auto &neighbor : graph.getNeighboursOfIdx(vertex))
+        for (const auto &neighbor : graph.getOutNeighbours(vertex))
         {
             int c = 1;
             if (withMultiplicity)
-                c = neighbor.label;
-            if (neighbor.vertexIndex == vertex)
+                c = graph.getEdgeMultiplicity(vertex, neighbor);
+            if (neighbor == vertex)
                 c *= 2;
             counter -= c;
-            neighborIndex = neighbor.vertexIndex;
+            neighborIndex = neighbor;
             if (counter < 0)
                 break;
         }
@@ -236,7 +236,7 @@ namespace GraphInf
             size_t sumEdgeMatrix(0);
 
             for (size_t otherBlock = 0; otherBlock < blockNumber; otherBlock++)
-                sumEdgeMatrix += ((block == otherBlock) ? 2 : 1) * labelGraph.getEdgeMultiplicityIdx(block, otherBlock);
+                sumEdgeMatrix += ((block == otherBlock) ? 2 : 1) * labelGraph.getEdgeMultiplicity(block, otherBlock);
 
             for (auto vertex : verticesInBlock[block])
                 stubsOfBlock[block].insert(stubsOfBlock[block].end(), degrees[vertex], vertex);
@@ -257,7 +257,7 @@ namespace GraphInf
         {
             for (size_t outBlock = inBlock; outBlock < blockNumber; outBlock++)
             {
-                edgeNumberBetweenBlocks = labelGraph.getEdgeMultiplicityIdx(inBlock, outBlock);
+                edgeNumberBetweenBlocks = labelGraph.getEdgeMultiplicity(inBlock, outBlock);
                 // if (inBlock==outBlock)
                 //     edgeNumberBetweenBlocks /= 2;
 
@@ -268,7 +268,7 @@ namespace GraphInf
                     vertex2 = *--stubsOfBlock[outBlock].end();
                     stubsOfBlock[outBlock].pop_back();
 
-                    multigraph.addEdgeIdx(vertex1, vertex2);
+                    multigraph.addEdge(vertex1, vertex2);
                 }
             }
         }
@@ -301,13 +301,13 @@ namespace GraphInf
         for (const auto &labeledEdges : allLabeledEdges)
         {
             BlockIndex r = labeledEdges.first.first, s = labeledEdges.first.second;
-            size_t ers = labelGraph.getEdgeMultiplicityIdx(r, s);
+            size_t ers = labelGraph.getEdgeMultiplicity(r, s);
 
             if (labeledEdges.second.size() < ers)
                 throw std::invalid_argument("generateSBM: edge count at r=" + std::to_string(r) + " and s=" + std::to_string(s) + " (ers=" + std::to_string(ers) + ") must be greater than the total number of pairs (" + std::to_string(labeledEdges.second.size()) + ").");
             auto indices = sampleUniformlySequenceWithoutReplacement(labeledEdges.second.size(), ers);
             for (const auto &i : indices)
-                graph.addEdgeIdx(labeledEdges.second[i].first, labeledEdges.second[i].second);
+                graph.addEdge(labeledEdges.second[i].first, labeledEdges.second[i].second);
         }
 
         return graph;
@@ -336,7 +336,7 @@ namespace GraphInf
             {
                 if (verticesInBlock[inBlock].size() == 0 or verticesInBlock[outBlock].size() == 0)
                     continue;
-                edgeNumberBetweenBlocks = labelGraph.getEdgeMultiplicityIdx(inBlock, outBlock);
+                edgeNumberBetweenBlocks = labelGraph.getEdgeMultiplicity(inBlock, outBlock);
                 for (size_t edge = 0; edge < edgeNumberBetweenBlocks; edge++)
                 {
                     if (withSelfLoops or inBlock != outBlock)
@@ -350,7 +350,7 @@ namespace GraphInf
                         vertex1 = p[0];
                         vertex2 = p[1];
                     }
-                    multigraph.addEdgeIdx(vertex1, vertex2);
+                    multigraph.addEdge(vertex1, vertex2);
                 }
             }
         }
@@ -385,13 +385,13 @@ namespace GraphInf
         for (const auto &labeledEdges : allLabeledEdges)
         {
             BlockIndex r = labeledEdges.first.first, s = labeledEdges.first.second;
-            size_t ers = labelGraph.getEdgeMultiplicityIdx(r, s);
+            size_t ers = labelGraph.getEdgeMultiplicity(r, s);
             auto flatMultiplicity = sampleRandomWeakComposition(ers, labeledEdges.second.size());
             size_t counter = 0;
             for (const auto &m : flatMultiplicity)
             {
                 if (m != 0)
-                    graph.addMultiedgeIdx(labeledEdges.second[counter].first, labeledEdges.second[counter].second, m);
+                    graph.addMultiedge(labeledEdges.second[counter].first, labeledEdges.second[counter].second, m);
                 ++counter;
             }
         }
@@ -421,7 +421,7 @@ namespace GraphInf
         {
             vertex1 = *stubIterator++;
             vertex2 = *stubIterator++;
-            randomGraph.addEdgeIdx(vertex1, vertex2);
+            randomGraph.addEdge(vertex1, vertex2);
         }
 
         return randomGraph;
@@ -441,7 +441,7 @@ namespace GraphInf
 
         MultiGraph graph(size);
         for (auto i : indices)
-            graph.addEdgeIdx(allEdges[i]);
+            graph.addEdge(allEdges[i].first, allEdges[i].second);
         return graph;
     }
 
@@ -462,7 +462,7 @@ namespace GraphInf
                 auto edge = sampleUniformlySequenceWithoutReplacement(size, 2);
                 i = edge[0], j = edge[1];
             }
-            graph.addMultiedgeIdx(i, j, 1);
+            graph.addMultiedge(i, j, 1);
         }
         return graph;
     }
@@ -480,7 +480,7 @@ namespace GraphInf
         for (auto m : flatMultiplicity)
         {
             if (m != 0)
-                graph.addMultiedgeIdx(allEdges[counter].first, allEdges[counter].second, m);
+                graph.addMultiedge(allEdges[counter].first, allEdges[counter].second, m);
             ++counter;
         }
 

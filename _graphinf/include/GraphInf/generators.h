@@ -6,8 +6,7 @@
 #include <list>
 #include <algorithm>
 
-#include "BaseGraph/undirected_multigraph.h"
-#include "BaseGraph/algorithms/randomgraphs.h"
+#include "BaseGraph/undirected_multigraph.hpp"
 #include "BaseGraph/types.h"
 
 #include "GraphInf/types.h"

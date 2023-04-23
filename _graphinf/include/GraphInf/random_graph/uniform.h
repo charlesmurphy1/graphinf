@@ -6,28 +6,28 @@
 #include <vector>
 
 #include "BaseGraph/types.h"
-#include "GraphInf/prior/sbm/edge_count.h"
 #include "GraphInf/random_graph/erdosrenyi.h"
 
-namespace GraphInf{
+namespace GraphInf
+{
 
-// class UniformMultiGraphFamily: public ErdosRenyiFamily{
-// protected:
-//     EdgeCountMultisetPrior m_edgeCountMultisetPrior;
-// public:
-//     UniformMultiGraphFamily(size_t graphSize, size_t maxEdgeCount):
-//     m_edgeCountMultisetPrior(maxEdgeCount),
-//     ErdosRenyiFamily(graphSize, m_edgeCountMultisetPrior){ }
-// };
-//
-// class UniformSimpleGraphFamily: public ErdosRenyiFamily{
-// protected:
-//     EdgeCountBinomialPrior m_edgeCountBinomialPrior;
-// public:
-//     UniformSimpleGraphFamily(size_t graphSize, size_t maxEdgeCount):
-//     m_edgeCountBinomialPrior(maxEdgeCount),
-//     ErdosRenyiFamily(graphSize, m_edgeCountBinomialPrior){ }
-// };
+    // class UniformMultiGraphFamily: public ErdosRenyiFamily{
+    // protected:
+    //     EdgeCountMultisetPrior m_edgeCountMultisetPrior;
+    // public:
+    //     UniformMultiGraphFamily(size_t graphSize, size_t maxEdgeCount):
+    //     m_edgeCountMultisetPrior(maxEdgeCount),
+    //     ErdosRenyiFamily(graphSize, m_edgeCountMultisetPrior){ }
+    // };
+    //
+    // class UniformSimpleGraphFamily: public ErdosRenyiFamily{
+    // protected:
+    //     EdgeCountBinomialPrior m_edgeCountBinomialPrior;
+    // public:
+    //     UniformSimpleGraphFamily(size_t graphSize, size_t maxEdgeCount):
+    //     m_edgeCountBinomialPrior(maxEdgeCount),
+    //     ErdosRenyiFamily(graphSize, m_edgeCountBinomialPrior){ }
+    // };
 
-}// end GraphInf
+} // end GraphInf
 #endif

@@ -46,22 +46,16 @@ namespace GraphInf
 
     void checkEdgeSamplerConsistencyWithGraph(const std::string className, const MultiGraph &graph, const EdgeSampler &edgeSampler)
     {
-        for (auto u : graph)
+        for (const auto &edge : graph.edges())
         {
-            for (auto neighbor : graph.getNeighboursOfIdx(u))
-            {
-                size_t v = neighbor.vertexIndex;
-                if (u > v)
-                    continue;
-                if (not edgeSampler.contains({u, v}))
-                    throw ConsistencyError(
-                        className + ": edgeSampler is inconsistent with graph, edge (" + std::to_string(u) + ", " + std::to_string(v) + ") is not in sampler.");
-                size_t expected = graph.getEdgeMultiplicityIdx({u, v});
-                size_t actual = edgeSampler.getEdgeWeight({u, v});
-                if (expected != actual)
-                    throw ConsistencyError(
-                        className + ": edgeSampler is inconsistent with graph, edge (" + std::to_string(u) + ", " + std::to_string(v) + ") with weights " + std::to_string(expected) + "!=" + std::to_string(actual) + ".");
-            }
+            if (not edgeSampler.contains(edge))
+                throw ConsistencyError(
+                    className + ": edgeSampler is inconsistent with graph, edge (" + std::to_string(edge.first) + ", " + std::to_string(edge.second) + ") is not in sampler.");
+            size_t expected = graph.getEdgeMultiplicity(edge.first, edge.second);
+            size_t actual = edgeSampler.getEdgeWeight(edge);
+            if (expected != actual)
+                throw ConsistencyError(
+                    className + ": edgeSampler is inconsistent with graph, edge (" + std::to_string(edge.first) + ", " + std::to_string(edge.second) + ") with weights " + std::to_string(expected) + "!=" + std::to_string(actual) + ".");
         }
     }
 

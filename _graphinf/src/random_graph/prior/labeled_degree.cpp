@@ -80,8 +80,8 @@ namespace GraphInf
         }
         for (auto diff : diffDegreeMap)
         {
-            m_degreeCounts.decrement({getBlockPrior().getBlockOfIdx(diff.first), degrees[diff.first]});
-            m_degreeCounts.increment({getBlockPrior().getBlockOfIdx(diff.first), degrees[diff.first] + diff.second});
+            m_degreeCounts.decrement({getBlockPrior().getBlock(diff.first), degrees[diff.first]});
+            m_degreeCounts.increment({getBlockPrior().getBlock(diff.first), degrees[diff.first] + diff.second});
         }
     }
 
@@ -283,7 +283,7 @@ namespace GraphInf
         std::vector<size_t> degreeSeq(getBlockPrior().getSize(), 0);
         for (size_t v = 0; v < getBlockPrior().getSize(); ++v)
         {
-            BlockIndex r = getBlockPrior().getBlockOfIdx(v);
+            BlockIndex r = getBlockPrior().getBlock(v);
             degreeSeq[v] = unorderedDegrees[r].front();
             unorderedDegrees[r].pop_front();
         }
@@ -317,8 +317,8 @@ namespace GraphInf
             diffDegreeMap.increment(edge.first);
             diffDegreeMap.increment(edge.second);
 
-            const auto &r = getBlockPrior().getBlockOfIdx(edge.first);
-            const auto &s = getBlockPrior().getBlockOfIdx(edge.second);
+            const auto &r = getBlockPrior().getBlock(edge.first);
+            const auto &s = getBlockPrior().getBlock(edge.second);
             diffEdgeMap.increment(r);
             diffEdgeMap.increment(s);
         }
@@ -328,13 +328,13 @@ namespace GraphInf
             diffDegreeMap.decrement(edge.first);
             diffDegreeMap.decrement(edge.second);
 
-            diffEdgeMap.decrement(getBlockPrior().getBlockOfIdx(edge.first));
-            diffEdgeMap.decrement(getBlockPrior().getBlockOfIdx(edge.second));
+            diffEdgeMap.decrement(getBlockPrior().getBlock(edge.first));
+            diffEdgeMap.decrement(getBlockPrior().getBlock(edge.second));
         }
 
         for (auto diff : diffDegreeMap)
         {
-            BlockIndex r = getBlockPrior().getBlockOfIdx(diff.first);
+            BlockIndex r = getBlockPrior().getBlock(diff.first);
             BlockIndex k = m_state[diff.first];
             diffDegreeCountMap.decrement({r, k});
             diffDegreeCountMap.increment({r, k + diff.second});

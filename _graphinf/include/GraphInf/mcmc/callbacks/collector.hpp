@@ -6,7 +6,7 @@
 
 #include "callback.hpp"
 #include "GraphInf/types.h"
-#include "BaseGraph/fileio.h"
+#include "BaseGraph/fileio.hpp"
 #include "GraphInf/mcmc/mcmc.h"
 #include "GraphInf/utility/functions.h"
 
@@ -81,19 +81,14 @@ namespace GraphInf
         ++m_totalCount;
         const MultiGraph &graph = getCurrentGraph();
 
-        for (auto vertex : graph)
+        for (const auto &edge : graph.edges())
         {
-            for (auto neighbor : graph.getNeighboursOfIdx(vertex))
-            {
-                if (vertex <= neighbor.vertexIndex)
-                {
-                    auto edge = getOrderedPair<BaseGraph::VertexIndex>({vertex, neighbor.vertexIndex});
-                    m_observedEdges.increment(edge);
-                    m_observedEdgesCount.increment({edge, neighbor.label});
-                    if (neighbor.label > m_observedEdgesMaxCount[edge])
-                        m_observedEdgesMaxCount.set(edge, neighbor.label);
-                }
-            }
+            const auto oedge = getOrderedPair<BaseGraph::VertexIndex>(edge);
+            const auto mult = graph.getEdgeMultiplicity(edge.first, edge.second);
+            m_observedEdges.increment(oedge);
+            m_observedEdgesCount.increment({oedge, mult});
+            if (mult > m_observedEdgesMaxCount[oedge])
+                m_observedEdgesMaxCount.set(oedge, mult);
         }
     }
 
@@ -127,7 +122,7 @@ namespace GraphInf
     {
         double logPosterior = 0;
         for (auto edge : m_observedEdges)
-            logPosterior += log(getEdgeCountProb(edge.first, graph.getEdgeMultiplicityIdx(edge.first)));
+            logPosterior += log(getEdgeCountProb(edge.first, graph.getEdgeMultiplicity(edge.first.first, edge.first.second)));
         return logPosterior;
     }
 

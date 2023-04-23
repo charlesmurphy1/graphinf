@@ -66,7 +66,7 @@ namespace GraphInf
         {
             CounterMap<BlockIndex> edgeCounts;
             for (auto v : state)
-                edgeCounts.set(v, state.getDegreeOfIdx(v));
+                edgeCounts.set(v, state.getDegree(v));
             return edgeCounts;
         }
         virtual void recomputeConsistentState();
@@ -126,9 +126,9 @@ namespace GraphInf
         {
             return m_blockPriorPtr->getState();
         }
-        const BlockIndex getBlockOfIdx(BaseGraph::VertexIndex vertex) const
+        const BlockIndex getBlock(BaseGraph::VertexIndex vertex) const
         {
-            return m_blockPriorPtr->getBlockOfIdx(vertex);
+            return m_blockPriorPtr->getBlock(vertex);
         }
 
         virtual const double getLogLikelihoodRatioFromGraphMove(const GraphMove &) const override = 0;
@@ -170,19 +170,25 @@ namespace GraphInf
         LabelGraph m_labelGraph;
         BlockDeltaPrior m_blockDeltaPrior;
         EdgeCountDeltaPrior m_edgeCountDeltaPrior;
-        void recomputeConsistentState() override { m_labelGraph = m_state; }
+        void recomputeConsistentState() override
+        {
+            m_labelGraph.clearEdges();
+            m_labelGraph.resize(m_state.getSize());
+            for (const auto &rs : m_state.edges())
+                m_labelGraph.addMultiedge(rs.first, rs.second, m_state.getEdgeMultiplicity(rs.first, rs.second));
+        }
 
     public:
         LabelGraphDeltaPrior() {}
         LabelGraphDeltaPrior(const std::vector<BlockIndex> &blocks, const LabelGraph &labelGraph) : LabelGraphPrior(),
-                                                                                                    m_blockDeltaPrior(blocks), m_edgeCountDeltaPrior(labelGraph.getTotalEdgeNumber()), m_labelGraph(labelGraph)
+                                                                                                    m_blockDeltaPrior(blocks), m_edgeCountDeltaPrior(labelGraph.getTotalEdgeNumber()), m_labelGraph(0)
         {
             setEdgeCountPrior(m_edgeCountDeltaPrior);
             setBlockPrior(m_blockDeltaPrior);
-            setState(m_labelGraph);
+            setState(labelGraph);
         }
         LabelGraphDeltaPrior(const LabelGraphDeltaPrior &other) : LabelGraphPrior(other),
-                                                                  m_blockDeltaPrior(other.getBlocks()), m_labelGraph(other.m_labelGraph)
+                                                                  m_blockDeltaPrior(other.getBlocks()), m_labelGraph(0)
         {
             setState(other.getState());
         }

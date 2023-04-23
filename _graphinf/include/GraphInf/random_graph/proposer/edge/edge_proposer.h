@@ -24,7 +24,7 @@ namespace GraphInf
         const MultiGraph *m_graphPtr = nullptr;
         mutable std::uniform_real_distribution<double> m_uniform01;
         bool isSelfLoop(BaseGraph::Edge edge) const { return edge.first == edge.second; }
-        bool isExistingEdge(BaseGraph::Edge edge) const { return m_graphPtr->getEdgeMultiplicityIdx(edge) >= 1; }
+        bool isExistingEdge(BaseGraph::Edge edge) const { return m_graphPtr->getEdgeMultiplicity(edge.first, edge.second) >= 1; }
 
     public:
         using Proposer<GraphMove>::Proposer;

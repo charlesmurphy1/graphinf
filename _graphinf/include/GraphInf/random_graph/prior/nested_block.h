@@ -93,7 +93,7 @@ namespace GraphInf
         const CounterMap<BlockIndex> &getNestedVertexCounts(Level l) const { return m_nestedVertexCounts[l]; };
         const std::vector<CounterMap<BlockIndex>> &getNestedAbsVertexCounts() const { return m_nestedAbsVertexCounts; };
         const CounterMap<BlockIndex> &getNestedAbsVertexCounts(Level l) const { return m_nestedAbsVertexCounts[l]; };
-        const BlockIndex getBlockOfIdx(BaseGraph::VertexIndex idx, Level level) const
+        const BlockIndex getBlock(BaseGraph::VertexIndex idx, Level level) const
         {
             if (level == -1)
                 return (BlockIndex)idx;
@@ -104,7 +104,7 @@ namespace GraphInf
                 currentBlock = m_nestedState[l][currentBlock];
             return currentBlock;
         }
-        const BlockIndex getNestedBlockOfIdx(BlockIndex idx, Level level) const { return m_nestedState[level][idx]; }
+        const BlockIndex getNestedBlock(BlockIndex idx, Level level) const { return m_nestedState[level][idx]; }
         static std::vector<CounterMap<BlockIndex>> computeNestedVertexCounts(const std::vector<std::vector<BlockIndex>> &);
         static std::vector<CounterMap<BlockIndex>> computeNestedAbsoluteVertexCounts(const std::vector<std::vector<BlockIndex>> &);
         static std::vector<BlockSequence> reduceHierarchy(const std::vector<BlockSequence> &nestedState, Level minLevel = 0);

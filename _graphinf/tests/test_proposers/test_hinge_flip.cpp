@@ -53,10 +53,10 @@ namespace GraphInf
             */
             MultiGraph graph(4);
 
-            graph.addEdgeIdx(0, 1);
-            graph.addEdgeIdx(1, 1);
-            graph.addEdgeIdx(0, 2);
-            graph.addEdgeIdx(0, 2);
+            graph.addEdge(0, 1);
+            graph.addEdge(1, 1);
+            graph.addEdge(0, 2);
+            graph.addEdge(0, 2);
             return graph;
         }
     };
@@ -64,18 +64,19 @@ namespace GraphInf
     TEST_F(TestHingeFlipUniformProposer, setup_anyGraph_edgeSamplableSetContainsAllEdges)
     {
         EXPECT_EQ(graph.getTotalEdgeNumber(), proposer.getEdgeSampler().getTotalWeight());
-        EXPECT_EQ(graph.getDistinctEdgeNumber(), proposer.getEdgeSampler().getSize());
+        EXPECT_EQ(graph.getEdgeNumber(), proposer.getEdgeSampler().getSize());
     }
 
     TEST_F(TestHingeFlipUniformProposer, setup_anyGraph_samplableSetHasOnlyOrderedEdges)
     {
-        for (auto vertex : graph)
-            for (auto neighbor : graph.getNeighboursOfIdx(vertex))
-                if (vertex <= neighbor.vertexIndex)
-                    EXPECT_EQ(round(proposer.getEdgeSampler().getEdgeWeight({vertex, neighbor.vertexIndex})), neighbor.label);
-                else
-
-                    EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight({vertex, neighbor.vertexIndex}), 0);
+        for (const auto &edge : graph.edges())
+        {
+            auto mult = graph.getEdgeMultiplicity(edge.first, edge.second);
+            if (edge.first <= edge.second)
+                EXPECT_EQ(round(proposer.getEdgeSampler().getEdgeWeight(edge)), mult);
+            else
+                EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), 0);
+        }
     }
 
     TEST_F(TestHingeFlipUniformProposer, applyGraphMove_addExistentEdge_edgeWeightIncreased)
@@ -83,7 +84,8 @@ namespace GraphInf
         BaseGraph::Edge edge = {0, 2};
         GraphMove move = {{}, {edge}};
         proposer.applyGraphMove(move);
-        EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), graph.getEdgeMultiplicityIdx(edge) + 1);
+        auto mult = graph.getEdgeMultiplicity(edge.first, edge.second);
+        EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), mult + 1);
     }
 
     TEST_F(TestHingeFlipUniformProposer, applyGraphMove_addMultiEdge_edgeWeightIncreased)
@@ -91,7 +93,8 @@ namespace GraphInf
         BaseGraph::Edge edge = {0, 1};
         GraphMove move = {{}, {edge, edge}};
         proposer.applyGraphMove(move);
-        EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), graph.getEdgeMultiplicityIdx(edge) + 2);
+        auto mult = graph.getEdgeMultiplicity(edge.first, edge.second);
+        EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), mult + 2);
         expectInconsistency = true;
     }
 
@@ -101,7 +104,8 @@ namespace GraphInf
         BaseGraph::Edge reversedEdge = {1, 0};
         GraphMove move = {{}, {edge}};
         proposer.applyGraphMove(move);
-        EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), graph.getEdgeMultiplicityIdx(edge) + 1);
+        auto mult = graph.getEdgeMultiplicity(edge.first, edge.second);
+        EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), mult + 1);
         EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(reversedEdge), 0);
     }
 
@@ -112,16 +116,16 @@ namespace GraphInf
         while (true)
         {
             edge = proposer.getEdgeSampler().sample();
-            weight = graph.getEdgeMultiplicityIdx(edge);
+            weight = graph.getEdgeMultiplicity(edge.first, edge.second);
             if (edge.first != edge.second)
                 break;
         }
 
-        size_t edgeMult = graph.getEdgeMultiplicityIdx(edge);
+        size_t edgeMult = graph.getEdgeMultiplicity(edge.first, edge.second);
         GraphMove move = {{edge}, {}};
         proposer.applyGraphMove(move);
         if (edgeMult > 1)
-            EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), graph.getEdgeMultiplicityIdx(edge) - 1);
+            EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), graph.getEdgeMultiplicity(edge.first, edge.second) - 1);
         expectInconsistency = true;
     }
     TEST_F(TestHingeFlipUniformProposer, applyGraphMove_removeSelfLoop_edgeWeightDecreased)
@@ -132,16 +136,16 @@ namespace GraphInf
         {
             SetUp();
             edge = proposer.getEdgeSampler().sample();
-            weight = graph.getEdgeMultiplicityIdx(edge);
+            weight = graph.getEdgeMultiplicity(edge.first, edge.second);
             if (edge.first == edge.second)
                 break;
         }
 
-        size_t edgeMult = graph.getEdgeMultiplicityIdx(edge);
+        size_t edgeMult = graph.getEdgeMultiplicity(edge.first, edge.second);
         GraphMove move = {{edge}, {}};
         proposer.applyGraphMove(move);
         if (edgeMult > 1)
-            EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), graph.getEdgeMultiplicityIdx(edge) - 1);
+            EXPECT_EQ(proposer.getEdgeSampler().getEdgeWeight(edge), edgeMult - 1);
         expectInconsistency = true;
     }
 

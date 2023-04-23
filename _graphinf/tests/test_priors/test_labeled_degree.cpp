@@ -168,7 +168,7 @@ namespace GraphInf
         prior.applyGraphMoveToDegreeCounts(move);
         auto actual = prior.getDegreeCounts();
 
-        BlockIndex r = blockPrior.getBlockOfIdx(0), s = blockPrior.getBlockOfIdx(4);
+        BlockIndex r = blockPrior.getBlock(0), s = blockPrior.getBlock(4);
         size_t ki = prior.getState()[0], kj = prior.getState()[4];
 
         EXPECT_EQ(expected.get({r, ki}) - 1, actual.get({r, ki}));
@@ -181,10 +181,10 @@ namespace GraphInf
 
     TEST_F(VertexLabeledDegreePriorTest, applyLabelMoveToDegreeCounts_forNonEmptyLabelMove_returnCorrectDegreeCounts)
     {
-        while (blockPrior.getBlockOfIdx(0) != 0)
+        while (blockPrior.getBlock(0) != 0)
             prior.sample();
         BlockMove move = {0, 0, 1};
-        size_t k = prior.getState()[0], r = blockPrior.getBlockOfIdx(0);
+        size_t k = prior.getState()[0], r = blockPrior.getBlock(0);
         auto expected = prior.getDegreeCounts();
         prior.applyLabelMoveToDegreeCounts(move);
         auto actual = prior.getDegreeCounts();
@@ -195,7 +195,7 @@ namespace GraphInf
 
     TEST_F(VertexLabeledDegreePriorTest, applyLabelMoveToDegreeCounts_forAddedLabelMove_returnCorrectDegreeCounts)
     {
-        while (blockPrior.getBlockOfIdx(0) != 0)
+        while (blockPrior.getBlock(0) != 0)
             prior.sample();
         BlockMove move = {0, 0, 3};
         size_t k = prior.getState()[0];
@@ -332,7 +332,7 @@ namespace GraphInf
         BaseGraph::VertexIndex idx = 0;
         auto g = generateDCSBM(blockPrior.getState(), prior.getLabelGraphPrior().getState(), prior.getState());
         prior.setGraph(g);
-        BlockMove move = {idx, blockPrior.getBlockOfIdx(idx), (int)blockPrior.getVertexCounts().size(), 1};
+        BlockMove move = {idx, blockPrior.getBlock(idx), (int)blockPrior.getVertexCounts().size(), 1};
         double actualLogLikelihoodRatio = prior.getLogLikelihoodRatioFromLabelMove(move);
 
         double logLikelihoodBefore = prior.getLogLikelihood();

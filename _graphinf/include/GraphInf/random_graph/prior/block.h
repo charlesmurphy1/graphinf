@@ -97,7 +97,7 @@ namespace GraphInf
         const size_t getEffectiveBlockCount() const { return m_vertexCounts.size(); }
         const size_t getEffectiveBlockCountFromPartition(const BlockSequence &blocks) const { return computeVertexCounts(blocks).size(); }
         const CounterMap<BlockIndex> &getVertexCounts() const { return m_vertexCounts; };
-        const BlockIndex getBlockOfIdx(BaseGraph::VertexIndex idx) const { return m_state[idx]; }
+        const BlockIndex getBlock(BaseGraph::VertexIndex idx) const { return m_state[idx]; }
         static CounterMap<BlockIndex> computeVertexCounts(const BlockSequence &);
 
         /* sampling methods */

@@ -18,14 +18,14 @@ namespace GraphInf
     {
         double weight, degree;
 
-        for (const auto &neighbor : graph.getNeighboursOfIdx(vertex))
+        for (const auto &neighbor : graph.getOutNeighbours(vertex))
         {
-            BlockIndex t = blocks[neighbor.vertexIndex];
-            size_t m = neighbor.label;
-            if (vertex == neighbor.vertexIndex)
+            BlockIndex t = blocks[neighbor];
+            size_t m = graph.getEdgeMultiplicity(vertex, neighbor);
+            if (vertex == neighbor)
                 m *= 2;
-            size_t Est = labelGraph.getEdgeMultiplicityIdx(s, t);
-            size_t Et = labelGraph.getDegreeOfIdx(t);
+            size_t Est = labelGraph.getEdgeMultiplicity(s, t);
+            size_t Et = labelGraph.getDegree(t);
             if (s == t)
                 Est *= 2;
             weight += m * (Est + shift) / (Et + shift * blockCount);
@@ -65,7 +65,7 @@ namespace GraphInf
         for (size_t i = 0; i < numSamples; ++i)
         {
             auto move = proposer.proposeLabelMove(0);
-            EXPECT_EQ(move.prevLabel, graphPrior.getLabelOfIdx(0));
+            EXPECT_EQ(move.prevLabel, graphPrior.getLabel(0));
             EXPECT_EQ(move.addedLabels, 0);
         }
     }
@@ -75,7 +75,7 @@ namespace GraphInf
         for (size_t i = 0; i < numSamples; ++i)
         {
             auto move = proposer.proposeNewLabelMove(0);
-            EXPECT_EQ(move.prevLabel, graphPrior.getLabelOfIdx(0));
+            EXPECT_EQ(move.prevLabel, graphPrior.getLabel(0));
             EXPECT_NE(move.addedLabels, 0);
         }
     }
@@ -108,7 +108,7 @@ namespace GraphInf
 
         while (true)
         {
-            if (graphPrior.getState().getDegreeOfIdx(0) == 0)
+            if (graphPrior.getState().getDegree(0) == 0)
                 SetUp();
             else
                 break;
@@ -125,10 +125,10 @@ namespace GraphInf
             int dB = 0;
             if (graphPrior.getVertexCounts().get(s.first) == 0)
                 dB = 1;
-            else if (graphPrior.getVertexCounts().get(graphPrior.getLabelOfIdx(0)) == 1)
+            else if (graphPrior.getVertexCounts().get(graphPrior.getLabel(0)) == 1)
                 dB = -1;
 
-            BlockMove move = {0, graphPrior.getLabelOfIdx(0), s.first, dB};
+            BlockMove move = {0, graphPrior.getLabel(0), s.first, dB};
             double expected = exp(proposer.getLogProposalProb(move));
             double actual = (double)s.second / (double)numSamples;
             EXPECT_NEAR(expected, actual, tol);
@@ -143,7 +143,7 @@ namespace GraphInf
 
         while (true)
         {
-            if (graphPrior.getState().getDegreeOfIdx(0) != 0)
+            if (graphPrior.getState().getDegree(0) != 0)
                 SetUp();
             else
                 break;
@@ -160,10 +160,10 @@ namespace GraphInf
             int dB = 0;
             if (graphPrior.getVertexCounts().get(s.first) == 0)
                 dB = 1;
-            else if (graphPrior.getVertexCounts().get(graphPrior.getLabelOfIdx(0)) == 1)
+            else if (graphPrior.getVertexCounts().get(graphPrior.getLabel(0)) == 1)
                 dB = -1;
 
-            BlockMove move = {0, graphPrior.getLabelOfIdx(0), s.first, dB};
+            BlockMove move = {0, graphPrior.getLabel(0), s.first, dB};
             double expected = exp(proposer.getLogProposalProb(move));
             double actual = (double)s.second / (double)numSamples;
             EXPECT_NEAR(expected, actual, tol);
@@ -211,7 +211,7 @@ namespace GraphInf
         for (size_t i = 0; i < numSamples; ++i)
         {
             auto move = proposer.proposeLabelMove(0);
-            EXPECT_EQ(move.prevLabel, graphPrior.getLabelOfIdx(0));
+            EXPECT_EQ(move.prevLabel, graphPrior.getLabel(0));
             EXPECT_NE(move.addedLabels, 1);
         }
     }
@@ -221,7 +221,7 @@ namespace GraphInf
         for (size_t i = 0; i < numSamples; ++i)
         {
             auto move = proposer.proposeNewLabelMove(0);
-            EXPECT_EQ(move.prevLabel, graphPrior.getLabelOfIdx(0));
+            EXPECT_EQ(move.prevLabel, graphPrior.getLabel(0));
             if (move.prevLabel != move.nextLabel)
                 EXPECT_EQ(move.addedLabels, 1);
         }
@@ -264,10 +264,10 @@ namespace GraphInf
             int dB = 0;
             if (graphPrior.getVertexCounts().get(s.first) == 0)
                 dB = 1;
-            else if (graphPrior.getVertexCounts().get(graphPrior.getLabelOfIdx(0)) == 1)
+            else if (graphPrior.getVertexCounts().get(graphPrior.getLabel(0)) == 1)
                 dB = -1;
 
-            BlockMove move = {0, graphPrior.getLabelOfIdx(0), s.first, dB};
+            BlockMove move = {0, graphPrior.getLabel(0), s.first, dB};
             double expected = exp(proposer.getLogProposalProb(move));
             double actual = (double)s.second / (double)numSamples;
             EXPECT_NEAR(expected, actual, tol);

@@ -64,9 +64,9 @@ namespace GraphInf
     public:
         const size_t getEdgeCount() const override { return m_nestedLabelGraphPrior.getEdgeCount(); }
         const size_t getDepth() const override { return m_nestedLabelGraphPrior.getDepth(); }
-        using NestedBlockLabeledRandomGraph::getLabelOfIdx;
-        const BlockIndex getLabelOfIdx(BaseGraph::VertexIndex vertex, Level level) const override { return m_nestedLabelGraphPrior.getBlockOfIdx(vertex, level); }
-        const BlockIndex getNestedLabelOfIdx(BaseGraph::VertexIndex vertex, Level level) const override { return m_nestedLabelGraphPrior.getNestedBlockOfIdx(vertex, level); }
+        using NestedBlockLabeledRandomGraph::getLabel;
+        const BlockIndex getLabel(BaseGraph::VertexIndex vertex, Level level) const override { return m_nestedLabelGraphPrior.getBlock(vertex, level); }
+        const BlockIndex getNestedLabel(BaseGraph::VertexIndex vertex, Level level) const override { return m_nestedLabelGraphPrior.getNestedBlock(vertex, level); }
         const std::vector<std::vector<BlockIndex>> &getNestedLabels() const override { return m_nestedLabelGraphPrior.getNestedBlocks(); }
         const std::vector<BlockIndex> &getNestedLabels(Level level) const override { return m_nestedLabelGraphPrior.getNestedBlocks(level); }
         const std::vector<size_t> &getNestedLabelCount() const override { return m_nestedLabelGraphPrior.getNestedBlockCount(); }
