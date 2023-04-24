@@ -15,15 +15,15 @@ find_package(pybind11 CONFIG REQUIRED)
 
 file(GLOB_RECURSE CORE_BINDINGS_SRC "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-pybind11_add_module(_core MODULE ${CORE_BINDINGS_SRC})
-target_link_libraries(_core PRIVATE core)
-set_target_properties(_core PROPERTIES CXX_STANDARD 14)
-target_compile_definitions(_core PRIVATE VERSION_INFO=${PROJECT_VERSION})
+pybind11_add_module(libgraphinf MODULE ${CORE_BINDINGS_SRC})
+# target_link_libraries(libgraphinf PRIVATE core)
+set_target_properties(libgraphinf PROPERTIES CXX_STANDARD 14)
+target_compile_definitions(libgraphinf PRIVATE VERSION_INFO=${PROJECT_VERSION})
 
 message(STATUS "SKBUILD:" ${SKBUILD})
 if (SKBUILD)
-    install(TARGETS _core DESTINATION ./graphinf)
+    install(TARGETS libgraphinf DESTINATION ./graphinf)
 else()
-    set_target_properties(_core PROPERTIES
+    set_target_properties(libgraphinf PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python-lib")
 endif()

@@ -17,13 +17,13 @@ namespace py = pybind11;
 namespace GraphInf
 {
 
-    PYBIND11_MODULE(_graphinf, m)
+    PYBIND11_MODULE(libgraphinf, m)
     {
-        py::module_::import("basegraph");
+        m.import("basegraph");
 
         py::module utility = m.def_submodule("utility");
         initUtility(utility);
-        initGenerators(utility);
+        // initGenerators(utility);
         initRNG(utility);
         initExceptions(utility);
 
