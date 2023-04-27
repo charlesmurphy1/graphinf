@@ -19,3 +19,4 @@ classifiers = [
 
 [tool.scikit-build]
 wheel.expand-macos-universal-tags = true
+build-dir = "./build"

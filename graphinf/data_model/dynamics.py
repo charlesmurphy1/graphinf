@@ -1,5 +1,5 @@
 from __future__ import annotations
-from _graphinf import data
+from graphinf._graphinf import data
 from graphinf.random_graph import RandomGraph
 from graphinf.wrapper import Wrapper
 

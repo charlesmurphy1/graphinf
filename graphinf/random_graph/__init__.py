@@ -1,4 +1,4 @@
-from _graphinf import random_graph as _random_graph
+from graphinf._graphinf import random_graph as _random_graph
 
 RandomGraph = _random_graph.RandomGraph
 BlockLabeledRandomGraph = _random_graph.BlockLabeledRandomGraph

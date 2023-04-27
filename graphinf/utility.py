@@ -1,1 +1,1 @@
-from _graphinf.utility import *
+from graphinf._graphinf.utility import *

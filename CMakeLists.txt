@@ -5,15 +5,14 @@ project(graphinf LANGUAGES CXX VERSION 0.3.0
 
 
 option(DEBUG_MODE "check consistency of objects at runtime" OFF)
-option(BUILD_TESTS "build gtest unit tests" off)
+option(BUILD_TESTS "build gtest unit tests" OFF)
 
 set(CXX_STANDARD 14)
-set(CXX_STANDARD_REQUIRED on)
+set(CXX_STANDARD_REQUIRED ON)
 if (APPLE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CXX_STANDARD} -stdlib=libc++")
 endif()
 
-set(MODULE_NAME graphinf)
 find_package(BaseGraph REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)

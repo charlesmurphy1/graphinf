@@ -23,7 +23,7 @@ namespace GraphInf
 
         py::module utility = m.def_submodule("utility");
         initUtility(utility);
-        // initGenerators(utility);
+        initGenerators(utility);
         initRNG(utility);
         initExceptions(utility);
 

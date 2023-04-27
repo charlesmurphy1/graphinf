@@ -5,7 +5,7 @@ from graphinf.random_graph import (
     RandomGraphWrapper as _RandomGraphWrapper,
     ErdosRenyiModel as _ErdosRenyiModel,
 )
-from _graphinf import data as _data
+from graphinf._graphinf import data as _data
 from graphinf.data_model import dynamics
 
 DataModel = _data.DataModel
