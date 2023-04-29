@@ -3,8 +3,8 @@
 
 #include "GraphInf/data/dynamics/cowan.h"
 #include "GraphInf/data/types.h"
-#include "GraphInf/random_graph/erdosrenyi.h"
-#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/graph/erdosrenyi.h"
+#include "GraphInf/graph/proposer/edge/hinge_flip.h"
 #include "../fixtures.hpp"
 
 namespace GraphInf

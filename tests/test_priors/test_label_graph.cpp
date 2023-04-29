@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include <vector>
 
-#include "GraphInf/random_graph/prior/edge_count.h"
-#include "GraphInf/random_graph/prior/label_graph.h"
+#include "GraphInf/graph/prior/edge_count.h"
+#include "GraphInf/graph/prior/label_graph.h"
 #include "GraphInf/exceptions.h"
 #include "GraphInf/utility/functions.h"
 // #include "../fixtures.hpp"

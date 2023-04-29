@@ -2,7 +2,7 @@
 #define GRAPH_INF_DATAMODEL_H
 
 #include "GraphInf/rv.hpp"
-#include "GraphInf/random_graph/random_graph.hpp"
+#include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/utility/mcmc.h"
 
 namespace GraphInf

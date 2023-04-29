@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "GraphInf/random_graph/proposer/label/mixed.hpp"
+#include "GraphInf/graph/proposer/label/mixed.hpp"
 #include "GraphInf/types.h"
 #include "GraphInf/rng.h"
 #include "../fixtures.hpp"

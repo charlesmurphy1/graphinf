@@ -2,9 +2,9 @@
 #include <vector>
 #include <iostream>
 
-#include "GraphInf/random_graph/prior/block_count.h"
-#include "GraphInf/random_graph/prior/block.h"
-#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/graph/prior/block_count.h"
+#include "GraphInf/graph/prior/block.h"
+#include "GraphInf/graph/proposer/movetypes.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/types.h"
 #include "GraphInf/exceptions.h"

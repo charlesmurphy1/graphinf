@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 
-#include "GraphInf/random_graph/prior/edge_count.h"
-#include "GraphInf/random_graph/erdosrenyi.h"
-#include "GraphInf/random_graph/proposer/edge/single_edge.h"
-#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/graph/prior/edge_count.h"
+#include "GraphInf/graph/erdosrenyi.h"
+#include "GraphInf/graph/proposer/edge/single_edge.h"
+#include "GraphInf/graph/proposer/movetypes.h"
 #include "GraphInf/utility/functions.h"
 #include "../fixtures.hpp"
 

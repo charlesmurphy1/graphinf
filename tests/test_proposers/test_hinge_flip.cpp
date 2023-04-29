@@ -2,10 +2,10 @@
 
 #include "SamplableSet.hpp"
 #include "hash_specialization.hpp"
-#include "GraphInf/random_graph/prior/edge_count.h"
-#include "GraphInf/random_graph/erdosrenyi.h"
-#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
-#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/graph/prior/edge_count.h"
+#include "GraphInf/graph/erdosrenyi.h"
+#include "GraphInf/graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/graph/proposer/movetypes.h"
 #include "GraphInf/rng.h"
 #include "../fixtures.hpp"
 

@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 
-#include "GraphInf/random_graph/random_graph.hpp"
+#include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/data/dynamics/dynamics.h"
 #include "GraphInf/types.h"
 

@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "GraphInf/random_graph/erdosrenyi.h"
+#include "GraphInf/graph/erdosrenyi.h"
 #include "GraphInf/data/uncertain/poisson.h"
 
 namespace GraphInf

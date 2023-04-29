@@ -2,12 +2,12 @@
 #include <vector>
 #include <iostream>
 
-#include "GraphInf/random_graph/prior/edge_count.h"
-#include "GraphInf/random_graph/prior/block_count.h"
-#include "GraphInf/random_graph/prior/block.h"
-#include "GraphInf/random_graph/prior/label_graph.h"
-#include "GraphInf/random_graph/prior/labeled_degree.h"
-#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/graph/prior/edge_count.h"
+#include "GraphInf/graph/prior/block_count.h"
+#include "GraphInf/graph/prior/block.h"
+#include "GraphInf/graph/prior/label_graph.h"
+#include "GraphInf/graph/prior/labeled_degree.h"
+#include "GraphInf/graph/proposer/movetypes.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"

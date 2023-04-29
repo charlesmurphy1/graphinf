@@ -10,7 +10,7 @@
 #include "GraphInf/generators.h"
 #include "GraphInf/rng.h"
 #include "GraphInf/types.h"
-#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/graph/proposer/edge/hinge_flip.h"
 
 namespace GraphInf
 {

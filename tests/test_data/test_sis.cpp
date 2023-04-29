@@ -3,8 +3,8 @@
 #include <cmath>
 
 #include "GraphInf/data/dynamics/sis.h"
-#include "GraphInf/random_graph/erdosrenyi.h"
-#include "GraphInf/random_graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/graph/erdosrenyi.h"
+#include "GraphInf/graph/proposer/edge/hinge_flip.h"
 #include "../fixtures.hpp"
 
 namespace GraphInf

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "GraphInf/random_graph/proposer/label/uniform.hpp"
+#include "GraphInf/graph/proposer/label/uniform.hpp"
 #include "GraphInf/types.h"
 #include "../fixtures.hpp"
 

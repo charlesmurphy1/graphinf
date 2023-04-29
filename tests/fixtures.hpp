@@ -3,16 +3,16 @@
 
 #include "GraphInf/types.h"
 
-#include "GraphInf/random_graph/likelihood/likelihood.hpp"
-#include "GraphInf/random_graph/prior/edge_count.h"
-#include "GraphInf/random_graph/prior/block_count.h"
-#include "GraphInf/random_graph/prior/block.h"
-#include "GraphInf/random_graph/prior/label_graph.h"
-#include "GraphInf/random_graph/random_graph.hpp"
-#include "GraphInf/random_graph/prior/nested_block.h"
-#include "GraphInf/random_graph/sbm.h"
-#include "GraphInf/random_graph/hsbm.h"
-#include "GraphInf/random_graph/erdosrenyi.h"
+#include "GraphInf/graph/likelihood/likelihood.hpp"
+#include "GraphInf/graph/prior/edge_count.h"
+#include "GraphInf/graph/prior/block_count.h"
+#include "GraphInf/graph/prior/block.h"
+#include "GraphInf/graph/prior/label_graph.h"
+#include "GraphInf/graph/random_graph.hpp"
+#include "GraphInf/graph/prior/nested_block.h"
+#include "GraphInf/graph/sbm.h"
+#include "GraphInf/graph/hsbm.h"
+#include "GraphInf/graph/erdosrenyi.h"
 
 #include "GraphInf/data/dynamics/sis.h"
 
