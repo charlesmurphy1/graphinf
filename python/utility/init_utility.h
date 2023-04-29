@@ -11,16 +11,14 @@
 // #include "init_distance.h"
 
 namespace py = pybind11;
-namespace GraphInf{
+using namespace GraphInf;
 
-
-void initUtility(py::module& m){
+void initUtility(py::module &m)
+{
     initMaps(m);
     initFunctions(m);
     initIntegerPartition(m);
     // initDistances(m);
-}
-
 }
 
 #endif

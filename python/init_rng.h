@@ -7,15 +7,11 @@
 #include "GraphInf/rng.h"
 
 namespace py = pybind11;
-namespace GraphInf
+using namespace GraphInf;
+void initRNG(py::module &m)
 {
-
-    void initRNG(py::module &m)
-    {
-        m.def("seed", &seed, py::arg("n"));
-        m.def("seedWithTime", &seedWithTime);
-    }
-
+    m.def("seed", &seed, py::arg("n"));
+    m.def("seedWithTime", &seedWithTime);
 }
 
 #endif

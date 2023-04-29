@@ -14,37 +14,32 @@
 // #include "mcmc/init.h"
 
 namespace py = pybind11;
-namespace GraphInf
+PYBIND11_MODULE(_graphinf, m)
 {
+    m.import("basegraph");
 
-    PYBIND11_MODULE(libgraphinf, m)
-    {
-        m.import("basegraph");
+    py::module utility = m.def_submodule("utility");
+    initUtility(utility);
+    initGenerators(utility);
+    initRNG(utility);
+    initExceptions(utility);
 
-        py::module utility = m.def_submodule("utility");
-        initUtility(utility);
-        initGenerators(utility);
-        initRNG(utility);
-        initExceptions(utility);
+    py::class_<NestedRandomVariable, PyNestedRandomVariable<>>(m, "NestedRandomVariable")
+        .def(py::init<>())
+        .def("is_root", [&](const NestedRandomVariable &self)
+             { return self.isRoot(); })
+        .def("is_processed", [&](const NestedRandomVariable &self)
+             { return self.isProcessed(); })
+        .def("check_consistency", &NestedRandomVariable::checkConsistency)
+        .def("check_safety", &NestedRandomVariable::checkSafety)
+        .def("is_safe", &NestedRandomVariable::isSafe);
 
-        py::class_<NestedRandomVariable, PyNestedRandomVariable<>>(m, "NestedRandomVariable")
-            .def(py::init<>())
-            .def("is_root", [&](const NestedRandomVariable &self)
-                 { return self.isRoot(); })
-            .def("is_processed", [&](const NestedRandomVariable &self)
-                 { return self.isProcessed(); })
-            .def("check_consistency", &NestedRandomVariable::checkConsistency)
-            .def("check_safety", &NestedRandomVariable::checkSafety)
-            .def("is_safe", &NestedRandomVariable::isSafe);
+    // py::module random_graph = m.def_submodule("random_graph");
+    // initRandomGraph(random_graph);
 
-        // py::module random_graph = m.def_submodule("random_graph");
-        // initRandomGraph(random_graph);
+    // py::module data = m.def_submodule("data");
+    // initDataModels(data);
 
-        // py::module data = m.def_submodule("data");
-        // initDataModels(data);
-
-        // py::module mcmc = m.def_submodule("mcmc");
-        // initMCMC(mcmc);
-    }
-
+    // py::module mcmc = m.def_submodule("mcmc");
+    // initMCMC(mcmc);
 }
