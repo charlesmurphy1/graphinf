@@ -6,50 +6,56 @@
 
 #include "BaseGraph/types.h"
 #include "GraphInf/types.h"
-#include "GraphInf/random_graph/proposer/python/label.hpp"
-#include "GraphInf/random_graph/proposer/nested_label/base.hpp"
-#include "GraphInf/random_graph/proposer/nested_label/uniform.hpp"
-#include "GraphInf/random_graph/proposer/nested_label/mixed.hpp"
-
+#include "GraphInf/graph/proposer/python/label.hpp"
+#include "GraphInf/graph/proposer/nested_label/base.hpp"
+#include "GraphInf/graph/proposer/nested_label/uniform.hpp"
+#include "GraphInf/graph/proposer/nested_label/mixed.hpp"
 
 namespace py = pybind11;
-namespace GraphInf{
+namespace GraphInf
+{
 
-template<typename Label, typename BaseClass = NestedLabelProposer<Label>>
-class PyNestedLabelProposer: public PyLabelProposer<Label, BaseClass>{
-protected:
-    using PyLabelProposer<Label, BaseClass>::getLogProposalProbForMove;
-    using PyLabelProposer<Label, BaseClass>::getLogProposalProbForReverseMove;
-public:
-    using PyLabelProposer<Label, BaseClass>::PyLabelProposer;
+    template <typename Label, typename BaseClass = NestedLabelProposer<Label>>
+    class PyNestedLabelProposer : public PyLabelProposer<Label, BaseClass>
+    {
+    protected:
+        using PyLabelProposer<Label, BaseClass>::getLogProposalProbForMove;
+        using PyLabelProposer<Label, BaseClass>::getLogProposalProbForReverseMove;
 
-    /* Pure abstract methods */
-    using PyLabelProposer<Label, BaseClass>::proposeLabelMove;
+    public:
+        using PyLabelProposer<Label, BaseClass>::PyLabelProposer;
 
-    /* Abstract & overloaded methods */
-    void setUpWithNestedPrior(const NestedVertexLabeledRandomGraph<Label>& graphPrior) override { PYBIND11_OVERRIDE(void, BaseClass, setUpWithNestedPrior, graphPrior); }
-};
+        /* Pure abstract methods */
+        using PyLabelProposer<Label, BaseClass>::proposeLabelMove;
 
-template<typename Label, typename BaseClass = GibbsNestedLabelProposer<Label>>
-class PyGibbsNestedLabelProposer: public PyNestedLabelProposer<Label, BaseClass>{
-public:
-    using PyNestedLabelProposer<Label, BaseClass>::PyNestedLabelProposer;
-};
+        /* Abstract & overloaded methods */
+        void setUpWithNestedPrior(const NestedVertexLabeledRandomGraph<Label> &graphPrior) override { PYBIND11_OVERRIDE(void, BaseClass, setUpWithNestedPrior, graphPrior); }
+    };
 
-template<typename Label, typename BaseClass = RestrictedNestedLabelProposer<Label>>
-class PyRestrictedNestedLabelProposer: public PyNestedLabelProposer<Label, BaseClass>{
-public:
-    using PyNestedLabelProposer<Label, BaseClass>::PyNestedLabelProposer;
-};
+    template <typename Label, typename BaseClass = GibbsNestedLabelProposer<Label>>
+    class PyGibbsNestedLabelProposer : public PyNestedLabelProposer<Label, BaseClass>
+    {
+    public:
+        using PyNestedLabelProposer<Label, BaseClass>::PyNestedLabelProposer;
+    };
 
-template<typename Label, typename BaseClass = MixedNestedSampler<Label>>
-class PyMixedNestedSampler: public BaseClass{
-protected:
-    const Label sampleLabelUniformlyAtLevel(Level level) const override { PYBIND11_OVERRIDE_PURE(const Label, BaseClass, sampleLabelUniformlyAtLevel, level); }
-    const size_t getAvailableLabelCountAtLevel(Level level) const override { PYBIND11_OVERRIDE_PURE(const size_t, BaseClass, getAvailableLabelCountAtLevel, level); }
-public:
-    using BaseClass::BaseClass;
-};
+    template <typename Label, typename BaseClass = RestrictedNestedLabelProposer<Label>>
+    class PyRestrictedNestedLabelProposer : public PyNestedLabelProposer<Label, BaseClass>
+    {
+    public:
+        using PyNestedLabelProposer<Label, BaseClass>::PyNestedLabelProposer;
+    };
+
+    template <typename Label, typename BaseClass = MixedNestedSampler<Label>>
+    class PyMixedNestedSampler : public BaseClass
+    {
+    protected:
+        const Label sampleLabelUniformlyAtLevel(Level level) const override { PYBIND11_OVERRIDE_PURE(const Label, BaseClass, sampleLabelUniformlyAtLevel, level); }
+        const size_t getAvailableLabelCountAtLevel(Level level) const override { PYBIND11_OVERRIDE_PURE(const size_t, BaseClass, getAvailableLabelCountAtLevel, level); }
+
+    public:
+        using BaseClass::BaseClass;
+    };
 
 }
 

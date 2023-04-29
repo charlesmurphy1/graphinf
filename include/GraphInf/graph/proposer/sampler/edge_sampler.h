@@ -26,6 +26,7 @@ namespace GraphInf
         EdgeSampler(double minWeight = 1, double maxWeight = 100) : m_minWeight(minWeight), m_maxWeight(maxWeight),
                                                                     m_edgeSampler(minWeight, maxWeight) {}
         EdgeSampler(const EdgeSampler &other) : m_edgeSampler(other.m_edgeSampler), m_hiddenWeights(other.m_hiddenWeights) {}
+        virtual ~EdgeSampler() {}
 
         BaseGraph::Edge sample() const
         {

@@ -40,6 +40,7 @@ namespace GraphInf
         // }
     public:
         MixedNestedSampler(double shift = 1) : m_shift(shift) {}
+        virtual ~MixedNestedSampler() {}
 
         const double getShift() const { return m_shift; }
     };

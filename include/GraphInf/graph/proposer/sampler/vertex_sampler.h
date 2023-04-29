@@ -18,6 +18,7 @@ namespace GraphInf
     class VertexSampler
     {
     public:
+        virtual ~VertexSampler() {}
         virtual BaseGraph::VertexIndex sample() const = 0;
         virtual bool contains(const BaseGraph::VertexIndex &) const = 0;
         virtual void onVertexInsertion(const BaseGraph::VertexIndex &vertex) = 0;

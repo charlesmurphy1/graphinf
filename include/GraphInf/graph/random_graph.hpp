@@ -56,6 +56,7 @@ namespace GraphInf
                                              m_likelihoodModelPtr(&likelihoodModel),
                                              m_withSelfLoops(withSelfLoops),
                                              m_withParallelEdges(withParallelEdges) {}
+        virtual ~RandomGraph() {}
 
         const MultiGraph &getState() const { return m_state; }
 
@@ -220,6 +221,7 @@ namespace GraphInf
             size_t size, VertexLabeledGraphLikelihoodModel<Label> &likelihoodModel,
             bool withSelfLoops = true, bool withParallelEdges = true) : RandomGraph(size, likelihoodModel, withSelfLoops, withParallelEdges), m_uniform(0, 1),
                                                                         m_vertexLabeledlikelihoodModelPtr(&likelihoodModel) {}
+        virtual ~VertexLabeledRandomGraph() {}
         virtual const std::vector<Label> &getLabels() const = 0;
         virtual const size_t getLabelCount() const = 0;
         virtual const CounterMap<Label> &getVertexCounts() const = 0;

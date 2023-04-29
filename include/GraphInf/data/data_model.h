@@ -18,6 +18,7 @@ namespace GraphInf
 
     public:
         DataModel(RandomGraph &graphPrior) : m_uniform(0, 1) { setGraphPrior(graphPrior); }
+        virtual ~DataModel() {}
 
         const MultiGraph &getGraph() const { return m_graphPriorPtr->getState(); }
         void setGraph(const MultiGraph &graph)

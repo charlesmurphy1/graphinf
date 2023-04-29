@@ -11,9 +11,9 @@ namespace GraphInf
     {
     protected:
         GraphLikelihoodModel() {}
-        virtual ~GraphLikelihoodModel() {}
 
     public:
+        virtual ~GraphLikelihoodModel() {}
         virtual const double getLogLikelihood() const = 0;
         virtual const double getLogLikelihoodRatioFromGraphMove(const GraphMove &) const = 0;
         virtual const MultiGraph sample() const = 0;

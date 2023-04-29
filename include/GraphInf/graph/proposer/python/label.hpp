@@ -6,54 +6,60 @@
 
 #include "BaseGraph/types.h"
 #include "GraphInf/types.h"
-#include "GraphInf/random_graph/proposer/python/proposer.hpp"
-#include "GraphInf/random_graph/proposer/proposer.hpp"
-#include "GraphInf/random_graph/proposer/label/base.hpp"
-#include "GraphInf/random_graph/proposer/label/mixed.hpp"
-
+#include "GraphInf/graph/proposer/python/proposer.hpp"
+#include "GraphInf/graph/proposer/proposer.hpp"
+#include "GraphInf/graph/proposer/label/base.hpp"
+#include "GraphInf/graph/proposer/label/mixed.hpp"
 
 namespace py = pybind11;
-namespace GraphInf{
+namespace GraphInf
+{
 
-template<typename Label, typename BaseClass = LabelProposer<Label>>
-class PyLabelProposer: public PyProposer<LabelMove<Label>, BaseClass>{
-protected:
-    const double getLogProposalProbForReverseMove(const LabelMove<Label>& move) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogProposalProbForReverseMove, move); }
-    const double getLogProposalProbForMove(const LabelMove<Label>& move) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogProposalProbForMove, move); }
-    bool isCreatingLabelMove(const LabelMove<Label>& move, bool reverse) const override { PYBIND11_OVERRIDE_PURE(bool, BaseClass, isCreatingLabelMove, move, reverse); }
-public:
-    using PyProposer<LabelMove<Label>, BaseClass>::PyProposer;
+    template <typename Label, typename BaseClass = LabelProposer<Label>>
+    class PyLabelProposer : public PyProposer<LabelMove<Label>, BaseClass>
+    {
+    protected:
+        const double getLogProposalProbForReverseMove(const LabelMove<Label> &move) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogProposalProbForReverseMove, move); }
+        const double getLogProposalProbForMove(const LabelMove<Label> &move) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogProposalProbForMove, move); }
+        bool isCreatingLabelMove(const LabelMove<Label> &move, bool reverse) const override { PYBIND11_OVERRIDE_PURE(bool, BaseClass, isCreatingLabelMove, move, reverse); }
 
-    /* Pure abstract methods */
-    const LabelMove<Label> proposeLabelMove(const BaseGraph::VertexIndex& vertex) const override { PYBIND11_OVERRIDE_PURE(const LabelMove<Label>, BaseClass, proposeLabelMove, vertex); }
-    const LabelMove<Label> proposeNewLabelMove(const BaseGraph::VertexIndex& vertex) const override { PYBIND11_OVERRIDE_PURE(const LabelMove<Label>, BaseClass, proposeNewLabelMove, vertex); }
+    public:
+        using PyProposer<LabelMove<Label>, BaseClass>::PyProposer;
 
-    /* Abstract & overloaded methods */
-    const double getLogProposalProb(const LabelMove<Label>& move, bool reverse) const override { PYBIND11_OVERRIDE(const double, BaseClass, getLogProposalProb, move, reverse); }
-    void applyLabelMove(const LabelMove<Label>& move) override { PYBIND11_OVERRIDE(void, BaseClass, applyLabelMove, move); }
-    void setUpWithPrior(const VertexLabeledRandomGraph<Label>& graphPrior) override { PYBIND11_OVERRIDE(void, BaseClass, setUpWithPrior, graphPrior); }
-};
+        /* Pure abstract methods */
+        const LabelMove<Label> proposeLabelMove(const BaseGraph::VertexIndex &vertex) const override { PYBIND11_OVERRIDE_PURE(const LabelMove<Label>, BaseClass, proposeLabelMove, vertex); }
+        const LabelMove<Label> proposeNewLabelMove(const BaseGraph::VertexIndex &vertex) const override { PYBIND11_OVERRIDE_PURE(const LabelMove<Label>, BaseClass, proposeNewLabelMove, vertex); }
 
-template<typename Label, typename BaseClass = GibbsLabelProposer<Label>>
-class PyGibbsLabelProposer: public PyLabelProposer<Label, BaseClass>{
-public:
-    using PyLabelProposer<Label, BaseClass>::PyLabelProposer;
-};
+        /* Abstract & overloaded methods */
+        const double getLogProposalProb(const LabelMove<Label> &move, bool reverse) const override { PYBIND11_OVERRIDE(const double, BaseClass, getLogProposalProb, move, reverse); }
+        void applyLabelMove(const LabelMove<Label> &move) override { PYBIND11_OVERRIDE(void, BaseClass, applyLabelMove, move); }
+        void setUpWithPrior(const VertexLabeledRandomGraph<Label> &graphPrior) override { PYBIND11_OVERRIDE(void, BaseClass, setUpWithPrior, graphPrior); }
+    };
 
-template<typename Label, typename BaseClass = RestrictedLabelProposer<Label>>
-class PyRestrictedLabelProposer: public PyLabelProposer<Label, BaseClass>{
-public:
-    using PyLabelProposer<Label, BaseClass>::PyLabelProposer;
-};
+    template <typename Label, typename BaseClass = GibbsLabelProposer<Label>>
+    class PyGibbsLabelProposer : public PyLabelProposer<Label, BaseClass>
+    {
+    public:
+        using PyLabelProposer<Label, BaseClass>::PyLabelProposer;
+    };
 
-template<typename Label, typename BaseClass = MixedSampler<Label>>
-class PyMixedSampler: public BaseClass{
-protected:
-    const Label sampleLabelUniformly() const override { PYBIND11_OVERRIDE_PURE(const Label, BaseClass, sampleLabelUniformly, ); }
-    const size_t getAvailableLabelCount() const override { PYBIND11_OVERRIDE_PURE(const size_t, BaseClass, getAvailableLabelCount, ); }
-public:
-    using BaseClass::BaseClass;
-};
+    template <typename Label, typename BaseClass = RestrictedLabelProposer<Label>>
+    class PyRestrictedLabelProposer : public PyLabelProposer<Label, BaseClass>
+    {
+    public:
+        using PyLabelProposer<Label, BaseClass>::PyLabelProposer;
+    };
+
+    template <typename Label, typename BaseClass = MixedSampler<Label>>
+    class PyMixedSampler : public BaseClass
+    {
+    protected:
+        const Label sampleLabelUniformly() const override { PYBIND11_OVERRIDE_PURE(const Label, BaseClass, sampleLabelUniformly, ); }
+        const size_t getAvailableLabelCount() const override { PYBIND11_OVERRIDE_PURE(const size_t, BaseClass, getAvailableLabelCount, ); }
+
+    public:
+        using BaseClass::BaseClass;
+    };
 
 }
 

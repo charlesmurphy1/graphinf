@@ -6,34 +6,36 @@
 
 #include "GraphInf/types.h"
 #include "GraphInf/python/rv.hpp"
-#include "GraphInf/random_graph/likelihood/likelihood.hpp"
-#include "GraphInf/random_graph/proposer/movetypes.h"
+#include "GraphInf/graph/likelihood/likelihood.hpp"
+#include "GraphInf/graph/proposer/movetypes.h"
 
+namespace GraphInf
+{
 
-namespace GraphInf{
+    template <typename BaseClass = GraphLikelihoodModel>
+    class PyGraphLikelihoodModel : public PyNestedRandomVariable<BaseClass>
+    {
+    public:
+        using PyNestedRandomVariable<BaseClass>::PyNestedRandomVariable;
+        /* Pure abstract methods */
+        const double getLogLikelihood() const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihood, ); }
+        const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihoodRatioFromGraphMove, move); }
+        const MultiGraph sample() const override { PYBIND11_OVERRIDE(const MultiGraph, BaseClass, sample, ); }
 
-template<typename BaseClass = GraphLikelihoodModel>
-class PyGraphLikelihoodModel: public PyNestedRandomVariable<BaseClass>{
-public:
-    using PyNestedRandomVariable<BaseClass>::PyNestedRandomVariable;
-    /* Pure abstract methods */
-    const double getLogLikelihood() const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihood, ); }
-    const double getLogLikelihoodRatioFromGraphMove(const GraphMove& move) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihoodRatioFromGraphMove, move); }
-    const MultiGraph sample() const override { PYBIND11_OVERRIDE(const MultiGraph, BaseClass, sample, ); }
+        /* Abstract methods */
+    };
 
-    /* Abstract methods */
-};
+    template <typename Label, typename BaseClass = VertexLabeledGraphLikelihoodModel<Label>>
+    class PyVertexLabeledGraphLikelihoodModel : public PyGraphLikelihoodModel<BaseClass>
+    {
+    public:
+        using PyGraphLikelihoodModel<BaseClass>::PyGraphLikelihoodModel;
 
-template<typename Label, typename BaseClass = VertexLabeledGraphLikelihoodModel<Label>>
-class PyVertexLabeledGraphLikelihoodModel: public PyGraphLikelihoodModel<BaseClass>{
-public:
-    using PyGraphLikelihoodModel<BaseClass>::PyGraphLikelihoodModel;
+        /* Pure abstract methods */
+        const double getLogLikelihoodRatioFromLabelMove(const LabelMove<Label> &move) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihoodRatioFromLabelMove, move); }
 
-    /* Pure abstract methods */
-    const double getLogLikelihoodRatioFromLabelMove(const LabelMove<Label>& move) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihoodRatioFromLabelMove, move); }
-
-    /* Abstract methods */
-};
+        /* Abstract methods */
+    };
 
 }
 

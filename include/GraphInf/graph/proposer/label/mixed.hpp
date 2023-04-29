@@ -42,6 +42,7 @@ namespace GraphInf
 
     public:
         MixedSampler(double shift = 1) : m_shift(shift) {}
+        virtual ~MixedSampler() {}
         virtual const size_t getAvailableLabelCount() const = 0;
 
         const double getShift() const { return m_shift; }
