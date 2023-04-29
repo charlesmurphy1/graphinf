@@ -1,6 +1,7 @@
-[submodule "_graphinf/ext/SamplableSet"]
-	path = _graphinf/ext/SamplableSet
-	url = git@github.com:gstonge/SamplableSet.git
-[submodule "_graphinf/ext/base_graph"]
-	path = _graphinf/ext/base_graph
+[submodule "ext/SamplableSet"]
+	path = ext/SamplableSet
+	url = git@github.com:SILIZ4/SamplableSet.git
+[submodule "ext/base_graph"]
+	path = ext/base_graph
 	url = git@github.com:antoineallard/base_graph.git
+	branch = performance-fix
