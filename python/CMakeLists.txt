@@ -14,6 +14,9 @@ find_package(pybind11 REQUIRED)
 
 pybind11_add_module(_${PROJECT_NAME} MODULE pybind_main.cpp)
 set_target_properties(_${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
-target_link_libraries(_${PROJECT_NAME} PRIVATE graphinf BaseGraph::core ${SAMPLABLESET})
+target_link_libraries(_${PROJECT_NAME} 
+                      PRIVATE graphinf 
+                      BaseGraph::core 
+                      ${SAMPLABLESET})
 
 install(TARGETS _${PROJECT_NAME} DESTINATION ./graphinf)
