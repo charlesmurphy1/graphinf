@@ -7,10 +7,10 @@ project(graphinf LANGUAGES CXX VERSION 0.3.0
 option(DEBUG_MODE "check consistency of objects at runtime" OFF)
 option(BUILD_TESTS "build gtest unit tests" OFF)
 
-set(CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
 if (APPLE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CXX_STANDARD} -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD} -stdlib=libc++")
 endif()
 
 find_package(BaseGraph REQUIRED)
@@ -22,6 +22,7 @@ set(SAMPLABLESET "${CMAKE_CURRENT_SOURCE_DIR}/ext/SamplableSet/src/build/libsamp
 
 add_subdirectory(src)
 if (SKBUILD)
+    set(CMAKE_BUILD_TYPE Release)
     add_subdirectory(python)
 endif()
 if (BUILD_TESTS)

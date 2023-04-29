@@ -1,7 +1,20 @@
+if(SKBUILD)
+  # Scikit-Build does not add your site-packages to the search path
+  # automatically, so we need to add it _or_ the pybind11 specific directory
+  # here.
+  execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c
+            "import pybind11; print(pybind11.get_cmake_dir())"
+    OUTPUT_VARIABLE _tmp_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
+  list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+endif()
+
 find_package(pybind11 REQUIRED)
 
 pybind11_add_module(_core MODULE pybind_main.cpp)
+set_target_properties(_core PROPERTIES CXX_STANDARD 14)
 target_link_libraries(_core PRIVATE graphinf BaseGraph::core ${SAMPLABLESET})
 
-install(TARGETS _core DESTINATION ../graphinf)
+install(TARGETS _core DESTINATION ./graphinf)
 # install(FILES graphinf/__init__.py DESTINATION ./graphinf/${MODULE_NAME})
