@@ -17,6 +17,5 @@ set_target_properties(_${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
 target_link_libraries(_${PROJECT_NAME} 
                       PRIVATE graphinf 
                       BaseGraph::core 
-                      ${SAMPLABLESET})
-
+                      "${PROJECT_BINARY_DIR}/SamplableSet/libsamplableset.a")
 install(TARGETS _${PROJECT_NAME} DESTINATION ./graphinf)
