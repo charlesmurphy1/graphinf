@@ -56,13 +56,31 @@ namespace GraphInf
                                                                                       m_pastLength(0) {}
 
         const std::vector<VertexState> &getState() const { return m_state; }
-        void setState(std::vector<VertexState> &state)
+        void setCurrentState(std::vector<VertexState> &state)
         {
             m_state = state;
             computeConsistentState();
 #if DEBUG
             checkSelfConsistency();
 #endif
+        }
+        void setState(Matrix<VertexState> states)
+        {
+            m_pastStateSequence.clear();
+            m_futureStateSequence.clear();
+
+            for (size_t t = 0; t < states.size() - 1; t++)
+            {
+                m_pastStateSequence.push_back(states[t]);
+                m_futureStateSequence.push_back(states[t + 1]);
+            }
+            computeConsistentState();
+        }
+        void setState(Matrix<VertexState> past, Matrix<VertexState> future)
+        {
+            m_pastStateSequence = past;
+            m_futureStateSequence = future;
+            computeConsistentState();
         }
         bool acceptSelfLoops() { return m_acceptSelfLoops; }
         void acceptSelfLoops(bool condition) { m_acceptSelfLoops = condition; }
@@ -96,6 +114,7 @@ namespace GraphInf
         const double getLogLikelihood() const override;
         virtual const double getTransitionProb(
             const VertexState &prevVertexState, const VertexState &nextVertexState, const VertexNeighborhoodState &neighborhoodState) const = 0;
+
         const std::vector<double> getTransitionProbs(
             const VertexState &prevVertexState,
             const VertexNeighborhoodState &neighborhoodState) const;

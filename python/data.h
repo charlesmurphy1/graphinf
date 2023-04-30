@@ -4,6 +4,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "GraphInf/types.h"
+
 #include "GraphInf/data/python/data_model.hpp"
 #include "GraphInf/data/data_model.h"
 
@@ -66,7 +68,13 @@ namespace GraphInf
                 { self.sample({}, asyncMode, initialBurn); },
                 py::arg("async_mode") = false, py::arg("initial_burn") = 0)
             .def("get_state", &Dynamics::getState)
-            .def("set_state", &Dynamics::setState, py::arg("state"))
+            .def("set_current_state", &Dynamics::setCurrentState, py::arg("state"))
+            .def("set_state_from", [](Dynamics &self, const Dynamics &other)
+                 { 
+                    self.setGraph(other.getGraph());
+                    self.setState(other.getPastStates(), other.getFutureStates()); })
+            .def("set_state", py::overload_cast<Matrix<VertexState>>(&Dynamics::setState), py::arg("state"))
+            .def("set_state", py::overload_cast<Matrix<VertexState>, Matrix<VertexState>>(&Dynamics::setState), py::arg("past"), py::arg("future"))
             .def("get_neighbors_state", &Dynamics::getNeighborsState)
             .def("get_past_states", &Dynamics::getPastStates)
             .def("get_past_neighbors_states", &Dynamics::getNeighborsPastStates)
@@ -179,6 +187,10 @@ namespace GraphInf
             .def("sample", &UncertainGraph::sample)
             .def("sample_state", &UncertainGraph::sampleState)
             .def("set_state", &UncertainGraph::setState, py::arg("state"))
+            .def("set_state_from", [](UncertainGraph &self, const UncertainGraph &other)
+                 {
+                self.setGraph(other.getGraph());
+                self.setState(other.getState()); })
             .def("get_state", &UncertainGraph::getState);
 
         py::class_<PoissonUncertainGraph, UncertainGraph>(uncertain, "PoissonUncertainGraph")
