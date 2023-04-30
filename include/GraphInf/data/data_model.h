@@ -17,7 +17,7 @@ namespace GraphInf
         std::uniform_real_distribution<double> m_uniform;
 
     public:
-        DataModel(RandomGraph &graphPrior) : m_uniform(0, 1) { setGraphPrior(graphPrior); }
+        DataModel(RandomGraph &prior) : m_uniform(0, 1) { setGraphPrior(prior); }
         virtual ~DataModel() {}
 
         const MultiGraph &getGraph() const { return m_graphPriorPtr->getState(); }

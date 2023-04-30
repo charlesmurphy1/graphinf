@@ -10,17 +10,17 @@
 namespace GraphInf
 {
 
-    class UncertainPoissonModel : public UncertainGraphModel
+    class PoissonUncertainGraph : public UncertainGraph
     {
         double m_averageNoEdge, m_averageEdge;
 
     protected:
-        void applyGraphMoveToSelf(const GraphMove &move) {}
+        void applyGraphMoveToSelf(const GraphMove &move) override {}
 
     public:
-        UncertainPoissonModel(RandomGraph &prior, double averageNoEdge, double averageEdge) : UncertainGraphModel(prior), m_averageNoEdge(averageNoEdge), m_averageEdge(averageEdge) {}
+        PoissonUncertainGraph(RandomGraph &prior, double averageEdge, double averageNoEdge = 0) : UncertainGraph(prior), m_averageNoEdge(averageNoEdge), m_averageEdge(averageEdge) {}
 
-        virtual void sampleState()
+        virtual void sampleState() override
         {
             const auto &graph = m_graphPriorPtr->getState();
             auto n = graph.getSize();
@@ -36,7 +36,7 @@ namespace GraphInf
                 }
             }
         }
-        const double getLogLikelihood() const
+        const double getLogLikelihood() const override
         {
             double logLikelihood = 0;
 
@@ -54,7 +54,7 @@ namespace GraphInf
             }
             return logLikelihood;
         }
-        const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const
+        const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override
         {
             double logLikelihoodRatio = 0;
 

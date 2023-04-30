@@ -5,7 +5,7 @@
 #include "GraphInf/generators.h"
 #include "GraphInf/python/rv.hpp"
 
-#include "utility/init_utility.h"
+#include "utility/utility.h"
 #include "exceptions.h"
 #include "generator.h"
 #include "rng.h"

@@ -8,6 +8,7 @@
 #include "GraphInf/data/data_model.h"
 #include "GraphInf/data/dynamics/dynamics.h"
 #include "GraphInf/data/dynamics/binary_dynamics.h"
+#include "GraphInf/data/uncertain/uncertain.h"
 
 namespace GraphInf
 {
@@ -69,6 +70,31 @@ namespace GraphInf
             PYBIND11_OVERRIDE_PURE(const double, BaseClass, getDeactivationProb, neighborState);
         }
         /* Abstract methods */
+    };
+
+    template <typename BaseClass = UncertainGraph>
+    class PyUncertainGraph : public PyDataModel<BaseClass>
+    {
+    public:
+        using PyDataModel<BaseClass>::PyDataModel;
+        void sampleState() override
+        {
+            PYBIND11_OVERRIDE_PURE(void, BaseClass, sampleState, );
+        }
+        const double getLogLikelihood() const override
+        {
+            PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihood, );
+        }
+        const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override
+        {
+            PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihoodRatioFromGraphMove, move);
+        }
+
+    protected:
+        void applyGraphMoveToSelf(const GraphMove &move) override
+        {
+            PYBIND11_OVERRIDE_PURE(void, BaseClass, applyGraphMoveToSelf, move);
+        }
     };
 
 }

@@ -6,14 +6,20 @@
 namespace GraphInf
 {
 
-    class UncertainGraphModel : public DataModel
+    class UncertainGraph : public DataModel
     {
     protected:
         MultiGraph m_state;
         virtual void applyGraphMoveToSelf(const GraphMove &move) = 0;
 
     public:
-        UncertainGraphModel(RandomGraph &prior) : DataModel(prior) {}
+        using DataModel::DataModel;
+        void sample()
+        {
+            samplePrior();
+            sampleState();
+            computationFinished();
+        }
         virtual void sampleState() = 0;
         virtual const double getLogLikelihood() const = 0;
         virtual const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const = 0;

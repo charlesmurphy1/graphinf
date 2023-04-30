@@ -6,12 +6,16 @@
 
 #include "GraphInf/data/python/data_model.hpp"
 #include "GraphInf/data/data_model.h"
+
 #include "GraphInf/data/dynamics/dynamics.h"
 #include "GraphInf/data/dynamics/binary_dynamics.h"
 #include "GraphInf/data/dynamics/degree.h"
 #include "GraphInf/data/dynamics/glauber.h"
 #include "GraphInf/data/dynamics/cowan.h"
 #include "GraphInf/data/dynamics/sis.h"
+
+#include "GraphInf/data/uncertain/uncertain.h"
+#include "GraphInf/data/uncertain/poisson.h"
 
 namespace py = pybind11;
 namespace GraphInf
@@ -168,6 +172,17 @@ namespace GraphInf
             .def("set_infection_prob", &SISDynamics::setInfectionProb, py::arg("infection_prob"))
             .def("get_recovery_prob", &SISDynamics::getRecoveryProb)
             .def("set_recovery_prob", &SISDynamics::setRecoveryProb, py::arg("recovery_prob"));
+
+        auto uncertain = m.def_submodule("uncertain");
+        py::class_<UncertainGraph, DataModel, PyUncertainGraph<>>(uncertain, "UncertainGraph")
+            .def(py::init<RandomGraph &>(), py::arg("prior"))
+            .def("sample", &UncertainGraph::sample)
+            .def("sample_state", &UncertainGraph::sampleState)
+            .def("set_state", &UncertainGraph::setState, py::arg("state"))
+            .def("get_state", &UncertainGraph::getState);
+
+        py::class_<PoissonUncertainGraph, UncertainGraph>(uncertain, "PoissonUncertainGraph")
+            .def(py::init<RandomGraph &, double, double>(), py::arg("prior"), py::arg("mu"), py::arg("mu_no_edge") = 0);
     }
 
 }
