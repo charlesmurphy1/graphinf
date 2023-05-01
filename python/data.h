@@ -43,7 +43,10 @@ namespace GraphInf
             .def("get_log_joint_ratio_from_graph_move", &DataModel::getLogJointRatioFromGraphMove,
                  py::arg("move"))
             .def("apply_graph_move", &DataModel::applyGraphMove,
-                 py::arg("move"));
+                 py::arg("move"))
+            .def("get_log_acceptance_prob_from_graph_move", &DataModel::getLogAcceptanceProbFromGraphMove, py::arg("move"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+            .def("metropolis_step", &DataModel::metropolisStep, py::arg("prior_prob") = 0.5, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+            .def("mcmc_sweep", &DataModel::mcmcSweep, py::arg("num_steps"), py::arg("prior_prob") = 0.5, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
 
         py::module dynamics = m.def_submodule("dynamics");
         py::class_<Dynamics, DataModel, PyDynamics<>>(dynamics, "Dynamics")

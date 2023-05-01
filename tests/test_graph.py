@@ -5,7 +5,7 @@ from itertools import product
 
 def test_erdosrenyi():
     N, E = 100, 250
-    g = graphinf.random_graph.ErdosRenyiModel(N, E)
+    g = graphinf.graph.ErdosRenyiModel(N, E)
     g.sample()
     assert g.get_size() == N
     assert g.get_edge_count() == E
@@ -17,7 +17,7 @@ def test_erdosrenyi():
 )
 def test_configuration(prior_type):
     N, E = 100, 250
-    g = graphinf.random_graph.ConfigurationModelFamily(
+    g = graphinf.graph.ConfigurationModelFamily(
         N, E, degree_prior_type=prior_type
     )
     assert g.get_size() == N
@@ -26,13 +26,13 @@ def test_configuration(prior_type):
 
 def test_poisson():
     N, E = 100, 250
-    g = graphinf.random_graph.PoissonModel(N, E)
+    g = graphinf.graph.PoissonModel(N, E)
     assert g.get_size() == N
 
 
 def test_nbinom():
     N, E, h = 100, 250, 1
-    g = graphinf.random_graph.NegativeBinomialModel(N, E, h)
+    g = graphinf.graph.NegativeBinomialModel(N, E, h)
     assert g.get_size() == N
 
 
@@ -52,7 +52,7 @@ def test_stochastic_block_model(
     block_prior_type, label_graph_prior_type, likelihood_type
 ):
     N, E = 100, 250
-    g = graphinf.random_graph.StochasticBlockModelFamily(
+    g = graphinf.graph.StochasticBlockModelFamily(
         N,
         E,
         block_prior_type=block_prior_type,
@@ -78,7 +78,7 @@ def test_degree_corrected_stochastic_block_model(
     block_prior_type, label_graph_prior_type
 ):
     N, E = 100, 250
-    g = graphinf.random_graph.StochasticBlockModelFamily(
+    g = graphinf.graph.StochasticBlockModelFamily(
         N,
         E,
         block_prior_type=block_prior_type,
@@ -95,7 +95,7 @@ def test_degree_corrected_stochastic_block_model(
 # )
 # def test_planted_partition(stub_labeled):
 #     N, E, B = 100, 250, 5
-#     g = graphinf.random_graph.PlantedPartitionModel(
+#     g = graphinf.graph.PlantedPartitionModel(
 #         N, E, B, stub_labeled=stub_labeled
 #     )
 #     assert g.get_size() == N

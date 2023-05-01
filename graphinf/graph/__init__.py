@@ -1,9 +1,10 @@
-from graphinf._graphinf import random_graph as _random_graph
+from graphinf import _graphinf
 
-RandomGraph = _random_graph.RandomGraph
-BlockLabeledRandomGraph = _random_graph.BlockLabeledRandomGraph
-NestedBlockLabeledRandomGraph = _random_graph.NestedBlockLabeledRandomGraph
-StochasticBlockModel = _random_graph.StochasticBlockModel
+_graph = _graphinf.graph
+RandomGraph = _graph.RandomGraph
+BlockLabeledRandomGraph = _graph.BlockLabeledRandomGraph
+NestedBlockLabeledRandomGraph = _graph.NestedBlockLabeledRandomGraph
+StochasticBlockModel = _graph.StochasticBlockModel
 
 from ..wrapper import Wrapper as _Wrapper
 from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
@@ -20,6 +21,10 @@ __all__ = (
     "StochasticBlockModelFamily",
 )
 
+
+class OptionError(ValueError):
+    def __init__(self, value: str, avail_options: list[str]) -> None:
+        super().__init__(f"Option {value} is unavailable, possible options are {avail_options}.")
 
 class RandomGraphWrapper(_Wrapper):
     def __init__(self, graph_model, labeled=False, nested=False, **kwargs):
@@ -41,7 +46,7 @@ class ErdosRenyiModel(RandomGraphWrapper):
         with_parallel_edges: bool = True,
         edge_proposer_type: str = "uniform",
     ):
-        wrapped = _random_graph.ErdosRenyiModel(
+        wrapped = _graph.ErdosRenyiModel(
             size,
             edge_count,
             canonical=canonical,
@@ -75,7 +80,7 @@ class ConfigurationModelFamily(RandomGraphWrapper):
             raise OptionError(
                 degree_prior_type, self.available_degree_prior_types
             )
-        wrapped = _random_graph.ConfigurationModelFamily(
+        wrapped = _graph.ConfigurationModelFamily(
             size,
             edge_count,
             canonical=canonical,
@@ -94,7 +99,7 @@ class ConfigurationModelFamily(RandomGraphWrapper):
 
 class ConfigurationModel(RandomGraphWrapper):
     def __init__(self, degree_seq: list[int]):
-        wrapped = _random_graph.ConfigurationModel(degree_seq)
+        wrapped = _graph.ConfigurationModel(degree_seq)
         super().__init__(wrapped)
 
 
@@ -110,36 +115,36 @@ class NegativeBinomialModel(ConfigurationModel):
         super().__init__(nbinom_degreeseq(size, avgk, heterogeneity))
 
 
-# class PlantedPartitionModel(RandomGraphWrapper):
-#     def __init__(
-#         self,
-#         size: int = 100,
-#         edge_count: int = 250,
-#         block_count: int = 3,
-#         assortativity: float = 0.5,
-#         stub_labeled: bool = False,
-#         with_self_loops: bool = True,
-#         with_parallel_edges: bool = True,
-#     ):
-#         wrapped = _random_graph.PlantedPartitionModel(
-#             size,
-#             edge_count,
-#             block_count=block_count,
-#             assortativity=assortativity,
-#             stub_labeled=stub_labeled,
-#             with_self_loops=with_self_loops,
-#             with_parallel_edges=with_parallel_edges,
-#         )
-#         super().__init__(
-#             wrapped,
-#             size=size,
-#             edge_count=edge_count,
-#             block_count=block_count,
-#             assortativity=assortativity,
-#             stub_labeled=stub_labeled,
-#             with_self_loops=with_self_loops,
-#             with_parallel_edges=with_parallel_edges,
-#         )
+class PlantedPartitionModel(RandomGraphWrapper):
+    def __init__(
+        self,
+        size: int = 100,
+        edge_count: int = 250,
+        block_count: int = 3,
+        assortativity: float = 0.5,
+        stub_labeled: bool = False,
+        with_self_loops: bool = True,
+        with_parallel_edges: bool = True,
+    ):
+        wrapped = _graph.PlantedPartitionModel(
+            size,
+            edge_count,
+            block_count=block_count,
+            assortativity=assortativity,
+            stub_labeled=stub_labeled,
+            with_self_loops=with_self_loops,
+            with_parallel_edges=with_parallel_edges,
+        )
+        super().__init__(
+            wrapped,
+            size=size,
+            edge_count=edge_count,
+            block_count=block_count,
+            assortativity=assortativity,
+            stub_labeled=stub_labeled,
+            with_self_loops=with_self_loops,
+            with_parallel_edges=with_parallel_edges,
+        )
 
 
 class StochasticBlockModelFamily(RandomGraphWrapper):
@@ -149,8 +154,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         "degree_corrected",
     ]
     available_block_prior_types = ["uniform", "hyper"]
-    available_label_graph_prior_types = ["uniform", "nested"]
-    # available_label_graph_prior_types = ["uniform", "planted", "nested"]
+    available_label_graph_prior_types = ["uniform", "planted", "nested"]
     available_degree_prior_types = ["uniform", "hyper"]
 
     def __init__(
@@ -195,7 +199,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
 
         if likelihood_type == "degree_corrected":
             if label_graph_prior_type == "nested":
-                wrapped = _random_graph.NestedDegreeCorrectedStochasticBlockModelFamily(
+                wrapped = _graph.NestedDegreeCorrectedStochasticBlockModelFamily(
                     size,
                     edge_count,
                     degree_hyperprior=(degree_prior_type == "hyper"),
@@ -208,7 +212,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                 )
                 nested = True
             else:
-                wrapped = _random_graph.DegreeCorrectedStochasticBlockModelFamily(
+                wrapped = _graph.DegreeCorrectedStochasticBlockModelFamily(
                     size,
                     edge_count,
                     block_count=block_count,
@@ -225,7 +229,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                 )
         else:
             if label_graph_prior_type == "nested":
-                wrapped = _random_graph.NestedStochasticBlockModelFamily(
+                wrapped = _graph.NestedStochasticBlockModelFamily(
                     size,
                     edge_count,
                     stub_labeled=(likelihood_type == "stub_labeled"),
@@ -240,7 +244,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                 )
                 nested = True
             else:
-                wrapped = _random_graph.StochasticBlockModelFamily(
+                wrapped = _graph.StochasticBlockModelFamily(
                     size,
                     edge_count,
                     block_count=block_count,

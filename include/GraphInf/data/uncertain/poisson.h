@@ -24,6 +24,7 @@ namespace GraphInf
         {
             const auto &graph = m_graphPriorPtr->getState();
             auto n = graph.getSize();
+            m_state = MultiGraph(n);
             for (size_t i = 0; i < n; i++)
             {
                 for (size_t j = i + 1; j < n; j++)

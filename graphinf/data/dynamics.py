@@ -1,33 +1,22 @@
 from __future__ import annotations
-from graphinf._graphinf import data
-from graphinf.random_graph import RandomGraph
+from graphinf import _graphinf
+from graphinf.graph import RandomGraph
 from graphinf.wrapper import Wrapper
 
-_dynamics = data.dynamics
-
-Dynamics = _dynamics.Dynamics
-BlockLabeledDynamics = _dynamics.BlockLabeledDynamics
-NestedBlockLabeledDynamics = _dynamics.NestedBlockLabeledDynamics
-
-from .__init__ import DataModelWrapper as _DataModelWrapper
+_dynamics = _graphinf.data.dynamics
+from graphinf.data import DataModelWrapper as _DataModelWrapper
 
 __all__ = (
     "Dynamics",
-    "BlockLabeledDynamics",
-    "NestedBlockLabeledDynamics",
     "SISDynamics",
     "GlauberDynamics",
     "CowanDynamics",
 )
 
+Dynamics = _dynamics.Dynamics
 
 class SISDynamics(_DataModelWrapper):
-    constructors = {
-        "normal": _dynamics.SISDynamics,
-        "labeled": _dynamics.BlockLabeledSISDynamics,
-        "nested": _dynamics.NestedBlockLabeledSISDynamics,
-    }
-
+    constructor = _dynamics.SISDynamics
     def __init__(
         self,
         graph_prior: RandomGraph | Wrapper = None,
@@ -48,11 +37,7 @@ class SISDynamics(_DataModelWrapper):
 
 
 class GlauberDynamics(_DataModelWrapper):
-    constructors = {
-        "normal": _dynamics.GlauberDynamics,
-        "labeled": _dynamics.BlockLabeledGlauberDynamics,
-        "nested": _dynamics.NestedBlockLabeledGlauberDynamics,
-    }
+    constructor = _dynamics.GlauberDynamics
 
     def __init__(
         self,
@@ -72,11 +57,7 @@ class GlauberDynamics(_DataModelWrapper):
 
 
 class CowanDynamics(_DataModelWrapper):
-    constructors = {
-        "normal": _dynamics.CowanDynamics,
-        "labeled": _dynamics.BlockLabeledCowanDynamics,
-        "nested": _dynamics.NestedBlockLabeledCowanDynamics,
-    }
+    constructor = _dynamics.CowanDynamics
 
     def __init__(
         self,
@@ -102,11 +83,7 @@ class CowanDynamics(_DataModelWrapper):
 
 
 class DegreeDynamics(_DataModelWrapper):
-    constructors = {
-        "normal": _dynamics.DegreeDynamics,
-        "labeled": _dynamics.BlockLabeledDegreeDynamics,
-        "nested": _dynamics.NestedBlockLabeledDegreeDynamics,
-    }
+    constructor = _dynamics.DegreeDynamics
 
     def __init__(
         self, graph_prior: RandomGraph = None, length: int = 10, C: float = 10
