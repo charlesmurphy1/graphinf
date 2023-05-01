@@ -27,16 +27,13 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
   endif()
 endif()
 
-find_package(BaseGraph REQUIRED)
-
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/ext/base_graph/include)
 include_directories(${PROJECT_SOURCE_DIR}/ext/SamplableSet/src)
 
-# set(SAMPLABLESET "${CMAKE_CURRENT_SOURCE_DIR}/ext/SamplableSet/src/build/libsamplableset.a")
-
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/SamplableSet/src SamplableSet)
 add_subdirectory(src)
+
 if (SKBUILD)
     set(CMAKE_BUILD_TYPE Release)
     add_subdirectory(python)

@@ -8,8 +8,6 @@ if(SKBUILD)
     OUTPUT_VARIABLE _tmp_dir
     OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
   list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
-
-  # execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pip install ${PROJECT_SOURCE_DIR}/ext/base_graph ${PROJECT_SOURCE_DIR}/ext/SamplableSet)
 endif()
 
 find_package(pybind11 REQUIRED)
@@ -18,6 +16,6 @@ pybind11_add_module(_${PROJECT_NAME} MODULE pybind_main.cpp)
 set_target_properties(_${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
 target_link_libraries(_${PROJECT_NAME} 
                       PRIVATE graphinf 
-                      BaseGraph::core 
                       "${PROJECT_BINARY_DIR}/SamplableSet/libsamplableset.a")
+target_include_directories(_${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/ext/base_graph/include")
 install(TARGETS _${PROJECT_NAME} DESTINATION ./graphinf)
