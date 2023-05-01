@@ -27,53 +27,24 @@ jobs:
                     sudo apt install gcc-9 g++ cmake
                     pip install --upgrade pip
 
-            - name: Installing basegraph==1.0.0
+            - name: Installing basegraph
               shell: bash
               run: |
-                    cd graphinf_cpp/base_graph
-                    [ ! -d "./build" ] && mkdir build
-                    cd build
-                    cmake ..
-                    make -j4
-                    cd ..
-                    pip install .
+                    echo Installing basegraph
+                    pip install ./ext/basegraph
 
             - name: Installing SamplableSet==2.2.0
               shell: bash
               run: |
-                    echo Installing SamplableSet==2.2.0
-                    cd graphinf_cpp/SamplableSet/src
-                    [ ! -d "./build" ] && mkdir build
-                    cd build
-                    cmake ..
-                    make -j4
-                    cd ../..
-                    pip install .
+                    echo Installing SamplableSet
+                    pip install ./ext/SamplableSet
 
-            - name: Building graphinf backend and run c++ tests
+            - name: Installing graphinf
               shell: bash
               run: |
-                    echo Build backend and tests
-                    cd graphinf_cpp
-                    [ ! -d "./build" ] && mkdir build
-                    cd build
-                    cmake ..
-                    make -j4
-                    ctest -C Debug --output-on-failure --verbose
+                    echo Installing graphinf
+                    pip install . -v
 
-            - name: Installing dev-dependencies
+            - name: Run tests
               shell: bash
-              run: |
-                    pip install -r requirements_dev.txt
-                    pip install -r requirements.txt
-                    pip install pybind11
-
-            - name: Installing graphinf==0.0.1
-              shell: bash
-              run: |
-                    [ -d "./build" ] && rm -r build
-                    pip install .[testing]
-
-            # - name: Run tests
-            #   shell: bash
-            #   run: pytest ./tests
+              run: pytest ./tests

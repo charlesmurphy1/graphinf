@@ -5,15 +5,11 @@ on:
     - pull_request
 
 jobs:
-    cpp-tests:
+    cpp-build:
         runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v2
-            # - name: Set up Python 3.9
-            #   uses: actions/setup-python@v2
-            #   with:
-            #         python-version: 3.9
 
             - name: Loading submodules
               shell: bash
@@ -21,48 +17,15 @@ jobs:
                     git submodule init
                     git submodule update
 
-            # - name: Install C++ dependencies
-            #   shell: bash
-            #   run: |
-            #         sudo apt install gcc-9 g++ cmake
-            #         pip install --upgrade pip
             - name: Install C++ dependencies
               shell: bash
               run: |
                     sudo apt install gcc-9 g++ cmake
 
-            - name: Installing basegraph==1.0.0
+            - name: Running graphinf C++ test
               shell: bash
               run: |
-                    cd graphinf_cpp/base_graph
-                    [ ! -d "./build" ] && mkdir build
-                    cd build
-                    cmake ..
-                    make -j4
-
-            - name: Installing SamplableSet==2.2.0
-              shell: bash
-              run: |
-                    echo Installing SamplableSet==2.2.0
-                    cd graphinf_cpp/SamplableSet/src
-                    [ ! -d "./build" ] && mkdir build
-                    cd build
-                    cmake ..
-                    make -j4
-
-            - name: Building graphinf backend and run c++ tests
-              shell: bash
-              run: |
-                    echo Build backend and tests
-                    cd graphinf_cpp
-                    [ ! -d "./build" ] && mkdir build
-                    cd build
-                    cmake .. -DBUILD_TESTS=ON
-                    make -j4
-
-
-            - name: Run tests
-              shell: bash
-              run: |
-                cd graphinf_cpp/build
-                ctest -C Debug --output-on-failure --verbose
+                    echo Running C++ tests
+                    cmake -S . -B build -DBUILD_TESTS=ON
+                    cmake --build build -j8
+                    ctest build/tests
