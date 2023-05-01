@@ -10,18 +10,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v2
-
-            - name: Reconfigure git to use HTTP authentication
-              run: >
-                git config --global url."https://github.com/".insteadOf
-                ssh://git@github.com/
-          
-
-            - name: Loading submodules
-              shell: bash
-              run: |
-                    git submodule init
-                    git submodule update --init --recursive
+              with:
+                submodules: recursive
 
             - name: Install C++ dependencies
               shell: bash
