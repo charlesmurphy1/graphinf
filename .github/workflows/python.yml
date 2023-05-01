@@ -10,16 +10,12 @@ jobs:
 
         steps:
             - uses: actions/checkout@v2
+              with:
+                submodules: recursive
             - name: Set up Python 3.9
               uses: actions/setup-python@v2
               with:
                     python-version: 3.9
-
-            - name: Loading submodules
-              shell: bash
-              run: |
-                    git submodule init
-                    git submodule update --init --recursive
 
             - name: Install C++ dependencies
               shell: bash

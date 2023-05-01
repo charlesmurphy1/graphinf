@@ -37,6 +37,7 @@ set(allGTests
 
 
 foreach(UnitTest ${allGTests})
-    target_link_libraries(${UnitTest} gtest gtest_main graphinf ${SAMPLABLESET} BaseGraph::core)
+    target_link_libraries(${UnitTest} gtest gtest_main graphinf ${PROJECT_BINARY_DIR}/SamplableSet/libsamplableset.a)
+    target_include_directories(${UnitTest} PRIVATE ${PROJECT_SOURCE_DIR}/ext/base_graph/include)
     add_test(${UnitTest} ${UnitTest})
 endforeach()

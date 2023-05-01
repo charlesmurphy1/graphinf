@@ -15,7 +15,7 @@ namespace GraphInf
         MultiGraph graph = MultiGraph(3);
         MultiGraph m_observations = MultiGraph(3);
         PoissonUncertainGraph m_model =
-            PoissonUncertainGraph{prior, m_noEdgeAverage, m_edgeAverage};
+            PoissonUncertainGraph{prior, m_edgeAverage, m_noEdgeAverage};
 
         void SetUp()
         {

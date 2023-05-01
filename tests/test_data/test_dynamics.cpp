@@ -37,7 +37,7 @@ namespace GraphInf
         {
             dynamics.acceptSelfLoops(false);
             dynamics.setGraph(graph);
-            dynamics.setState(state);
+            dynamics.setCurrentState(state);
             // dynamics.checkSafety();
         }
         void TearDown()
