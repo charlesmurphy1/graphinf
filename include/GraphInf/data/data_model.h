@@ -73,8 +73,18 @@ namespace GraphInf
             return getLogPriorRatioFromGraphMove(move) + getLogLikelihoodRatioFromGraphMove(move);
         }
         const double getLogAcceptanceProbFromGraphMove(const GraphMove &move, double betaPrior = 1, double betaLikelihood = 1) const;
-        virtual const MCMCSummary metropolisStep(const double samplePriorProb = 0.5, const double betaPrior = 1, const double betaLikelihood = 1);
-        const int mcmcSweep(size_t numSteps, const double samplePriorProb = 0.5, const double betaPrior = 1, const double betaLikelihood = 1);
+        virtual const MCMCSummary metropolisGraphStep(const double betaPrior = 1, const double betaLikelihood = 1);
+        virtual const MCMCSummary metropolisParamStep()
+        {
+            return {"no step", 1, true};
+        }
+        virtual const MCMCSummary metropolisPriorStep()
+        {
+            return m_graphPriorPtr->metropolisStep();
+        }
+
+        const int gibbsSweep(size_t numSteps, const double sampleGraphProb = 1., const double samplePriorProb = 0., const double sampleParamProb = 0., const double betaPrior = 1, const double betaLikelihood = 1);
+        const int metropolisSweep(size_t numSteps, const double sampleGraphRate = 1., const double samplePriorRate = 0., const double sampleParamRate = 0., const double betaPrior = 1, const double betaLikelihood = 1);
 
         void applyGraphMove(const GraphMove &move)
         {

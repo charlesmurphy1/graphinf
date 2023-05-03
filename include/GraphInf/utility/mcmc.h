@@ -4,7 +4,6 @@
 #include <string>
 namespace GraphInf
 {
-
     struct MCMCSummary
     {
         std::string move;

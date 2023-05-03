@@ -16,8 +16,6 @@
 
 #include "GraphInf/data/dynamics/sis.h"
 
-#include "GraphInf/mcmc/mcmc.h"
-
 namespace GraphInf
 {
 
@@ -177,29 +175,6 @@ namespace GraphInf
     {
     public:
         DummyNestedSISDynamics(NestedVertexLabeledRandomGraph<BlockIndex> &graphPrior, size_t length = 10, double infection = 0.1) : SISDynamics(graphPrior, length, infection) {}
-    };
-
-    class DummyMCMC : public MCMC
-    {
-    public:
-        bool doMetropolisHastingsStep() override
-        {
-            onStepBegin();
-            m_lastLogJointRatio = 0;
-            m_lastLogAcceptance = -log(2);
-            if (m_uniform(rng) < exp(m_lastLogAcceptance))
-                m_isLastAccepted = true;
-            else
-                m_isLastAccepted = false;
-            onStepEnd();
-            return m_isLastAccepted;
-        }
-        // void sample() override { }
-        // void sampleState() override { }
-        // void samplePrior() override { }
-        const double getLogLikelihood() const override { return 1; }
-        const double getLogPrior() const override { return 2; }
-        const double getLogJoint() const override { return getLogLikelihood() + getLogPrior(); }
     };
 
 }

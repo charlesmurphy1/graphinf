@@ -3,6 +3,7 @@
 
 #include "GraphInf/data/dynamics/binary_dynamics.h"
 #include "GraphInf/data/util.h"
+#include "random"
 
 namespace GraphInf
 {

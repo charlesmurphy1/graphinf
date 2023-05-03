@@ -21,11 +21,8 @@ namespace GraphInf
         return logProposalRatio + logJointRatio;
     }
 
-    const MCMCSummary DataModel::metropolisStep(const double samplePriorProb, const double betaPrior, const double betaLikelihood)
+    const MCMCSummary DataModel::metropolisGraphStep(const double betaPrior, const double betaLikelihood)
     {
-        if (m_uniform(rng) < samplePriorProb)
-            return m_graphPriorPtr->metropolisStep();
-
         const auto move = m_graphPriorPtr->proposeGraphMove();
         if (m_graphPriorPtr->getEdgeProposer().isTrivialMove(move))
             return {"graph", 1.0, true};
@@ -38,12 +35,47 @@ namespace GraphInf
         }
         return {"graph", acceptProb, isAccepted};
     }
-    const int DataModel::mcmcSweep(size_t numSteps, const double samplePriorProb, const double betaPrior, const double betaLikelihood)
+    const int DataModel::gibbsSweep(size_t numSteps, const double sampleGraphProb, const double samplePriorProb, const double sampleParamProb, const double betaPrior, const double betaLikelihood)
     {
         int numSuccesses = 0;
         for (size_t i = 0; i < numSteps; i++)
         {
-            auto summary = metropolisStep(samplePriorProb, betaPrior, betaLikelihood);
+            MCMCSummary summary;
+            if (m_uniform(rng) < sampleParamProb)
+                summary = metropolisParamStep();
+            if (m_uniform(rng) < samplePriorProb)
+                summary = metropolisPriorStep();
+            if (m_uniform(rng) < samplePriorProb)
+                summary = metropolisGraphStep(betaPrior, betaLikelihood);
+
+            if (summary.isAccepted)
+                numSuccesses += 1;
+        }
+        return numSuccesses;
+    }
+    const int DataModel::metropolisSweep(size_t numSteps, const double sampleGraphRate, const double samplePriorRate, const double sampleParamRate, const double betaPrior, const double betaLikelihood)
+    {
+        int numSuccesses = 0;
+        auto dist = std::discrete_distribution<int>({sampleGraphRate, samplePriorRate, sampleParamRate});
+        for (size_t i = 0; i < numSteps; i++)
+        {
+            MCMCSummary summary;
+
+            switch (dist(rng))
+            {
+            case 0:
+                summary = metropolisGraphStep(betaPrior, betaLikelihood);
+                break;
+            case 1:
+                summary = metropolisPriorStep();
+                break;
+            case 2:
+                summary = metropolisParamStep();
+                break;
+            default:
+                break;
+            }
+
             if (summary.isAccepted)
                 numSuccesses += 1;
         }
