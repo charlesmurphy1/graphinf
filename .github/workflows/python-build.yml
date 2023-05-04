@@ -26,6 +26,8 @@ jobs:
     - name: Install C++ dependencies
       run: pip install --upgrade pip
 
+    - name: Debug action
+      run: pwd && ls
     - name: Installing basegraph
       run: pip install ${{github.workspace}}/ext/basegraph
 
