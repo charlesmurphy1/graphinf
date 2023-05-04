@@ -1,9 +1,9 @@
 name: Python interface
 on:
   push:
-    branches: [ main, fix-workflow ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, fix-workflow ]
+    branches: [ main ]
 
 jobs:
   python-interface:
@@ -13,39 +13,27 @@ jobs:
       fail-fast: false
       matrix:
         platform: [macos-latest] #, ubuntu-latest, windows-latest]
+        python-version: ["3.9", "3.10" ]
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Set up Python 3.9
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-            python-version: 3.9
+            python-version: ${{ matrix.python-version }}
 
     - name: Install C++ dependencies
-      shell: bash
-      run: |
-            sudo apt install gcc-9 g++ cmake
-            pip install --upgrade pip
+      run: pip install --upgrade pip
 
     - name: Installing basegraph
-      shell: bash
-      run: |
-            echo Installing basegraph
-            pip install ./ext/basegraph
+      run: pip install ./ext/basegraph
 
     - name: Installing SamplableSet==2.2.0
-      shell: bash
-      run: |
-            echo Installing SamplableSet
-            pip install ./ext/SamplableSet
+      run: pip install ./ext/SamplableSet
 
     - name: Installing graphinf
-      shell: bash
-      run: |
-            echo Installing graphinf
-            pip install . -v
+      run: pip install . -v
 
     - name: Run tests
-      shell: bash
       run: pytest ./tests

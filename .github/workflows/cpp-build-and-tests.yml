@@ -1,9 +1,9 @@
 name: C++ build
 on:
   push:
-    branches: [ main, fix-workflow ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, fix-workflow ]
+    branches: [ main ]
 
 jobs:
   build:
