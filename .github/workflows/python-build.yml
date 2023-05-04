@@ -27,7 +27,9 @@ jobs:
       run: pip install --upgrade pip
 
     - name: Debug action
-      run: pwd && ls
+      run: pwd && ls ext
+    - name: Cloning submodules
+      run: git submodule init; git submodule update --init --recursive
     - name: Installing basegraph
       run: pip install ${{github.workspace}}/ext/basegraph
 
