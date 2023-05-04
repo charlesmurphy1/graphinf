@@ -23,13 +23,9 @@ jobs:
       with:
             python-version: ${{ matrix.python-version }}
 
-    - name: Install C++ dependencies
-      run: pip install --upgrade pip
+    - name: Install dependencies
+      run: pip install --upgrade pip pybind11
 
-    - name: Debug action
-      run: pwd && ls ext
-    - name: Cloning submodules
-      run: git submodule init; git submodule update --init --recursive
     - name: Installing basegraph
       run: pip install ${{github.workspace}}/ext/base_graph
 
