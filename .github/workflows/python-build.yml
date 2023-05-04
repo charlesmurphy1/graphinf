@@ -1,46 +1,51 @@
 name: Python interface
-
 on:
-    - push
-    - pull_request
+  push:
+    branches: [ main, fix-workflow ]
+  pull_request:
+    branches: [ main, fix-workflow ]
 
 jobs:
-    python-interface:
-        runs-on: ubuntu-latest
+  python-interface:
+    name: Build python bindings
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest] #, ubuntu-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+            python-version: 3.9
 
-        steps:
-            - uses: actions/checkout@v2
-              with:
-                submodules: recursive
-            - name: Set up Python 3.9
-              uses: actions/setup-python@v2
-              with:
-                    python-version: 3.9
+    - name: Install C++ dependencies
+      shell: bash
+      run: |
+            sudo apt install gcc-9 g++ cmake
+            pip install --upgrade pip
 
-            - name: Install C++ dependencies
-              shell: bash
-              run: |
-                    sudo apt install gcc-9 g++ cmake
-                    pip install --upgrade pip
+    - name: Installing basegraph
+      shell: bash
+      run: |
+            echo Installing basegraph
+            pip install ./ext/basegraph
 
-            - name: Installing basegraph
-              shell: bash
-              run: |
-                    echo Installing basegraph
-                    pip install ./ext/basegraph
+    - name: Installing SamplableSet==2.2.0
+      shell: bash
+      run: |
+            echo Installing SamplableSet
+            pip install ./ext/SamplableSet
 
-            - name: Installing SamplableSet==2.2.0
-              shell: bash
-              run: |
-                    echo Installing SamplableSet
-                    pip install ./ext/SamplableSet
+    - name: Installing graphinf
+      shell: bash
+      run: |
+            echo Installing graphinf
+            pip install . -v
 
-            - name: Installing graphinf
-              shell: bash
-              run: |
-                    echo Installing graphinf
-                    pip install . -v
-
-            - name: Run tests
-              shell: bash
-              run: pytest ./tests
+    - name: Run tests
+      shell: bash
+      run: pytest ./tests
