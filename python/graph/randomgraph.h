@@ -110,7 +110,9 @@ namespace GraphInf
               .def("apply_graph_move", &RandomGraph::applyGraphMove, py::arg("move"))
               .def("propose_graph_move", &RandomGraph::proposeGraphMove)
               .def("is_compatible", &RandomGraph::isCompatible)
-              .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"));
+              .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"))
+              .def("metropolis_step", &RandomGraph::metropolisStep, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+              .def("metropolis_sweep", &RandomGraph::metropolisSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
           declareVertexLabeledRandomGraph<BlockIndex>(m, "BlockLabeledRandomGraph");
           declareNestedVertexLabeledRandomGraph<BlockIndex>(m, "NestedBlockLabeledRandomGraph");
      }

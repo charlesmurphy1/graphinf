@@ -100,6 +100,7 @@ namespace GraphInf
         {
             return m_degreePriorPtr->getLabelGraphPrior().getEdgeCount();
         }
+        const size_t getDegree(const BaseGraph::VertexIndex vertex) const { return getDegreePrior().getDegree(vertex); }
         const std::vector<size_t> getDegrees() const { return getDegreePrior().getState(); }
         const double getLabelLogJoint() const override
         {

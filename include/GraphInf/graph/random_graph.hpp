@@ -141,7 +141,7 @@ namespace GraphInf
         {
             return {"none", 1, true};
         }
-        const int mcmcSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1)
+        const int metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1)
         {
             int numSuccesses = 0;
             for (size_t i = 0; i < numSteps; i++)

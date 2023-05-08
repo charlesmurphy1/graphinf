@@ -2,8 +2,8 @@ from graphinf import wrapper
 from graphinf import _graphinf
 from graphinf import graph
 from graphinf import data
+from graphinf import utility
 from .metadata import __version__
-utility = _graphinf.utility
 utility.seedWithTime()
 
 __all__ = (
