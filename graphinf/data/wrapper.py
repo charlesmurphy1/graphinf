@@ -2,15 +2,20 @@ from graphinf.wrapper import Wrapper as _Wrapper
 from graphinf.graph import (
     RandomGraphWrapper as _RandomGraphWrapper,
     ErdosRenyiModel as _ErdosRenyiModel,
+    DeltaGraph as _DeltaGraph,
 )
+from basegraph import core
 
 class DataModelWrapper(_Wrapper):
     constructor = None
 
-    def __init__(self, graph_prior: _RandomGraphWrapper = None, **kwargs):
-        graph_prior = (
-            _ErdosRenyiModel(100, 250) if graph_prior is None else graph_prior
-        )
+    def __init__(self, graph_prior: _RandomGraphWrapper or core.UndirectedMultigraph = None, **kwargs):
+        if graph_prior is None:
+            graph_prior = (
+                _ErdosRenyiModel(100, 250) if graph_prior is None else graph_prior
+            )
+        elif isinstance(graph_prior, core.UndirectedMultigraph):
+            graph_prior = _DeltaGraph(graph_prior)
         self.labeled = graph_prior.labeled
         self.nested = graph_prior.nested
         data_model = self.constructor(graph_prior.wrap, **kwargs)
