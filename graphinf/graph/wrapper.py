@@ -1,5 +1,6 @@
 from graphinf.wrapper import Wrapper as _Wrapper
 from graphinf._graphinf import graph as _graph
+from basegraph import core
 from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
 from typing import Optional
 
@@ -28,7 +29,7 @@ class RandomGraphWrapper(_Wrapper):
     def __repr__(self):
         str_format = f"{self.__class__.__name__}("
         if len(self.params) == 0:
-            return str_format[:-1] + ")"
+            return str_format + ")"
         for k, v in self.params.items():
             if isinstance(v, str):
                 v = f"'{v}'"
@@ -39,6 +40,11 @@ class RandomGraphWrapper(_Wrapper):
 
     def post_init(self):
         self.wrap.sample()
+
+class DeltaGraph(RandomGraphWrapper):
+    def __init__(self, graph: core.UndirectedMultigraph):
+        wrapped = _graph.DeltaGraph(graph)
+        super().__init__(wrapped)
 
 
 class ErdosRenyiModel(RandomGraphWrapper):

@@ -6,7 +6,9 @@
 #include <iostream>
 
 #include "GraphInf/graph/random_graph.hpp"
+#include "GraphInf/generators.h"
 #include "GraphInf/types.h"
+#include "GraphInf/graph/delta.h"
 #include "BaseGraph/types.h"
 #include "../fixtures.hpp"
 
@@ -71,4 +73,12 @@ TEST_F(TestRandomGraphBaseClass, applyMove_forNonExistingEdgeRemoved_throwRuntim
 {
     GraphMove move = {{{0, 0}}, {}}; // non-existing edge, throw logic_error
     EXPECT_THROW(randomGraph.applyGraphMove(move), std::runtime_error);
+}
+
+TEST(TestDeltaGraph, forSomeGraph_constructDeltaGraphAndSample_returnOriginalgraph)
+{
+
+    const auto g = generateErdosRenyi(10, 10);
+    DeltaGraph model = {g};
+    model.sample();
 }

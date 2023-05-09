@@ -5,6 +5,7 @@
 #include <pybind11/stl.h>
 
 #include "GraphInf/graph/likelihood/python/likelihood.hpp"
+#include "GraphInf/graph/likelihood/delta.h"
 #include "GraphInf/graph/likelihood/erdosrenyi.h"
 #include "GraphInf/graph/likelihood/configuration.h"
 #include "GraphInf/graph/likelihood/sbm.h"
@@ -29,6 +30,7 @@ namespace GraphInf
 
         declareVertexLabeledGraphLikelihoodBaseClass<BlockIndex>(m, "BlockLabeledGraphLikelihoodBaseClass");
         py::class_<ErdosRenyiLikelihood, GraphLikelihoodModel>(m, "ErdosRenyiLikelihood");
+        py::class_<DeltaGraphLikelihood, GraphLikelihoodModel>(m, "DeltaGraphLikelihood");
         py::class_<ConfigurationModelLikelihood, GraphLikelihoodModel>(m, "ConfigurationModelLikelihood");
         py::class_<StochasticBlockModelLikelihood, VertexLabeledGraphLikelihoodModel<BlockIndex>>(m, "StochasticBlockModelLikelihood");
         py::class_<StubLabeledStochasticBlockModelLikelihood, StochasticBlockModelLikelihood>(m, "StubLabeledStochasticBlockModelLikelihood");

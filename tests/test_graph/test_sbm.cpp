@@ -365,6 +365,13 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(true, false, true),
         std::make_tuple(true, true, true)));
 
+// TEST(SBMTest, sampleSBM_return)
+// {
+//     seedWithTime();
+//     StochasticBlockModelFamily graph = {5, 5, 0, true, false, false, false, false, true};
+//     EXPECT_EQ(graph.getEdgeCount(), 5);
+// }
+
 TEST(SBMTest, construction_returnSafeObject)
 {
     std::vector<size_t> sizes = {10, 20, 30};

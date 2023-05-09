@@ -6,6 +6,7 @@
 
 #include "GraphInf/python/rv.hpp"
 #include "GraphInf/graph/random_graph.hpp"
+#include "GraphInf/graph/delta.h"
 #include "GraphInf/graph/python/randomgraph.hpp"
 
 namespace py = pybind11;
@@ -113,6 +114,9 @@ namespace GraphInf
               .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"))
               .def("metropolis_step", &RandomGraph::metropolisStep, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
               .def("metropolis_sweep", &RandomGraph::metropolisSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
+
+          py::class_<DeltaGraph, RandomGraph>(m, "DeltaGraph")
+              .def(py::init<const MultiGraph>(), py::arg("graph"));
           declareVertexLabeledRandomGraph<BlockIndex>(m, "BlockLabeledRandomGraph");
           declareNestedVertexLabeledRandomGraph<BlockIndex>(m, "NestedBlockLabeledRandomGraph");
      }

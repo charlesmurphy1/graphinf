@@ -1,13 +1,11 @@
 #ifndef GRAPH_INF_GRAPH_H
 #define GRAPH_INF_GRAPH_H
 
-// #include <random>
 #include <vector>
 
 #include "GraphInf/types.h"
 #include "GraphInf/rv.hpp"
 #include "GraphInf/exceptions.h"
-// #include "GraphInf/rng.h"
 #include "GraphInf/graph/proposer/movetypes.h"
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/utility/mcmc.h"
@@ -16,6 +14,8 @@
 #include "GraphInf/graph/proposer/edge/edge_proposer.h"
 #include "GraphInf/graph/proposer/label/base.hpp"
 #include "GraphInf/graph/proposer/nested_label/base.hpp"
+
+// #include "GraphInf/graph/util.h"
 
 namespace GraphInf
 {
@@ -64,12 +64,6 @@ namespace GraphInf
         {
             if (state.getSize() != m_size)
                 throw std::invalid_argument("Cannot set state with graph of size " + std::to_string(state.getSize()) + " != " + std::to_string(m_size));
-            // m_state.clearEdges();
-            // for (const auto &edge : state.getEdges())
-            // {
-            //     auto mult = state.getEdgeMultiplicity(edge.first, edge.second);
-            //     m_state.addMultiedge(edge.first, edge.second, mult);
-            // }
             m_state = state;
 
             computeConsistentState();

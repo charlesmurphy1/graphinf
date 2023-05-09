@@ -108,4 +108,11 @@ namespace GraphInf
         }
     }
 
+    TEST(TestSBMGenerator, generateSBM_ggivenLabelGraph_returnGraphsWithCorrectLabelGraph)
+    {
+
+        auto graph = GraphInf::generateSBM(VERTEX_BLOCKS, LABEL_GRAPH);
+        EXPECT_EQ(LABEL_GRAPH, getLabelGraph(graph, VERTEX_BLOCKS));
+    }
+
 }

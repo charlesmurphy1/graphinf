@@ -60,14 +60,17 @@ py::class_<CounterMap<KeyType>, Map<KeyType, size_t>> declareCounterMap(py::modu
 
 void initMaps(py::module &m)
 {
-    declareMap<size_t, int>(m, "UnIntKeyedIntValuedMap");
-    declareIntMap<size_t>(m, "UnIntKeyedIntMap");
+    declareMap<size_t, int>(m, "Map_unint_int");
+    declareIntMap<size_t>(m, "IntMap_unint");
 
-    declareMap<size_t, size_t>(m, "UnIntKeyedUnIntValuedMap");
-    declareCounterMap<size_t>(m, "UnIntKeyedCounterMap");
+    declareMap<size_t, size_t>(m, "Map_unint_unint");
+    declareCounterMap<size_t>(m, "CounterMap_unint");
 
-    declareMap<std::pair<size_t, size_t>, size_t>(m, "UnIntPairKeyedUnIntValuedMap");
-    declareCounterMap<std::pair<size_t, size_t>>(m, "UnIntPairKeyedCounterMap");
+    declareMap<int, size_t>(m, "Map_int_unint");
+    declareCounterMap<int>(m, "CounterMap_int");
+
+    declareMap<std::pair<size_t, size_t>, size_t>(m, "Map_unintpair_int");
+    declareCounterMap<std::pair<size_t, size_t>>(m, "CounterMap_unintpair");
 }
 
 #endif

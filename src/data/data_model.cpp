@@ -56,7 +56,8 @@ namespace GraphInf
     const int DataModel::metropolisSweep(size_t numSteps, const double sampleGraphRate, const double samplePriorRate, const double sampleParamRate, const double betaPrior, const double betaLikelihood)
     {
         int numSuccesses = 0;
-        auto dist = std::discrete_distribution<int>({sampleGraphRate, samplePriorRate, sampleParamRate});
+        double z = sampleGraphRate + samplePriorRate + sampleParamRate;
+        auto dist = std::discrete_distribution<int>({sampleGraphRate / z, samplePriorRate / z, sampleParamRate / z});
         for (size_t i = 0; i < numSteps; i++)
         {
             MCMCSummary summary;
