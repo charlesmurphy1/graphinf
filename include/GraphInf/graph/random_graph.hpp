@@ -225,6 +225,7 @@ namespace GraphInf
 
         virtual void setLabels(const std::vector<Label> &, bool reduce = false) = 0;
         virtual void sampleOnlyLabels() = 0;
+        virtual void sampleWithLabels() = 0;
 
         void setLabelProposer(LabelProposer<Label> &proposer)
         {
@@ -271,15 +272,16 @@ namespace GraphInf
         {
             const auto move = proposeLabelMove();
             if (m_labelProposerPtr->isTrivialMove(move))
-                return {"label", 1., true};
+                return {"LabelMove(trivial)", 1., true};
             double acceptProb = exp(getLogAcceptanceProbFromLabelMove(move));
             bool isAccepted = false;
             if (m_uniform(rng) < acceptProb)
             {
                 isAccepted = true;
+
                 applyLabelMove(move);
             }
-            return {"label", acceptProb, isAccepted};
+            return {move.display(), acceptProb, isAccepted};
         }
 
         void applyLabelMove(const LabelMove<Label> &move);

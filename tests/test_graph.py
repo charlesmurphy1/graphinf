@@ -17,9 +17,7 @@ def test_erdosrenyi():
 )
 def test_configuration(prior_type):
     N, E = 100, 250
-    g = graphinf.graph.ConfigurationModelFamily(
-        N, E, degree_prior_type=prior_type
-    )
+    g = graphinf.graph.ConfigurationModelFamily(N, E, degree_prior_type=prior_type)
     assert g.get_size() == N
     assert g.get_edge_count() == E
 

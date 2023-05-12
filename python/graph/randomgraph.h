@@ -31,6 +31,7 @@ namespace GraphInf
                   py::arg("vertex"))
               .def("set_labels", &VertexLabeledRandomGraph<Label>::setLabels, py::arg("labels"), py::arg("reduce") = false)
               .def("sample_only_labels", &VertexLabeledRandomGraph<Label>::sampleOnlyLabels)
+              .def("sample_with_labels", &VertexLabeledRandomGraph<Label>::sampleWithLabels)
               .def("get_label_log_joint", &VertexLabeledRandomGraph<Label>::getLabelLogJoint)
               .def("get_log_likelihood_ratio_from_label_move", &VertexLabeledRandomGraph<Label>::getLogLikelihoodRatioFromLabelMove, py::arg("move"))
               .def("get_log_prior_ratio_from_label_move", &VertexLabeledRandomGraph<Label>::getLogPriorRatioFromLabelMove, py::arg("move"))

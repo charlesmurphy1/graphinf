@@ -25,7 +25,7 @@ namespace GraphInf
     {
         const auto move = m_graphPriorPtr->proposeGraphMove();
         if (m_graphPriorPtr->getEdgeProposer().isTrivialMove(move))
-            return {"graph", 1.0, true};
+            return {"GraphMove(trivial)", 1.0, true};
         double acceptProb = exp(getLogAcceptanceProbFromGraphMove(move, betaPrior, betaLikelihood));
         bool isAccepted = false;
         if (m_uniform(rng) < acceptProb)
@@ -33,7 +33,7 @@ namespace GraphInf
             isAccepted = true;
             applyGraphMove(move);
         }
-        return {"graph", acceptProb, isAccepted};
+        return {move.display(), acceptProb, isAccepted};
     }
     const int DataModel::gibbsSweep(size_t numSteps, const double sampleGraphProb, const double samplePriorProb, const double sampleParamProb, const double betaPrior, const double betaLikelihood)
     {

@@ -14,13 +14,15 @@ __all__ = (
 
 UncertainGraph = _uncertain.UncertainGraph
 
+
 class PoissonUncertainGraph(_DataModelWrapper):
     constructor = _uncertain.PoissonUncertainGraph
+
     def __init__(
         self,
         graph_prior: RandomGraph | Wrapper = None,
         mu: int = 5,
-        mu_no_edge: float = 0.,
+        mu_no_edge: float = 0.0,
     ):
         super().__init__(
             graph_prior=graph_prior,

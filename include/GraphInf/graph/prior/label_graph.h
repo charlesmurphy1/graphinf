@@ -112,7 +112,7 @@ namespace GraphInf
         void samplePartition()
         {
             m_blockPriorPtr->sample();
-            recomputeConsistentState();
+            recomputeStateFromGraph();
         }
 
         const size_t &getEdgeCount() const { return m_edgeCountPriorPtr->getState(); }

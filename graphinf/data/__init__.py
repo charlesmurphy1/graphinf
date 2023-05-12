@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from graphinf import _graphinf
+from graphinf._graphinf.data import DataModel
 
 from graphinf.data.wrapper import DataModelWrapper
 from graphinf.data import dynamics
 from graphinf.data import uncertain
 
-DataModel = _graphinf.data.DataModel
 __all__ = (
     "dynamics",
     "uncertain",
     "DataModel",
     "DataModelWrapper",
 )
-

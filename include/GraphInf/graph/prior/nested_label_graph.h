@@ -71,17 +71,6 @@ namespace GraphInf
         }
         void setNestedState(const std::vector<LabelGraph> &nestedState)
         {
-            // m_nestedState = std::vector<LabelGraph>(nestedState.size(), LabelGraph());
-            // size_t l = 0;
-            // for (const auto &state : nestedState)
-            // {
-            //     for (const auto &edge : state.getEdges())
-            //     {
-            //         const auto mult = state.getEdgeMultiplicity(edge.first, edge.second);
-            //         m_nestedState[l].addMultiedge(edge.first, edge.second, mult);
-            //     }
-            //     ++l;
-            // }
             m_nestedState = nestedState;
 
             m_nestedEdgeCounts = computeNestedEdgeCountsFromNestedState(nestedState);
@@ -188,6 +177,7 @@ namespace GraphInf
             setEdgeCountPrior(edgeCountPrior);
             setNestedBlockPrior(m_blockPrior);
         }
+        using NestedLabelGraphPrior::sampleState;
         const LabelGraph sampleState(Level level) const override;
         const double getLogLikelihoodAtLevel(Level level) const override;
         const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override;

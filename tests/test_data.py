@@ -22,13 +22,9 @@ def graph_prior():
 @pytest.mark.parametrize(
     "data, graph",
     [
-        pytest.param(
-            getattr(graphinf.data.dynamics, d), graphs[g], id=f"{d}-{g}"
-        )
+        pytest.param(getattr(graphinf.data.dynamics, d), graphs[g], id=f"{d}-{g}")
         for d, g in product(graphinf.data.dynamics.__all__, graphs)
-        if issubclass(
-            getattr(graphinf.data.dynamics, d), graphinf.wrapper.Wrapper
-        )
+        if issubclass(getattr(graphinf.data.dynamics, d), graphinf.wrapper.Wrapper)
     ],
 )
 def test_dynamics(data, graph):

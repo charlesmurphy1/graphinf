@@ -1,8 +1,17 @@
+import logging
+
+from typing import Optional, Callable, Optional
+
 from graphinf.wrapper import Wrapper as _Wrapper
 from graphinf._graphinf import graph as _graph
 from basegraph import core
 from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
-from typing import Optional
+from .util import (
+    log_evidence_exact,
+    log_evidence_iid_meanfield,
+    log_evidence_partition_meanfield,
+    log_evidence_annealed,
+)
 
 __all__ = (
     "OptionError",
@@ -16,9 +25,13 @@ __all__ = (
     "PlantedPartitionGraph",
 )
 
+
 class OptionError(ValueError):
     def __init__(self, value: str, avail_options: list[str]) -> None:
-        super().__init__(f"Option {value} is unavailable, possible options are {avail_options}.")
+        super().__init__(
+            f"Option {value} is unavailable, possible options are {avail_options}."
+        )
+
 
 class RandomGraphWrapper(_Wrapper):
     def __init__(self, graph_model, labeled=False, nested=False, **kwargs):
@@ -37,9 +50,66 @@ class RandomGraphWrapper(_Wrapper):
         str_format += "\n)"
         return str_format
 
-
     def post_init(self):
         self.wrap.sample()
+
+    def get_log_evidence(
+        self,
+        graph: Optional[core.UndirectedMultigraph] = None,
+        method: Optional[str] = None,
+        n_sweeps: int = 1000,
+        n_steps_per_vertex: int = 10,
+        burn: int = 0,
+        start_from_original: bool = False,
+        reset_original: bool = False,
+        verbose: bool = False,
+        **kwargs,
+    ) -> None:
+        all_methods = [
+            "exact",
+            "iid_meanfield",
+            "partition_meanfield",
+            "annealed",
+        ]
+        if method is None:
+            method = (
+                "exact"
+                if (self.get_size() <= 5 or not self.labeled)
+                else "iid_meanfield"
+            )
+        if method not in all_methods:
+            raise ValueError(
+                f"Cannot parse method '{method}', available options are {all_methods}."
+            )
+        if graph is None:
+            graph = self.get_state()
+        kwargs["n_sweeps"] = n_sweeps
+        kwargs["n_steps"] = n_steps_per_vertex * self.get_size()
+        kwargs["burn"] = burn
+        kwargs["start_from_original"] = start_from_original
+        kwargs["reset_original"] = reset_original
+        kwargs["verbose"] = verbose
+        if not self.labeled:
+            if method == "exact":
+                evidence = self.get_log_joint()
+            elif method == "iid_meanfield":
+                evidence = log_evidence_iid_meanfield(self, graph, **kwargs)
+            self.set_state(graph)
+            return evidence
+
+        original = self.get_labels()
+        if method == "exact":
+            evidence = log_evidence_exact(self, graph)
+        elif method == "iid_meanfield":
+            evidence = log_evidence_iid_meanfield(self, graph, **kwargs)
+        elif method == "partition_meanfield":
+            evidence = log_evidence_partition_meanfield(self, graph, **kwargs)
+        elif method == "annealed":
+            evidence = log_evidence_annealed(self, graph, **kwargs)
+        self.set_state(graph)
+        self.set_labels(original)
+        return evidence
+
 
 class DeltaGraph(RandomGraphWrapper):
     def __init__(self, graph: core.UndirectedMultigraph):
@@ -85,7 +155,7 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         edge_count: float = 250,
         degree_prior_type: str = "uniform",
         canonical: bool = False,
-        edge_proposer_type: str = "uniform",
+        edge_proposer_type: str = "degree",
     ):
         if degree_prior_type not in self.available_degree_prior_types:
             raise OptionError(
@@ -95,7 +165,7 @@ class ConfigurationModelFamily(RandomGraphWrapper):
             size,
             edge_count,
             canonical=canonical,
-            hyperprior=(degree_prior_type == "hyperprior"),
+            hyperprior=(degree_prior_type == "hyper"),
             edge_proposer_type=edge_proposer_type,
         )
         super().__init__(
@@ -113,7 +183,9 @@ class ConfigurationModel(RandomGraphWrapper):
         print(type(degree_seq))
         wrapped = _graph.ConfigurationModel(degree_seq)
         self.degrees = degree_seq
-        super().__init__(wrapped, size=len(degree_seq), edge_count=int(sum(degree_seq) /2))
+        super().__init__(
+            wrapped, size=len(degree_seq), edge_count=int(sum(degree_seq) / 2)
+        )
 
 
 class PoissonGraph(ConfigurationModel):
@@ -213,16 +285,18 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
 
         if likelihood_type == "degree_corrected":
             if label_graph_prior_type == "nested":
-                wrapped = _graph.NestedDegreeCorrectedStochasticBlockModelFamily(
-                    size,
-                    edge_count,
-                    degree_hyperprior=(degree_prior_type == "hyper"),
-                    canonical=canonical,
-                    edge_proposer_type=edge_proposer_type,
-                    block_proposer_type=block_proposer_type,
-                    sample_label_count_prob=sample_label_count_prob,
-                    label_creation_prob=label_creation_prob,
-                    shift=shift,
+                wrapped = (
+                    _graph.NestedDegreeCorrectedStochasticBlockModelFamily(
+                        size,
+                        edge_count,
+                        degree_hyperprior=(degree_prior_type == "hyper"),
+                        canonical=canonical,
+                        edge_proposer_type=edge_proposer_type,
+                        block_proposer_type=block_proposer_type,
+                        sample_label_count_prob=sample_label_count_prob,
+                        label_creation_prob=label_creation_prob,
+                        shift=shift,
+                    )
                 )
                 nested = True
             else:

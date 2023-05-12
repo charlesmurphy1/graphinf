@@ -55,6 +55,7 @@ namespace GraphInf
         /* Pure abstract methods */
         void setLabels(const std::vector<BlockIndex> &labels, bool reduce = false) override { PYBIND11_OVERRIDE_PURE(void, BaseClass, setLabels, labels, reduce); }
         void sampleOnlyLabels() override { PYBIND11_OVERRIDE_PURE(void, BaseClass, sampleOnlyLabels, ); }
+        void sampleWithLabels() override { PYBIND11_OVERRIDE_PURE(void, BaseClass, sampleWithLabels, ); }
         const double getLabelLogJoint() const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLabelLogJoint, ); }
 
         const std::vector<Label> &getLabels() const override

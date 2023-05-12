@@ -4,6 +4,7 @@ from graphinf import graph
 from graphinf import data
 from graphinf import utility
 from .metadata import __version__
+
 utility.seedWithTime()
 
 __all__ = (

@@ -4,7 +4,6 @@ from graphinf.wrapper import Wrapper
 from graphinf._graphinf import graph as _graph
 
 
-
 @pytest.fixture
 def wrapper():
     erdos = _graph.ErdosRenyiModel(10, 10)

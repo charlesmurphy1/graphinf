@@ -1,5 +1,15 @@
 from graphinf._graphinf.graph import RandomGraph, StochasticBlockModel
-from .wrapper import RandomGraphWrapper, DeltaGraph, ErdosRenyiModel, ConfigurationModel, ConfigurationModelFamily, PoissonGraph, NegativeBinomialGraph, StochasticBlockModelFamily, PlantedPartitionGraph
+from .wrapper import (
+    RandomGraphWrapper,
+    DeltaGraph,
+    ErdosRenyiModel,
+    ConfigurationModel,
+    ConfigurationModelFamily,
+    PoissonGraph,
+    NegativeBinomialGraph,
+    StochasticBlockModelFamily,
+    PlantedPartitionGraph,
+)
 from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
 
 __all__ = (
@@ -15,4 +25,3 @@ __all__ = (
     "PlantedPartition",
     "StochasticBlockModelFamily",
 )
-

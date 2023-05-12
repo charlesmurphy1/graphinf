@@ -82,6 +82,11 @@ namespace GraphInf
         {
             m_nestedLabelGraphPrior.samplePartition();
         }
+        void sampleWithLabels() override
+        {
+            m_nestedLabelGraphPrior.sampleState();
+            sampleState();
+        }
         void setNestedLabels(const std::vector<BlockSequence> &labels, bool reduce = false) override
         {
             m_nestedLabelGraphPrior.setNestedPartition(labels);

@@ -77,6 +77,11 @@ namespace GraphInf
         {
             m_labelGraphPriorPtr->samplePartition();
         }
+        void sampleWithLabels() override
+        {
+            m_labelGraphPriorPtr->sampleState();
+            sampleState();
+        }
         void setLabels(const std::vector<BlockIndex> &labels, bool reduce = false) override
         {
             m_labelGraphPriorPtr->setPartition(labels);

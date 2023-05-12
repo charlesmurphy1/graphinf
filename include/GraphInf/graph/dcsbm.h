@@ -37,6 +37,12 @@ namespace GraphInf
         const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const override { return m_degreePriorPtr->getLogJointRatioFromGraphMove(move); }
         const double _getLogPriorRatioFromLabelMove(const BlockMove &move) const override { return m_degreePriorPtr->getLogJointRatioFromLabelMove(move); }
         void sampleOnlyPrior() override { m_degreePriorPtr->sample(); }
+        void sampleWithLabels() override
+        {
+            m_degreePriorPtr->getLabelGraphPriorRef().sampleState();
+            m_degreePriorPtr->sampleState();
+            sampleState();
+        }
         void setUpLikelihood() override
         {
             m_likelihoodModel.m_statePtr = &m_state;

@@ -15,8 +15,10 @@ __all__ = (
 
 Dynamics = _dynamics.Dynamics
 
+
 class SISDynamics(_DataModelWrapper):
     constructor = _dynamics.SISDynamics
+
     def __init__(
         self,
         graph_prior: RandomGraph | Wrapper = None,

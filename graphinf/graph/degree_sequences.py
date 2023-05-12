@@ -51,7 +51,7 @@ def bnbinomial(k, r, a, b):
 
 
 def poisson_degreeseq(size, avgk):
-    x = np.linspace(1./size, 1 - 1./size, size)
+    x = np.linspace(1.0 / size, 1 - 1.0 / size, size)
     k = poisson.ppf(x, avgk)
     k[k < 1] = 1
     return generate_valid_degree_sequence(k)
@@ -60,10 +60,10 @@ def poisson_degreeseq(size, avgk):
 def nbinom_degreeseq(size, avgk, heterogeneity):
     if heterogeneity == 0:
         return poisson_degreeseq(size, avgk)
-    var = avgk + heterogeneity * avgk ** 2
+    var = avgk + heterogeneity * avgk**2
     q = avgk / var
-    n = avgk ** 2 / (var - avgk)
-    x = np.linspace(1./size, 1 - 1./size, size)
+    n = avgk**2 / (var - avgk)
+    x = np.linspace(1.0 / size, 1 - 1.0 / size, size)
     k = nbinom.ppf(x, n, q)
     k[k < 1] = 1
     return generate_valid_degree_sequence(k)
