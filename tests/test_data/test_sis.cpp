@@ -85,5 +85,22 @@ namespace GraphInf
 
         EXPECT_NEAR(ratio, logLikelihoodAfter - logLikelihoodBefore, 1e-6);
     }
+    TEST_F(TestSISDynamics, metropolisGraphStep_forAcceptedMove_noConsistencyError)
+    {
+        dynamics.sample();
+        MCMCSummary summary = {"none", 0, false};
+        while (not summary.isAccepted)
+            summary = dynamics.metropolisGraphStep();
+        dynamics.checkConsistency();
+    }
+
+    TEST_F(TestSISDynamics, metropolisParamStep_noConsistencyError)
+    {
+        dynamics.sample();
+        MCMCSummary summary = {"none", 0, false};
+        while (not summary.isAccepted)
+            summary = dynamics.metropolisParamStep();
+        dynamics.checkConsistency();
+    }
 
 }

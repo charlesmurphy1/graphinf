@@ -6,6 +6,7 @@
 
 #include "GraphInf/types.h"
 
+#include "GraphInf/data/python/proposer.hpp"
 #include "GraphInf/data/python/data_model.hpp"
 #include "GraphInf/data/data_model.h"
 
@@ -25,6 +26,38 @@ namespace GraphInf
 
     void initDataModels(py::module &m)
     {
+        py::class_<ParamProposer, PyParamProposer<>>(m, "ParamProposer")
+            .def(py::init<>())
+            .def("proposer_move", &ParamProposer::proposeMove)
+            .def("log_proposal", &ParamProposer::logProposal, py::arg("move"))
+            .def("log_proposal_ratio", &ParamProposer::logProposalRatio, py::arg("move"));
+
+        py::class_<StepParamProposer, ParamProposer>(m, "StepParamProposer")
+            .def(py::init<double, double>(), py::arg("step_size") = 0.01, py::arg("p") = 0.5);
+        py::class_<GaussianParamProposer, ParamProposer>(m, "GaussianParamProposer")
+            .def(py::init<double, double>(), py::arg("mean") = 0.0, py::arg("stddev") = 0.1);
+
+        py::class_<ParamMove>(m, "ParamMove")
+            .def(py::init<std::string, double>(), py::arg("key"), py::arg("value"))
+            .def_readwrite("key", &ParamMove::key)
+            .def_readwrite("value", &ParamMove::value)
+            .def("__repr__", [](ParamMove &self)
+                 { return self.display(); });
+
+        py::class_<MultiParamProposer>(m, "MultiParamProposer")
+            .def(py::init<double, double>(), py::arg("min_weight") = 1, py::arg("max_weight") = 10)
+            .def("insert_step_proposer", &MultiParamProposer::insertStepProposer, py::arg("key"), py::arg("rate") = 1, py::arg("step_size") = 0.01, py::arg("p") = 0.5)
+            .def("insert_gaussian_proposer", &MultiParamProposer::insertGaussianProposer, py::arg("key"), py::arg("rate") = 1, py::arg("mean") = 0.0, py::arg("stddev") = 0.1)
+            .def("erase", &MultiParamProposer::erase, py::arg("key"))
+            .def("size", &MultiParamProposer::size)
+            // .def("propose_move", py::overload_cast<>(&MultiParamProposer::proposeMove))
+            // .def("propose_move", &MultiParamProposer::proposeMove, py::arg("key"))
+            .def("propose_move", [](MultiParamProposer &self)
+                 { return self.proposeMove(); })
+            .def("propose_move", [](MultiParamProposer &self, std::string key)
+                 { return self.proposeMove(key); })
+            .def("log_proposal_ratio", &MultiParamProposer::logProposalRatio, py::arg("move"));
+
         py::class_<DataModel, NestedRandomVariable, PyDataModel<>>(m, "DataModel")
             .def(py::init<RandomGraph &>(), py::arg("graph_prior"))
             .def("get_size", &DataModel::getSize)
@@ -36,14 +69,12 @@ namespace GraphInf
             .def("get_log_likelihood", &DataModel::getLogLikelihood)
             .def("get_log_prior", &DataModel::getLogPrior)
             .def("get_log_joint", &DataModel::getLogJoint)
-            .def("get_log_likelihood_ratio_from_graph_move", &DataModel::getLogLikelihoodRatioFromGraphMove,
-                 py::arg("move"))
-            .def("get_log_prior_ratio_from_graph_move", &DataModel::getLogPriorRatioFromGraphMove,
-                 py::arg("move"))
-            .def("get_log_joint_ratio_from_graph_move", &DataModel::getLogJointRatioFromGraphMove,
-                 py::arg("move"))
-            .def("apply_graph_move", &DataModel::applyGraphMove,
-                 py::arg("move"))
+            .def("get_log_likelihood_ratio_from_graph_move", &DataModel::getLogLikelihoodRatioFromGraphMove, py::arg("move"))
+            .def("get_log_prior_ratio_from_graph_move", &DataModel::getLogPriorRatioFromGraphMove, py::arg("move"))
+            .def("get_log_joint_ratio_from_graph_move", &DataModel::getLogJointRatioFromGraphMove, py::arg("move"))
+            .def("apply_graph_move", &DataModel::applyGraphMove, py::arg("move"))
+            .def("apply_param_move", &DataModel::applyParamMove, py::arg("move"))
+            .def("is_valid_param_move", &DataModel::isValidParamMove, py::arg("move"))
             .def("get_log_acceptance_prob_from_graph_move", &DataModel::getLogAcceptanceProbFromGraphMove, py::arg("move"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
             .def("metropolis_graph_step", &DataModel::metropolisGraphStep, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
             .def("metropolis_prior_step", &DataModel::metropolisPriorStep)

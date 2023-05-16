@@ -24,6 +24,7 @@ namespace GraphInf
 
     public:
         using PyNestedRandomVariable<BaseClass>::PyNestedRandomVariable;
+        ~PyDataModel() override = default;
         /* Pure abstract methods */
         const double getLogLikelihood() const override
         {
@@ -38,6 +39,8 @@ namespace GraphInf
         const MCMCSummary metropolisGraphStep(const double b = 1, const double c = 1) override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisGraphStep, b, c); }
         const MCMCSummary metropolisPriorStep() override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisPriorStep, ); }
         const MCMCSummary metropolisParamStep() override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisParamStep, ); }
+        void applyParamMove(const ParamMove &move) override { PYBIND11_OVERRIDE(void, BaseClass, applyParamMove, move); }
+        bool isValidParamMove(const ParamMove &move) const override { PYBIND11_OVERRIDE(bool, BaseClass, isValidParamMove, move); }
 
         bool isSafe() const override { PYBIND11_OVERRIDE(bool, BaseClass, isSafe, ); }
     };

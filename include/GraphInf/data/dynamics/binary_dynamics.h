@@ -22,9 +22,15 @@ namespace GraphInf
             RandomGraph &randomGraph,
             size_t numSteps,
             double autoActivationProb = 0.0,
-            double autoDeactivationProb = 0.0) : Dynamics(randomGraph, 2, numSteps),
-                                                 m_autoActivationProb(autoActivationProb),
-                                                 m_autoDeactivationProb(autoDeactivationProb) {}
+            double autoDeactivationProb = 0.0,
+            double activationStddev = 0.1,
+            double deactivationStddev = 0.1) : Dynamics(randomGraph, 2, numSteps),
+                                               m_autoActivationProb(autoActivationProb),
+                                               m_autoDeactivationProb(autoDeactivationProb)
+        {
+            m_paramProposer.insertGaussianProposer("activation", 1, 0., activationStddev);
+            m_paramProposer.insertGaussianProposer("deactivation", 1, 0., deactivationStddev);
+        }
         const double getTransitionProb(
             const VertexState &prevVertexState, const VertexState &nextVertexState, const VertexNeighborhoodState &neighborhoodState) const override;
 
@@ -37,6 +43,23 @@ namespace GraphInf
         void setAutoDeactivationProb(double autoDeactivationProb) { m_autoDeactivationProb = autoDeactivationProb; }
         const double getAutoActivationProb() const { return m_autoActivationProb; }
         const double getAutoDeactivationProb() const { return m_autoDeactivationProb; }
+        void applyParamMove(const ParamMove &move) override
+        {
+            if (move.key == "activation")
+                m_autoActivationProb += move.value;
+
+            if (move.key == "deactivation")
+                m_autoDeactivationProb += move.value;
+            Dynamics::applyParamMove(move);
+        }
+        virtual bool isValidParamMove(const ParamMove &move) const override
+        {
+            if (move.key == "activation")
+                return 0 <= m_autoActivationProb + move.value && m_autoActivationProb + move.value <= 1;
+            if (move.key == "deactivation")
+                return 0 <= m_autoDeactivationProb + move.value && m_autoDeactivationProb + move.value <= 1;
+            return Dynamics::isValidParamMove(move);
+        }
     };
 
 } // namespace GraphInf

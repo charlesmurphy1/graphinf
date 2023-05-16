@@ -3,6 +3,7 @@
 
 #include "GraphInf/rv.hpp"
 #include "GraphInf/graph/random_graph.hpp"
+#include "GraphInf/data/proposer.h"
 #include "GraphInf/utility/mcmc.h"
 
 namespace GraphInf
@@ -15,6 +16,7 @@ namespace GraphInf
         virtual void computeConsistentState(){};
         virtual void applyGraphMoveToSelf(const GraphMove &move) = 0;
         std::uniform_real_distribution<double> m_uniform;
+        MultiParamProposer m_paramProposer;
 
     public:
         DataModel(RandomGraph &prior) : m_uniform(0, 1) { setGraphPrior(prior); }
@@ -31,19 +33,9 @@ namespace GraphInf
         void setGraphPrior(RandomGraph &prior)
         {
             m_graphPriorPtr = &prior;
-            // m_graphPriorPtr->isRoot(false);
             computeConsistentState();
         }
         const size_t getSize() const { return m_graphPriorPtr->getSize(); }
-        // virtual void sampleState() = 0;
-        // void sample(){
-        //     m_graphPriorPtr->sample();
-        //     sampleState();
-        //     computationFinished();
-        //     #if DEBUG
-        //     checkConsistency();
-        //     #endif
-        // }
         void samplePrior()
         {
             m_graphPriorPtr->sample();
@@ -62,6 +54,15 @@ namespace GraphInf
         }
         const double getLogJoint() const { return getLogPrior() + getLogLikelihood(); }
         virtual const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const = 0;
+        virtual const double getLogLikelihoodRatioFromParaMove(const ParamMove &move)
+        {
+            ParamMove reverseMove = {move.key, -move.value};
+            double logLikelihoodRatio = -getLogLikelihood();
+            applyParamMove(move);
+            logLikelihoodRatio += getLogLikelihood();
+            applyParamMove(reverseMove);
+            return logLikelihoodRatio;
+        }
         const double getLogPriorRatioFromGraphMove(const GraphMove &move) const
         {
             return NestedRandomVariable::processRecursiveConstFunction<double>([&]()
@@ -76,7 +77,23 @@ namespace GraphInf
         virtual const MCMCSummary metropolisGraphStep(const double betaPrior = 1, const double betaLikelihood = 1);
         virtual const MCMCSummary metropolisParamStep()
         {
-            return {"no step", 1, true};
+            if (m_paramProposer.size() == 0)
+                return {"ParamMove()", 0, true};
+
+            auto move = m_paramProposer.proposeMove();
+
+            if (not isValidParamMove(move))
+                return {move.display(), -INFINITY, false};
+
+            double likelihoodRatio = getLogLikelihoodRatioFromParaMove(move);
+            double proposalRatio = m_paramProposer.logProposalRatio(move);
+            double acceptProb = exp(likelihoodRatio + proposalRatio);
+            if (m_uniform(rng) < acceptProb)
+            {
+                applyParamMove(move);
+                return {move.display(), acceptProb, true};
+            }
+            return {move.display(), acceptProb, false};
         }
         virtual const MCMCSummary metropolisPriorStep()
         {
@@ -96,6 +113,8 @@ namespace GraphInf
             checkConsistency();
 #endif
         }
+        virtual void applyParamMove(const ParamMove &move) {}
+        virtual bool isValidParamMove(const ParamMove &move) const { return true; }
 
         void computationFinished() const override
         {

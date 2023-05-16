@@ -3,6 +3,7 @@
 
 #include "GraphInf/data/dynamics/binary_dynamics.h"
 #include "GraphInf/data/util.h"
+#include "GraphInf/data/proposer.h"
 #include "random"
 
 namespace GraphInf
@@ -11,6 +12,7 @@ namespace GraphInf
     class GlauberDynamics : public BinaryDynamics
     {
         double m_coupling;
+        MultiParamProposer m_proposer;
 
     public:
         GlauberDynamics(
@@ -18,11 +20,19 @@ namespace GraphInf
             size_t numSteps,
             double coupling = 1,
             double autoActivationProb = 0,
-            double autoDeactivationProb = 0) : BinaryDynamics(graphPrior,
+            double autoDeactivationProb = 0,
+            double couplingStddev = 0.1,
+            double activationStddev = 0.1,
+            double deactivationStddev = 0.1) : BinaryDynamics(graphPrior,
                                                               numSteps,
                                                               autoActivationProb,
-                                                              autoDeactivationProb),
-                                               m_coupling(coupling) {}
+                                                              autoDeactivationProb,
+                                                              activationStddev,
+                                                              deactivationStddev),
+                                               m_coupling(coupling)
+        {
+            m_paramProposer.insertGaussianProposer("coupling", 1, 0.0, couplingStddev);
+        }
 
         const double getActivationProb(const VertexNeighborhoodState &vertexNeighborState) const override
         {
@@ -36,6 +46,19 @@ namespace GraphInf
         }
         const double getCoupling() const { return m_coupling; }
         void setCoupling(double coupling) { m_coupling = coupling; }
+        void applyParamMove(const ParamMove &move) override
+        {
+            if (move.key == "coupling")
+                m_coupling += move.value;
+
+            BinaryDynamics::applyParamMove(move);
+        }
+        bool isValidParamMove(const ParamMove &move) const override
+        {
+            if (move.key == "coupling")
+                return 0 <= m_coupling + move.value;
+            return BinaryDynamics::isValidParamMove(move);
+        }
     };
 
 } // namespace GraphInf

@@ -125,6 +125,10 @@ namespace GraphInf
 
         const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override;
         void applyGraphMoveToSelf(const GraphMove &move) override;
+        virtual bool isValidParamMove(const ParamMove &move) const override
+        {
+            return DataModel::isValidParamMove(move);
+        }
         void checkSelfSafety() const override;
         void checkSelfConsistency() const override;
 
