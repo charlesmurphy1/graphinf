@@ -180,7 +180,6 @@ class ConfigurationModelFamily(RandomGraphWrapper):
 
 class ConfigurationModel(RandomGraphWrapper):
     def __init__(self, degree_seq: list[int]):
-        print(type(degree_seq))
         wrapped = _graph.ConfigurationModel(degree_seq)
         self.degrees = degree_seq
         super().__init__(

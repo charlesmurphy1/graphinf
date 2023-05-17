@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Optional, Literal
 from graphinf.wrapper import Wrapper as _Wrapper
 from graphinf.graph import (
@@ -6,6 +7,7 @@ from graphinf.graph import (
     DeltaGraph as _DeltaGraph,
 )
 from basegraph import core
+from graphinf._graphinf.data import DataModel
 
 from .util import (
     log_posterior_meanfield,
@@ -34,6 +36,8 @@ class DataModelWrapper(_Wrapper):
         self.nested = graph_prior.nested
         data_model = self.constructor(graph_prior.wrap, **kwargs)
         data_model.sample()
+        if not graph_prior.labeled:
+            data_model.freeze_graph_prior()
         super().__init__(data_model, graph_prior=graph_prior, params=kwargs)
 
     def __repr__(self):
@@ -51,6 +55,16 @@ class DataModelWrapper(_Wrapper):
         elif self.labeled:
             return "labeled"
         return "normal"
+
+    def set_state_from(self, other: DataModelWrapper):
+        if issubclass(other.__class__, DataModelWrapper):
+            self.wrap.set_state_from(other.wrap)
+        elif issubclass(other.__class__, DataModel):
+            self.wrap.set_state_from(other)
+        else:
+            raise TypeError(
+                f"Model `{other}` has an invalid type `{other.__class__.__name__}`"
+            )
 
     def set_graph_prior(self, graph_prior: _RandomGraphWrapper):
         self.labeled = graph_prior.labeled

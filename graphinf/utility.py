@@ -103,3 +103,14 @@ class EdgeCollector:
                 continue
             logp += np.log(self.mle(edge, m))
         return logp
+
+    def entropy(self):
+        entropy = 0
+        for e, mult in self.multiplicities.items():
+            if self.counts[e] < self.total_count:
+                p = self.mle(e, 0)
+                entropy -= p * np.log(p)
+            for m, c in mult.items():
+                p = self.mle(e, m)
+                entropy -= p * np.log(p)
+        return entropy

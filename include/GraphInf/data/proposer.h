@@ -111,6 +111,16 @@ namespace GraphInf
             m_moveSampler.erase(key);
         }
         size_t size() { return m_moveSampler.size(); }
+        void freeze(std::string key)
+        {
+            m_moveSampler.erase(key);
+        }
+        void unfreeze(std::string key, double weight = 1)
+        {
+            if (m_proposersPtrMap.count(key) == 0)
+                return;
+            m_moveSampler.insert(key, weight);
+        }
 
         const ParamMove proposeMove(std::string key) const
         {

@@ -35,17 +35,17 @@ namespace GraphInf
         }
         return {move.display(), acceptProb, isAccepted};
     }
-    const int DataModel::gibbsSweep(size_t numSteps, const double sampleGraphProb, const double samplePriorProb, const double sampleParamProb, const double betaPrior, const double betaLikelihood)
+    const int DataModel::gibbsSweep(size_t numSteps, const double betaPrior, const double betaLikelihood)
     {
         int numSuccesses = 0;
         for (size_t i = 0; i < numSteps; i++)
         {
             MCMCSummary summary;
-            if (m_uniform(rng) < sampleParamProb)
+            if (m_uniform(rng) < m_paramRate)
                 summary = metropolisParamStep();
-            if (m_uniform(rng) < samplePriorProb)
+            if (m_uniform(rng) < m_graphPriorRate)
                 summary = metropolisPriorStep();
-            if (m_uniform(rng) < samplePriorProb)
+            if (m_uniform(rng) < m_graphRate)
                 summary = metropolisGraphStep(betaPrior, betaLikelihood);
 
             if (summary.isAccepted)
@@ -53,11 +53,11 @@ namespace GraphInf
         }
         return numSuccesses;
     }
-    const int DataModel::metropolisSweep(size_t numSteps, const double sampleGraphRate, const double samplePriorRate, const double sampleParamRate, const double betaPrior, const double betaLikelihood)
+    const int DataModel::metropolisSweep(size_t numSteps, const double betaPrior, const double betaLikelihood)
     {
         int numSuccesses = 0;
-        double z = sampleGraphRate + samplePriorRate + sampleParamRate;
-        auto dist = std::discrete_distribution<int>({sampleGraphRate / z, samplePriorRate / z, sampleParamRate / z});
+        double z = m_graphRate + m_graphPriorRate + m_paramRate;
+        auto dist = std::discrete_distribution<int>({m_graphRate / z, m_graphPriorRate / z, m_paramRate / z});
         for (size_t i = 0; i < numSteps; i++)
         {
             MCMCSummary summary;

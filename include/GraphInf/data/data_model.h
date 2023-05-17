@@ -17,6 +17,7 @@ namespace GraphInf
         virtual void applyGraphMoveToSelf(const GraphMove &move) = 0;
         std::uniform_real_distribution<double> m_uniform;
         MultiParamProposer m_paramProposer;
+        double m_graphRate = 1, m_graphPriorRate = 1, m_paramRate = 1;
 
     public:
         DataModel(RandomGraph &prior) : m_uniform(0, 1) { setGraphPrior(prior); }
@@ -100,8 +101,8 @@ namespace GraphInf
             return m_graphPriorPtr->metropolisStep();
         }
 
-        const int gibbsSweep(size_t numSteps, const double sampleGraphProb = 1., const double samplePriorProb = 0., const double sampleParamProb = 0., const double betaPrior = 1, const double betaLikelihood = 1);
-        const int metropolisSweep(size_t numSteps, const double sampleGraphRate = 1., const double samplePriorRate = 0., const double sampleParamRate = 0., const double betaPrior = 1, const double betaLikelihood = 1);
+        const int gibbsSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1);
+        const int metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1);
 
         void applyGraphMove(const GraphMove &move)
         {
@@ -113,7 +114,20 @@ namespace GraphInf
             checkConsistency();
 #endif
         }
+        void freezeGraph() { m_graphRate = 0; }
+        void unfreezeGraph(double rate = 1) { m_graphRate = rate; }
+
+        void freezeGraphPrior() { m_graphPriorRate = 0; }
+        void unfreezeGraphPrior(double rate = 1) { m_graphPriorRate = rate; }
+
+        void freezeParam() { m_paramRate = 0; }
+        void unfreezeParam(double rate = 1) { m_paramRate = rate; }
+
+        void freezeParam(std::string key) { m_paramProposer.freeze(key); }
+        void unfreezeParam(std::string key, double rate = 1) { m_paramProposer.unfreeze(key, rate); }
+
         virtual void applyParamMove(const ParamMove &move) {}
+
         virtual bool isValidParamMove(const ParamMove &move) const { return true; }
 
         void computationFinished() const override

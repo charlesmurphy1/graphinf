@@ -50,8 +50,6 @@ namespace GraphInf
             .def("insert_gaussian_proposer", &MultiParamProposer::insertGaussianProposer, py::arg("key"), py::arg("rate") = 1, py::arg("mean") = 0.0, py::arg("stddev") = 0.1)
             .def("erase", &MultiParamProposer::erase, py::arg("key"))
             .def("size", &MultiParamProposer::size)
-            // .def("propose_move", py::overload_cast<>(&MultiParamProposer::proposeMove))
-            // .def("propose_move", &MultiParamProposer::proposeMove, py::arg("key"))
             .def("propose_move", [](MultiParamProposer &self)
                  { return self.proposeMove(); })
             .def("propose_move", [](MultiParamProposer &self, std::string key)
@@ -79,8 +77,16 @@ namespace GraphInf
             .def("metropolis_graph_step", &DataModel::metropolisGraphStep, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
             .def("metropolis_prior_step", &DataModel::metropolisPriorStep)
             .def("metropolis_param_step", &DataModel::metropolisParamStep)
-            .def("gibbs_sweep", &DataModel::gibbsSweep, py::arg("num_steps"), py::arg("graph_prob") = 1, py::arg("prior_prob") = 0, py::arg("param_prob") = 0, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            .def("metropolis_sweep", &DataModel::metropolisSweep, py::arg("num_steps"), py::arg("graph_rate") = 1, py::arg("prior_rate") = 0, py::arg("param_rate") = 0, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
+            .def("gibbs_sweep", &DataModel::gibbsSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+            .def("metropolis_sweep", &DataModel::metropolisSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+            .def("freeze_graph", &DataModel::freezeGraph)
+            .def("unfreeze_graph", &DataModel::unfreezeGraph, py::arg("rate") = 1)
+            .def("freeze_graph_prior", &DataModel::freezeGraphPrior)
+            .def("unfreeze_graph_prior", &DataModel::unfreezeGraphPrior, py::arg("rate") = 1)
+            .def("freeze_param", py::overload_cast<>(&DataModel::freezeParam))
+            .def("freeze_param", py::overload_cast<std::string>(&DataModel::freezeParam), py::arg("key"))
+            .def("unfreeze_param", py::overload_cast<double>(&DataModel::unfreezeParam), py::arg("rate") = 1)
+            .def("unfreeze_param", py::overload_cast<std::string, double>(&DataModel::unfreezeParam), py::arg("key"), py::arg("rate") = 1);
 
         py::module dynamics = m.def_submodule("dynamics");
         py::class_<Dynamics, DataModel, PyDynamics<>>(dynamics, "Dynamics")
