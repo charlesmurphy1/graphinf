@@ -91,6 +91,7 @@ namespace GraphInf
               .def("get_average_degree", &RandomGraph::getAverageDegree)
               .def("get_edge_proposer", &RandomGraph::getEdgeProposer, py::return_value_policy::reference_internal)
               .def("set_edge_proposer", &RandomGraph::setEdgeProposer, py::arg("proposer"))
+              .def("from_graph", &RandomGraph::fromGraph, py::arg("graph"))
               .def("with_self_loops", [](const RandomGraph &self)
                    { return self.withSelfLoops(); })
               .def("with_self_loops", [](RandomGraph &self, bool condition)

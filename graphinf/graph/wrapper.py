@@ -46,9 +46,17 @@ class RandomGraphWrapper(_Wrapper):
         for k, v in self.params.items():
             if isinstance(v, str):
                 v = f"'{v}'"
+            if k in dir(self):
+                v = getattr(self, k)
             str_format += f"\n\t{k}={v},"
         str_format += "\n)"
         return str_format
+    @property
+    def size(self):
+        return self.get_size()
+    @property
+    def edge_count(self):
+        return self.get_edge_count()
 
     def post_init(self):
         self.wrap.sample()
@@ -115,6 +123,12 @@ class DeltaGraph(RandomGraphWrapper):
     def __init__(self, graph: core.UndirectedMultigraph):
         wrapped = _graph.DeltaGraph(graph)
         super().__init__(wrapped)
+    @property
+    def size(self):
+        return self.get_size()
+    @property
+    def edge_count(self):
+        return self.get_edge_count()
 
 
 class ErdosRenyiModel(RandomGraphWrapper):
@@ -123,16 +137,16 @@ class ErdosRenyiModel(RandomGraphWrapper):
         size: int = 100,
         edge_count: float = 250,
         canonical: bool = False,
-        with_self_loops: bool = True,
-        with_parallel_edges: bool = True,
+        loopy: bool = True,
+        multigraph: bool = True,
         edge_proposer_type: str = "uniform",
     ):
         wrapped = _graph.ErdosRenyiModel(
             size,
             edge_count,
             canonical=canonical,
-            with_self_loops=with_self_loops,
-            with_parallel_edges=with_parallel_edges,
+            with_self_loops=loopy,
+            with_parallel_edges=multigraph,
             edge_proposer_type=edge_proposer_type,
         )
         super().__init__(
@@ -140,8 +154,8 @@ class ErdosRenyiModel(RandomGraphWrapper):
             size=size,
             edge_count=edge_count,
             canonical=canonical,
-            with_self_loops=with_self_loops,
-            with_parallel_edges=with_parallel_edges,
+            loopy=loopy,
+            multigraph=multigraph,
             edge_proposer_type=edge_proposer_type,
         )
 
@@ -155,6 +169,7 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         edge_count: float = 250,
         degree_prior_type: str = "uniform",
         canonical: bool = False,
+        degree_constrained: bool = False,
         edge_proposer_type: str = "degree",
     ):
         if degree_prior_type not in self.available_degree_prior_types:
@@ -166,6 +181,7 @@ class ConfigurationModelFamily(RandomGraphWrapper):
             edge_count,
             canonical=canonical,
             hyperprior=(degree_prior_type == "hyper"),
+            degree_constrained=degree_constrained,
             edge_proposer_type=edge_proposer_type,
         )
         super().__init__(
@@ -173,9 +189,15 @@ class ConfigurationModelFamily(RandomGraphWrapper):
             size=size,
             edge_count=edge_count,
             degree_prior_type=degree_prior_type,
+            degree_constrained=degree_constrained,
             canonical=canonical,
-            edge_proposer_type=edge_proposer_type,
         )
+    @property
+    def size(self):
+        return self.get_size()
+    @property
+    def edge_count(self):
+        return self.get_edge_count()
 
 
 class ConfigurationModel(RandomGraphWrapper):
@@ -207,8 +229,8 @@ class PlantedPartitionGraph(RandomGraphWrapper):
         block_count: int = 3,
         assortativity: float = 0.5,
         stub_labeled: bool = False,
-        with_self_loops: bool = True,
-        with_parallel_edges: bool = True,
+        loopy: bool = True,
+        multigraph: bool = True,
     ):
         wrapped = _graph.PlantedPartitionModel(
             size,
@@ -216,8 +238,8 @@ class PlantedPartitionGraph(RandomGraphWrapper):
             block_count=block_count,
             assortativity=assortativity,
             stub_labeled=stub_labeled,
-            with_self_loops=with_self_loops,
-            with_parallel_edges=with_parallel_edges,
+            with_self_loops=loopy,
+            with_parallel_edges=multigraph,
         )
         super().__init__(
             wrapped,
@@ -226,8 +248,8 @@ class PlantedPartitionGraph(RandomGraphWrapper):
             block_count=block_count,
             assortativity=assortativity,
             stub_labeled=stub_labeled,
-            with_self_loops=with_self_loops,
-            with_parallel_edges=with_parallel_edges,
+            loopy=loopy,
+            multigraph=multigraph,
         )
 
 
@@ -251,8 +273,8 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         label_graph_prior_type: str = "uniform",
         degree_prior_type: str = "uniform",
         canonical: bool = False,
-        with_self_loops: bool = True,
-        with_parallel_edges: bool = True,
+        loopy: bool = True,
+        multigraph: bool = True,
         edge_proposer_type: str = "uniform",
         block_proposer_type: str = "mixed",
         sample_label_count_prob: float = 0.1,
@@ -320,8 +342,8 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                     edge_count,
                     stub_labeled=(likelihood_type == "stub_labeled"),
                     canonical=canonical,
-                    with_self_loops=with_self_loops,
-                    with_parallel_edges=with_parallel_edges,
+                    with_self_loops=loopy,
+                    with_parallel_edges=multigraph,
                     edge_proposer_type=edge_proposer_type,
                     block_proposer_type=block_proposer_type,
                     sample_label_count_prob=sample_label_count_prob,
@@ -338,8 +360,8 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                     planted=(label_graph_prior_type == "planted"),
                     stub_labeled=(likelihood_type == "stub_labeled"),
                     canonical=canonical,
-                    with_self_loops=with_self_loops,
-                    with_parallel_edges=with_parallel_edges,
+                    with_self_loops=loopy,
+                    with_parallel_edges=multigraph,
                     edge_proposer_type=edge_proposer_type,
                     block_proposer_type=block_proposer_type,
                     sample_label_count_prob=sample_label_count_prob,
@@ -356,8 +378,8 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             label_graph_prior_type=label_graph_prior_type,
             degree_prior_type=degree_prior_type,
             canonical=canonical,
-            with_self_loops=with_self_loops,
-            with_parallel_edges=with_parallel_edges,
+            loopy=loopy,
+            multigraph=multigraph,
             edge_proposer_type=edge_proposer_type,
             block_proposer_type=block_proposer_type,
             sample_label_count_prob=sample_label_count_prob,
@@ -366,3 +388,4 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             labeled=labeled,
             nested=nested,
         )
+    

@@ -21,15 +21,17 @@ namespace GraphInf
             .def("get_degrees", &ConfigurationModelBase::getDegrees);
 
         py::class_<ConfigurationModel, ConfigurationModelBase>(m, "ConfigurationModel")
-            .def(py::init<std::vector<size_t>>(), py::arg("degrees"));
+            .def(py::init<std::vector<size_t>>(), py::arg("degrees"))
+            .def(py::init<BaseGraph::UndirectedMultigraph>(), py::arg("graph"));
 
         py::class_<ConfigurationModelFamily, ConfigurationModelBase>(m, "ConfigurationModelFamily")
             .def(
-                py::init<size_t, double, bool, bool, std::string>(),
+                py::init<size_t, double, bool, bool, bool, std::string>(),
                 py::arg("size"),
                 py::arg("edge_count"),
                 py::arg("hyperprior") = true,
                 py::arg("canonical") = false,
+                py::arg("degree_constrained") = false,
                 py::arg("edge_proposer_type") = "degree");
     }
 

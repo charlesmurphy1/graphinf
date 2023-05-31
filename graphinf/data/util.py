@@ -23,31 +23,21 @@ def mcmc_on_graph(
     sweep_type: Literal["metropolis", "gibbs"] = "metropolis",
     n_steps: int = 1000,
     burn: int = 0,
-    p_graph: float = 1,
-    p_prior: float = 0,
-    p_param: float = 0,
     beta_prior: float = 1,
     beta_likelihood: float = 1,
     start_from_original: bool = False,
     reset_original: bool = False,
     callback: Optional[Callable[[DataModel], None]] = None,
+    graph_rate: Optional[float] = None,
+    prior_rate: Optional[float] = None,
+    param_rate: Optional[float] = None,
     verbose: bool = False,
 ) -> None:
     if sweep_type == "metropolis":
-        sweep = partial(
-            model.metropolis_sweep,
-            graph_rate=p_graph,
-            prior_rate=p_prior,
-            param_rate=p_param,
-        )
+        sweep = model.metropolis_sweep
 
     elif sweep_type == "gibbs":
-        sweep = partial(
-            model.gibbs_sweep,
-            graph_prob=p_graph,
-            prior_prob=p_prior,
-            param_prob=p_param,
-        )
+        sweep = model.gibbs_sweep
     else:
         raise ValueError()
 
@@ -67,6 +57,13 @@ def mcmc_on_graph(
     original = model.get_graph()
     if not start_from_original:
         model.sample_prior()
+    
+    if graph_rate is not None and graph_rate >= 0:
+        model.unfreeze_graph(graph_rate)
+    if prior_rate is not None and prior_rate >= 0:
+        model.unfreeze_graph_prior(prior_rate)
+    if param_rate is not None and param_rate >= 0:
+        model.unfreeze_param(param_rate)
 
     if burn > 0:
         sweep(burn, beta_prior=beta_prior, beta_likelihood=beta_likelihood)
@@ -114,7 +111,6 @@ def log_evidence_exact(model: DataModel, **kwargs):
             f"A model with size {N} is being used"
             f"for exact evaluation, which might not finish."
         )
-    N, M = model.graph_prior.get_size()
     original = model.get_graph()
     samples = []
     for g in enumerate_all_graphs(N, M, selfloops=ws, parallel_edges=wp):

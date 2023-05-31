@@ -38,18 +38,22 @@ namespace GraphInf
     class EdgeCountDeltaPrior : public EdgeCountPrior
     {
     private:
-        size_t m_edgeCount;
+        size_t m_edgeCount = 0;
 
     public:
         EdgeCountDeltaPrior() {}
-        EdgeCountDeltaPrior(const size_t &edgeCount) : m_edgeCount(edgeCount) { setState(m_edgeCount); }
-        EdgeCountDeltaPrior(const EdgeCountDeltaPrior &other) : m_edgeCount(other.m_edgeCount) { setState(m_edgeCount); }
+        EdgeCountDeltaPrior(const size_t &edgeCount) { setState(m_edgeCount); }
+        EdgeCountDeltaPrior(const EdgeCountDeltaPrior &other) { setState(m_edgeCount); }
         virtual ~EdgeCountDeltaPrior() {}
         const EdgeCountDeltaPrior &operator=(const EdgeCountDeltaPrior &other)
         {
-            m_edgeCount = other.m_edgeCount;
-            setState(m_edgeCount);
+            setState(other.m_edgeCount);
             return *this;
+        }
+        void setState(const size_t &state) override
+        {
+            Prior<size_t>::setState(state);
+            m_edgeCount = state;
         }
 
         void sampleState() override{};

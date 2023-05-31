@@ -39,6 +39,7 @@ namespace GraphInf
         bool isSafe() const override { PYBIND11_OVERRIDE(bool, BaseClass, isSafe, ); }
         void checkSelfSafety() const override { PYBIND11_OVERRIDE(void, BaseClass, checkSelfSafety, ); }
         void checkSelfConsistency() const override { PYBIND11_OVERRIDE(void, BaseClass, checkSelfConsistency, ); }
+        void fromGraph(const MultiGraph &graph) override { PYBIND11_OVERRIDE(void, BaseClass, fromGraph, graph); }
         bool isValidGraphMove(const GraphMove &move) const override { PYBIND11_OVERRIDE(bool, BaseClass, isValidGraphMove, move); }
     };
 

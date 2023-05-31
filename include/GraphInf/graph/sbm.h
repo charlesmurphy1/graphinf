@@ -73,6 +73,11 @@ namespace GraphInf
         }
 
     public:
+        void fromGraph(const MultiGraph &graph) override
+        {
+            RandomGraph::fromGraph(graph);
+            m_labelGraphPriorPtr->setGraph(graph);
+        }
         void sampleOnlyLabels() override
         {
             m_labelGraphPriorPtr->samplePartition();

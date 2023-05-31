@@ -78,6 +78,12 @@ namespace GraphInf
         const std::vector<MultiGraph> &getNestedLabelGraph() const override { return m_nestedLabelGraphPrior.getNestedState(); }
         const MultiGraph &getNestedLabelGraph(Level level) const override { return m_nestedLabelGraphPrior.getNestedState(level); }
 
+        void fromGraph(const MultiGraph &graph) override
+        {
+            RandomGraph::fromGraph(graph);
+            m_labelGraphPriorPtr->setGraph(graph);
+        }
+
         void sampleOnlyLabels() override
         {
             m_nestedLabelGraphPrior.samplePartition();

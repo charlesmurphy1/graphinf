@@ -100,6 +100,7 @@ class DataModelWrapper(_Wrapper):
         kwargs["reset_original"] = reset_original
         kwargs["verbose"] = verbose
 
+        graph = self.get_graph() if graph is None else graph
         if method == "meanfield":
             posterior = log_posterior_meanfield(self, graph, **kwargs)
         else:
