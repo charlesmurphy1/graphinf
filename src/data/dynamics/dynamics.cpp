@@ -207,7 +207,7 @@ namespace GraphInf
         double logLikelihood = 0;
         std::vector<int> neighborsState(getNumStates(), 0);
         const auto &graph = DataModel::getGraph();
-        for (size_t t = m_pastLength; t < m_length; t++)
+        for (size_t t = 0; t < m_length; t++)
         {
             for (auto idx : graph)
             {
@@ -228,6 +228,25 @@ namespace GraphInf
             transProbs[nextVertexState] = getTransitionProb(prevVertexState, nextVertexState, neighborhoodState);
         }
         return transProbs;
+    };
+    const std::vector<std::vector<double>> Dynamics::getTransitionMatrix(VertexState outState) const
+    {
+        std::vector<std::vector<double>> probs;
+        for (auto idx : getGraph())
+        {
+            probs.push_back({});
+            for (size_t t = 0; t < m_length; t++)
+            {
+                VertexState futureState = outState;
+                if (outState == -1)
+                    futureState = m_futureStateSequence[idx][t];
+                probs[idx].push_back(getTransitionProb(
+                    m_pastStateSequence[idx][t],
+                    futureState,
+                    m_neighborsPastStateSequence[idx][t]));
+            }
+        }
+        return probs;
     };
 
     void Dynamics::updateNeighborsStateFromEdgeMove(
@@ -290,7 +309,7 @@ namespace GraphInf
 
         for (const auto &idx : verticesAffected)
         {
-            for (size_t t = m_pastLength; t < m_length; t++)
+            for (size_t t = 0; t < m_length; t++)
             {
                 logLikelihoodRatio += log(
                     getTransitionProb(m_pastStateSequence[idx][t], m_futureStateSequence[idx][t], nextNeighborMap[idx][t]));

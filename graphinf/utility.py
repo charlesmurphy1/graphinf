@@ -1,9 +1,12 @@
-import numpy as np
-
-from itertools import combinations_with_replacement
-from graphinf._graphinf.utility import *
+import importlib
 from collections import defaultdict
-from basegraph import core
+from itertools import combinations_with_replacement
+
+import networkx as nx
+import numpy as np
+from basegraph import core as bs
+
+from graphinf._graphinf.utility import *
 
 
 def logbase(x, base=np.e):
@@ -79,7 +82,7 @@ class EdgeCollector:
         self.counts = defaultdict(int)
         self.total_count = 0
 
-    def update(self, graph: core.UndirectedMultigraph):
+    def update(self, graph: bs.UndirectedMultigraph):
         self.total_count += 1
         for edge in graph.edges():
             self.multiplicities[edge][graph.get_edge_multiplicity(*edge)] += 1
@@ -114,3 +117,36 @@ class EdgeCollector:
                 p = self.mle(e, m)
                 entropy -= p * np.log(p)
         return entropy
+
+
+def convert_basegraph_to_networkx(
+    bs_graph: bs.UndirectedMultigraph,
+) -> nx.Graph:
+    nx_graph = nx.Graph()
+    for v in bs_graph:
+        nx_graph.add_node(v)
+        for u in bs_graph.get_out_neighbours(v):
+            if v > u:
+                continue
+            nx_graph.add_edge(v, u)
+    return nx_graph
+
+
+def convert_basegraph_to_graphtool(bs_graph: bs.UndirectedMultigraph):
+    if importlib.find_spec("graph_tool"):
+        import graph_tool.all as gt
+    else:
+        raise RuntimeError("Could not find `graph_tool`.")
+
+    gt_graph = gt.Graph(directed=False)
+    for e in bs_graph.edges():
+        for m in range(bs_graph.get_edge_multiplicity(*e)):
+            gt_graph.add_edge(*e)
+    return gt_graph
+
+
+def convert_graphtool_to_basegraph(gt_graph) -> bs.UndirectedMultigraph:
+    bs_graph = bs.UndirectedMultigraph(gt_graph.num_vertices())
+    for e in gt_graph.edges():
+        bs_graph.add_edge(*e)
+    return bs_graph

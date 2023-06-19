@@ -26,7 +26,6 @@ namespace GraphInf
     protected:
         size_t m_numStates;
         size_t m_length;
-        size_t m_pastLength;
         std::vector<VertexState> m_state;
         Matrix<VertexState> m_neighborsState;
         bool m_acceptSelfLoops = false;
@@ -52,8 +51,7 @@ namespace GraphInf
     public:
         explicit Dynamics(RandomGraph &graphPrior, size_t numStates, size_t length) : DataModel(graphPrior),
                                                                                       m_numStates(numStates),
-                                                                                      m_length(length),
-                                                                                      m_pastLength(0) {}
+                                                                                      m_length(length) {}
 
         const std::vector<VertexState> &getState() const { return m_state; }
         void setCurrentState(std::vector<VertexState> &state)
@@ -91,8 +89,6 @@ namespace GraphInf
         const size_t getNumStates() const { return m_numStates; }
         const size_t getLength() const { return m_length; }
         void setLength(size_t length) { m_length = length; }
-        const size_t getPastLength() const { return m_pastLength; }
-        void setPastLength(size_t length) { m_pastLength = length; }
 
         void sampleState(const std::vector<VertexState> &initialState = {}, bool asyncMode = false, size_t initialBurn = 0);
         void sample(const std::vector<VertexState> &initialState = {}, bool asyncMode = false, size_t initialBurn = 0)
@@ -122,6 +118,7 @@ namespace GraphInf
         {
             return getTransitionProbs(m_state[vertex], m_neighborsState[vertex]);
         }
+        const std::vector<std::vector<double>> getTransitionMatrix(VertexState outState = -1) const;
 
         const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override;
         void applyGraphMoveToSelf(const GraphMove &move) override;

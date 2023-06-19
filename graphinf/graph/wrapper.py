@@ -1,16 +1,16 @@
 import logging
+from typing import Callable, Optional
 
-from typing import Optional, Callable, Optional
-
-from graphinf.wrapper import Wrapper as _Wrapper
-from graphinf._graphinf import graph as _graph
 from basegraph import core
-from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
+from graphinf._graphinf import graph as _graph
+from graphinf.wrapper import Wrapper as _Wrapper
+
+from .degree_sequences import nbinom_degreeseq, poisson_degreeseq
 from .util import (
+    log_evidence_annealed,
     log_evidence_exact,
     log_evidence_iid_meanfield,
     log_evidence_partition_meanfield,
-    log_evidence_annealed,
 )
 
 __all__ = (
@@ -51,9 +51,11 @@ class RandomGraphWrapper(_Wrapper):
             str_format += f"\n\t{k}={v},"
         str_format += "\n)"
         return str_format
+
     @property
     def size(self):
         return self.get_size()
+
     @property
     def edge_count(self):
         return self.get_edge_count()
@@ -61,7 +63,7 @@ class RandomGraphWrapper(_Wrapper):
     def post_init(self):
         self.wrap.sample()
 
-    def get_log_evidence(
+    def log_evidence(
         self,
         graph: Optional[core.UndirectedMultigraph] = None,
         method: Optional[str] = None,
@@ -98,10 +100,10 @@ class RandomGraphWrapper(_Wrapper):
         kwargs["reset_original"] = reset_original
         kwargs["verbose"] = verbose
         if not self.labeled:
-            if method == "exact":
-                evidence = self.get_log_joint()
-            elif method == "iid_meanfield":
+            if method == "iid_meanfield":
                 evidence = log_evidence_iid_meanfield(self, graph, **kwargs)
+            else:
+                evidence = self.log_joint()
             self.set_state(graph)
             return evidence
 
@@ -123,9 +125,11 @@ class DeltaGraph(RandomGraphWrapper):
     def __init__(self, graph: core.UndirectedMultigraph):
         wrapped = _graph.DeltaGraph(graph)
         super().__init__(wrapped)
+
     @property
     def size(self):
         return self.get_size()
+
     @property
     def edge_count(self):
         return self.get_edge_count()
@@ -192,9 +196,11 @@ class ConfigurationModelFamily(RandomGraphWrapper):
             degree_constrained=degree_constrained,
             canonical=canonical,
         )
+
     @property
     def size(self):
         return self.get_size()
+
     @property
     def edge_count(self):
         return self.get_edge_count()
@@ -388,4 +394,3 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             labeled=labeled,
             nested=nested,
         )
-    

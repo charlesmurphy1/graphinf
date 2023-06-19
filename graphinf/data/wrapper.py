@@ -1,18 +1,19 @@
 from __future__ import annotations
-from typing import Optional, Literal
-from graphinf.wrapper import Wrapper as _Wrapper
-from graphinf.graph import (
-    RandomGraphWrapper as _RandomGraphWrapper,
-    ErdosRenyiModel as _ErdosRenyiModel,
-    DeltaGraph as _DeltaGraph,
-)
+
+from typing import Literal, Optional
+
 from basegraph import core
 from graphinf._graphinf.data import DataModel
+from graphinf.graph import DeltaGraph as _DeltaGraph
+from graphinf.graph import ErdosRenyiModel as _ErdosRenyiModel
+from graphinf.graph import RandomGraphWrapper as _RandomGraphWrapper
+from graphinf.wrapper import Wrapper as _Wrapper
 
 from .util import (
-    log_posterior_meanfield,
-    log_evidence_exact,
     log_evidence_annealed,
+    log_evidence_exact,
+    log_posterior_exact_meanfield,
+    log_posterior_meanfield,
 )
 
 
@@ -73,7 +74,7 @@ class DataModelWrapper(_Wrapper):
         self.wrap.set_graph_prior(graph_prior.wrap)
         self.__wrapped__.sample()
 
-    def get_log_posterior(
+    def log_posterior(
         self,
         graph: Optional[core.UndirectedMultigraph] = None,
         method: Optional[str] = None,
@@ -103,12 +104,14 @@ class DataModelWrapper(_Wrapper):
         graph = self.get_graph() if graph is None else graph
         if method == "meanfield":
             posterior = log_posterior_meanfield(self, graph, **kwargs)
+        elif method == "exact_meanfield":
+            posterior = log_posterior_exact_meanfield(self, graph, **kwargs)
         else:
             self.set_graph(graph)
-            prior = self.graph_prior.get_log_evidence(
+            prior = self.graph_prior.log_evidence(
                 **kwargs.get("prior_args", {})
             )
-            likelihood = self.get_log_likelihood()
+            likelihood = self.log_likelihood()
             if method == "exact":
                 posterior = prior + likelihood - log_evidence_exact(self)
             elif method == "annealed":
@@ -147,9 +150,7 @@ class DataModelWrapper(_Wrapper):
             return log_evidence_exact(self)
         if method == "annealed":
             return log_evidence_annealed(self, **kwargs)
-        prior = self.graph_prior.get_log_evidence(
-            **kwargs.get("prior_args", {})
-        )
-        likelihood = self.get_log_likelihood()
+        prior = self.graph_prior.log_evidence(**kwargs.get("prior_args", {}))
+        likelihood = self.log_likelihood()
         posterior = log_posterior_meanfield(self, self.get_graph(), **kwargs)
         return prior + likelihood - posterior

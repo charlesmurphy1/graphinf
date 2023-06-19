@@ -1,20 +1,19 @@
-import numpy as np
-import time
 import logging
 import sys
+import time
+from functools import partial
+from typing import Callable, List, Literal, Optional
 from warnings import warn
 
-from typing import Literal, Callable, Optional, List
-from functools import partial
-
+import numpy as np
 from basegraph import core
+from graphinf.data import DataModel
 from graphinf.utility import (
     EdgeCollector,
-    log_mean_exp,
     enumerate_all_graphs,
+    log_mean_exp,
     log_sum_exp,
 )
-from graphinf.data import DataModel
 
 
 def mcmc_on_graph(
@@ -57,7 +56,7 @@ def mcmc_on_graph(
     original = model.get_graph()
     if not start_from_original:
         model.sample_prior()
-    
+
     if graph_rate is not None and graph_rate >= 0:
         model.unfreeze_graph(graph_rate)
     if prior_rate is not None and prior_rate >= 0:
@@ -78,8 +77,8 @@ def mcmc_on_graph(
                 f"Epoch {i}: "
                 f"time={t1 - t0: 0.4f}, "
                 f"accepted={success}, "
-                f"log(likelihood)={model.get_log_likelihood(): 0.4f}, "
-                f"log(prior)={model.get_log_prior(): 0.4f}"
+                f"log(likelihood)={model.log_likelihood(): 0.4f}, "
+                f"log(prior)={model.log_prior(): 0.4f}"
             )
 
         if callback is not None:
@@ -102,6 +101,37 @@ def log_posterior_meanfield(
     return collector.log_prob_estimate(graph)
 
 
+def log_posterior_exact_meanfield(
+    model: DataModel, graph: core.UndirectedMultigraph, **kwargs
+):
+    g = model.graph_prior
+    N, M = g.get_size(), g.get_edge_count()
+    ws, wp = g.with_self_loops(), g.with_parallel_edges()
+    if N > 7:
+        warn(
+            f"A model with size {N} is being used"
+            f"for exact evaluation, which might not finish."
+        )
+    original = model.get_graph()
+    evidence = []
+
+    logits = dict()
+    for g in enumerate_all_graphs(N, M, selfloops=ws, parallel_edges=wp):
+        model.set_graph(g)
+        likelihood = model.log_likelihood()
+        prior = model.graph_prior.log_evidence(method="exact")
+        evidence.append(likelihood + prior)
+        for e in g.edges():
+            logits[e] = likelihood + prior
+    model.set_graph(original)
+    evidence = log_sum_exp(evidence)
+
+    logp = 0
+    for e in original.edges():
+        logp += logits[e] - evidence
+    return logp
+
+
 def log_evidence_exact(model: DataModel, **kwargs):
     g = model.graph_prior
     N, M = g.get_size(), g.get_edge_count()
@@ -115,8 +145,8 @@ def log_evidence_exact(model: DataModel, **kwargs):
     samples = []
     for g in enumerate_all_graphs(N, M, selfloops=ws, parallel_edges=wp):
         model.set_graph(g)
-        likelihood = model.get_log_likelihood()
-        prior = model.graph_prior.get_log_evidence(method="exact")
+        likelihood = model.log_likelihood()
+        prior = model.graph_prior.log_evidence(method="exact")
         samples.append(likelihood + prior)
     model.set_graph(original)
     return log_sum_exp(samples)
@@ -132,9 +162,7 @@ def log_evidence_annealed(
     samples = []
     for lb, ub in zip(betas[:-1], betas[1:]):
         likelihoods = []
-        callback = lambda model: likelihoods.append(
-            model.get_log_likelihood()
-        )
+        callback = lambda model: likelihoods.append(model.log_likelihood())
         kwargs["beta_likelihood"] = lb
         if kwargs.get("verbose"):
             print(f"---Temps: {lb:0.4f}---")
