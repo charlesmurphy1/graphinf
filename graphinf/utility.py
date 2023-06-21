@@ -119,6 +119,22 @@ class EdgeCollector:
         return entropy
 
 
+def load_graph(path):
+    edgelist = np.load(path)
+    g = bs.UndirectedMultigraph(edgelist.max() + 1)
+    for e in edgelist:
+        i, j, m = e
+        g.add_multiedge(i, j, m)
+    return g
+
+
+def save_graph(graph, path):
+    edgelist = np.array(
+        [(*e, graph.get_edge_multiplicity(*e)) for e in graph.edges()]
+    )
+    np.save(path, edgelist)
+
+
 def convert_basegraph_to_networkx(
     bs_graph: bs.UndirectedMultigraph,
 ) -> nx.Graph:
