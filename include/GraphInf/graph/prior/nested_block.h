@@ -270,6 +270,7 @@ namespace GraphInf
         void setSize(size_t size) override
         {
             m_size = size;
+
             m_nestedBlockCountPrior.setGraphSize(size);
         }
         const double getLogLikelihoodAtLevel(Level level) const override;

@@ -45,6 +45,10 @@ class DataModelWrapper(_Wrapper):
         str_format = f"{self.__class__.__name__ }(\n\tprior={self.graph_prior.__class__.__name__},"
 
         for k, v in self.params.items():
+            if isinstance(v, str):
+                v = f"'{v}'"
+            if k in dir(self):
+                v = getattr(self, k)
             str_format += f"\n\t{k}={v},"
         str_format += "\n)"
         return str_format

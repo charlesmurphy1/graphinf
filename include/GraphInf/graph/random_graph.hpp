@@ -104,6 +104,10 @@ namespace GraphInf
 
         void sample()
         {
+            // processRecursiveFunction([&]()
+            //                          { sampleOnlyPrior(); });
+            // sampleState();
+            // setUp();
             try
             {
                 processRecursiveFunction([&]()

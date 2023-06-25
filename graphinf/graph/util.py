@@ -1,22 +1,21 @@
-import numpy as np
-import logging
-import time
-import sys
 import importlib
-import tqdm
-
-from warnings import warn
+import logging
+import sys
+import time
 from typing import Callable, Optional
-from scipy.special import loggamma
+from warnings import warn
 
+import numpy as np
+import tqdm
 from basegraph import core
 from graphinf.graph import RandomGraph
 from graphinf.utility import (
-    enumerate_all_partitions,
-    log_sum_exp,
-    log_mean_exp,
     EdgeCollector,
+    enumerate_all_partitions,
+    log_mean_exp,
+    log_sum_exp,
 )
+from scipy.special import loggamma
 
 
 def mcmc_on_labels(
@@ -30,6 +29,7 @@ def mcmc_on_labels(
     reset_original: bool = False,
     callback: Optional[Callable[[RandomGraph], None]] = None,
     verbose: bool = False,
+    **kwargs,
 ) -> None:
 
     if verbose:
@@ -65,8 +65,8 @@ def mcmc_on_labels(
                 f"Epoch {i}: "
                 f"time={t1 - t0: 0.4f}, "
                 f"accepted={success}, "
-                f"log(likelihood)={model.get_log_likelihood(): 0.4f}, "
-                f"log(prior)={model.get_log_prior(): 0.4f}"
+                f"log(likelihood)={model.log_likelihood(): 0.4f}, "
+                f"log(prior)={model.log_prior(): 0.4f}"
             )
 
         if callback is not None:
@@ -98,7 +98,7 @@ def log_evidence_exact(
         partitions = tqdm.tqdm(partitions)
     for p in partitions:
         model.set_labels(p, False)
-        samples.append(model.get_log_joint())
+        samples.append(model.log_joint())
 
     model.set_labels(original)
     return log_sum_exp(samples)
@@ -154,9 +154,7 @@ def log_evidence_partition_meanfield(
     samples = []
     for p in partitions:
         set_labels(p)
-        samples.append(
-            model.get_log_joint() + loggamma(1 + len(np.unique(p)))
-        )
+        samples.append(model.log_joint() + loggamma(1 + len(np.unique(p))))
     if kwargs.get("reset_original", True):
         set_labels(original)
     return np.mean(samples) + pmodes.posterior_entropy()
@@ -172,9 +170,7 @@ def log_evidence_annealed(
     samples = []
     for lb, ub in zip(betas[:-1], betas[1:]):
         likelihoods = []
-        callback = lambda model: likelihoods.append(
-            model.get_log_likelihood()
-        )
+        callback = lambda model: likelihoods.append(model.log_likelihood())
         kwargs["beta_likelihood"] = lb
         if kwargs.get("verbose"):
             print(f"---Temps: {lb:0.4f}---")

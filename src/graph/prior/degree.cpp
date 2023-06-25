@@ -47,6 +47,7 @@ namespace GraphInf
 
     void DegreePrior::setGraph(const MultiGraph &graph)
     {
+        m_size = graph.getSize();
         m_state = graph.getDegrees();
         recomputeConsistentState();
     }

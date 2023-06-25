@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from graphinf import _graphinf
 from graphinf.graph import RandomGraph
 from graphinf.wrapper import Wrapper
@@ -13,10 +14,16 @@ __all__ = (
     "CowanDynamics",
 )
 
-Dynamics = _dynamics.Dynamics
+# _Dynamics = _dynamics.Dynamics
 
 
-class SISDynamics(_DataModelWrapper):
+class Dynamics(_DataModelWrapper):
+    @property
+    def length(self):
+        return self.get_length()
+
+
+class SISDynamics(Dynamics):
     constructor = _dynamics.SISDynamics
 
     def __init__(
@@ -38,7 +45,7 @@ class SISDynamics(_DataModelWrapper):
         )
 
 
-class GlauberDynamics(_DataModelWrapper):
+class GlauberDynamics(Dynamics):
     constructor = _dynamics.GlauberDynamics
 
     def __init__(
@@ -58,7 +65,7 @@ class GlauberDynamics(_DataModelWrapper):
         )
 
 
-class CowanDynamics(_DataModelWrapper):
+class CowanDynamics(Dynamics):
     constructor = _dynamics.CowanDynamics
 
     def __init__(
@@ -84,7 +91,7 @@ class CowanDynamics(_DataModelWrapper):
         )
 
 
-class DegreeDynamics(_DataModelWrapper):
+class DegreeDynamics(Dynamics):
     constructor = _dynamics.DegreeDynamics
 
     def __init__(

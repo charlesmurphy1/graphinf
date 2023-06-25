@@ -98,10 +98,16 @@ namespace GraphInf
         BlockIndex r, s;
         const LabelGraph *graphPtr = nullptr;
         std::vector<LabelGraph> nestedState;
+        if (m_graphPtr->getSize() != m_nestedBlockPriorPtr->getSize())
+        {
+            m_nestedBlockPriorPtr->setSize(m_graphPtr->getSize());
+            m_nestedBlockPriorPtr->sample();
+        }
         for (Level l = 0; l < getDepth(); ++l)
         {
             nestedState.push_back(MultiGraph(m_nestedBlockPriorPtr->getNestedMaxBlockCount(l)));
             graphPtr = (l == 0) ? m_graphPtr : &nestedState[l - 1];
+
             for (const auto &edge : graphPtr->edges())
             {
                 const auto mult = graphPtr->getEdgeMultiplicity(edge.first, edge.second);

@@ -18,6 +18,12 @@ namespace GraphInf
     }
     void LabelGraphPrior::recomputeStateFromGraph()
     {
+        if (m_graphPtr->getSize() != m_blockPriorPtr->getSize())
+        {
+            m_blockPriorPtr->setSize(m_graphPtr->getSize());
+            m_blockPriorPtr->sample();
+        }
+
         MultiGraph state(m_blockPriorPtr->getMaxBlockCount());
         for (const auto &edge : m_graphPtr->edges())
         {

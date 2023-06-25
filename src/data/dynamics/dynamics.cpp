@@ -8,7 +8,10 @@ namespace GraphInf
         if (m_state.size() != 0)
             m_neighborsState = computeNeighborsState(m_state);
         if (m_pastStateSequence.size() != 0)
+        {
             m_neighborsPastStateSequence = computeNeighborsStateSequence(m_pastStateSequence);
+            m_length = m_pastStateSequence[0].size();
+        }
     }
 
     void Dynamics::sampleState(const State &x0, bool asyncMode, size_t initialBurn)
