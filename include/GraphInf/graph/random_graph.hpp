@@ -64,7 +64,7 @@ namespace GraphInf
         {
             if (state.getSize() != m_size)
                 throw std::invalid_argument("Cannot set state with graph of size " + std::to_string(state.getSize()) + " != " + std::to_string(m_size));
-            m_state = state;
+            m_state = MultiGraph(state);
 
             computeConsistentState();
             setUp();

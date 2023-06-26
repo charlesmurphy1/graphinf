@@ -80,7 +80,11 @@ namespace GraphInf
 
         /* Accessors & mutators of attributes */
         const size_t getSize() const { return m_size; }
-        virtual void setSize(size_t size) { m_size = size; }
+        virtual void setSize(size_t size)
+        {
+            m_size = size;
+            m_blockCountPriorPtr->setMaxBlockCount(m_size);
+        }
 
         /* Accessors & mutators of accessory states */
         const BlockCountPrior &getBlockCountPrior() const { return *m_blockCountPriorPtr; }

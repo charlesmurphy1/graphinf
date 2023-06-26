@@ -47,7 +47,7 @@ namespace GraphInf
 
     void LabelGraphPrior::setState(const MultiGraph &labelGraph)
     {
-        m_state = labelGraph;
+        m_state = MultiGraph(labelGraph);
         recomputeConsistentState();
     }
 

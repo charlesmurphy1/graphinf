@@ -31,7 +31,6 @@ def mcmc_on_labels(
     verbose: bool = False,
     **kwargs,
 ) -> None:
-
     if verbose:
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)

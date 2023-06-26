@@ -27,6 +27,7 @@ namespace GraphInf
         const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override { return 0; }
         const double getLogLikelihoodRatioFromLabelMove(const BlockMove &move) const override { throw DepletedMethodError("BlockCount", "getLogLikelihoodRatioFromLabelMove"); }
         void setStateFromPartition(const BlockSequence &blocks) { setState(*max_element(blocks.begin(), blocks.end()) + 1); }
+        virtual void setMaxBlockCount(size_t maxBlockCount) {}
     };
 
     class BlockCountDeltaPrior : public BlockCountPrior
@@ -123,6 +124,11 @@ namespace GraphInf
             m_max = max;
             checkMax();
             m_uniformDistribution = std::uniform_int_distribution<size_t>(m_min, m_max);
+        }
+        void setMaxBlockCount(size_t maxBlockCount) override
+        {
+            setMax(maxBlockCount);
+            sample();
         }
         void setMinMax(size_t min, size_t max)
         {

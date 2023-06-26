@@ -71,7 +71,12 @@ namespace GraphInf
         }
         void setNestedState(const std::vector<LabelGraph> &nestedState)
         {
-            m_nestedState = nestedState;
+            // m_nestedState = nestedState;
+            m_nestedState.clear();
+            for (const auto &s : nestedState)
+            {
+                m_nestedState.push_back(MultiGraph(s));
+            }
 
             m_nestedEdgeCounts = computeNestedEdgeCountsFromNestedState(nestedState);
             m_state.clearEdges();

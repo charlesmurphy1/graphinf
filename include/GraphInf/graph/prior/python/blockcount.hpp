@@ -19,6 +19,7 @@ namespace GraphInf
         using PyVertexLabeledPrior<size_t, BlockIndex, BaseClass>::PyVertexLabeledPrior;
         /* Pure abstract methods */
         const double getLogLikelihoodFromState(const size_t &state) const override { PYBIND11_OVERRIDE_PURE(const double, BaseClass, getLogLikelihoodFromState, state); }
+        void setMaxBlockCount(size_t maxBlockCount) override { PYBIND11_OVERRIDE(void, BaseClass, setMaxBlockCount, maxBlockCount); }
     };
 
     template <typename BaseClass = NestedBlockCountPrior>
