@@ -112,7 +112,6 @@ namespace GraphInf
         void samplePartition()
         {
             m_blockPriorPtr->sample();
-
             recomputeStateFromGraph();
         }
 

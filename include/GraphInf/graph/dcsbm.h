@@ -36,12 +36,17 @@ namespace GraphInf
         const double _getLogPrior() const override { return m_degreePriorPtr->getLogJoint(); }
         const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const override { return m_degreePriorPtr->getLogJointRatioFromGraphMove(move); }
         const double _getLogPriorRatioFromLabelMove(const BlockMove &move) const override { return m_degreePriorPtr->getLogJointRatioFromLabelMove(move); }
-        void sampleOnlyPrior() override { m_degreePriorPtr->sample(); }
+        void sampleOnlyPrior() override
+        {
+            m_degreePriorPtr->sample();
+            computationFinished();
+        }
         void sampleWithLabels() override
         {
             m_degreePriorPtr->getLabelGraphPriorRef().sampleState();
             m_degreePriorPtr->sampleState();
             sampleState();
+            computationFinished();
         }
         void setUpLikelihood() override
         {
@@ -65,11 +70,12 @@ namespace GraphInf
         void fromGraph(const MultiGraph &graph) override
         {
             BlockLabeledRandomGraph::fromGraph(graph);
-            m_degreePriorPtr->setGraph(graph);
+            m_degreePriorPtr->setGraph(m_state);
         }
         void sampleOnlyLabels() override
         {
             m_degreePriorPtr->samplePartition();
+            computationFinished();
         }
         void setLabels(const std::vector<BlockIndex> &labels, bool reduce = false) override
         {

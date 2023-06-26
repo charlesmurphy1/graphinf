@@ -139,7 +139,6 @@ def log_evidence_partition_meanfield(
 
     if not kwargs.get("start_from_original", False):
         model.sample_only_labels()
-
     partitions = [original]
     callback = lambda model: partitions.append(get_labels())
 

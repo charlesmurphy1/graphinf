@@ -81,17 +81,19 @@ namespace GraphInf
         void fromGraph(const MultiGraph &graph) override
         {
             RandomGraph::fromGraph(graph);
-            m_labelGraphPriorPtr->setGraph(graph);
+            m_labelGraphPriorPtr->setGraph(m_state);
         }
 
         void sampleOnlyLabels() override
         {
             m_nestedLabelGraphPrior.samplePartition();
+            computationFinished();
         }
         void sampleWithLabels() override
         {
             m_nestedLabelGraphPrior.sampleState();
             sampleState();
+            computationFinished();
         }
         void setNestedLabels(const std::vector<BlockSequence> &labels, bool reduce = false) override
         {
