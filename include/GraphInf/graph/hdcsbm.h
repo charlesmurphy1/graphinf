@@ -78,6 +78,7 @@ namespace GraphInf
         void sampleOnlyLabels() override
         {
             m_degreePriorPtr->samplePartition();
+            m_nestedLabelProposerPtr->setUpWithNestedPrior(*this);
             computationFinished();
         }
         void sampleWithLabels() override

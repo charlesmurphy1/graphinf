@@ -79,10 +79,7 @@ namespace GraphInf
             }
 
             m_nestedEdgeCounts = computeNestedEdgeCountsFromNestedState(nestedState);
-            m_state.clearEdges();
-            m_state.resize(nestedState[0].getSize());
-            for (const auto &rs : nestedState[0].edges())
-                m_state.addMultiedge(rs.first, rs.second, nestedState[0].getEdgeMultiplicity(rs.first, rs.second));
+            m_state = MultiGraph(nestedState[0]);
 
             m_edgeCounts = m_nestedEdgeCounts[0];
             m_edgeCountPriorPtr->setState(m_state.getTotalEdgeNumber());

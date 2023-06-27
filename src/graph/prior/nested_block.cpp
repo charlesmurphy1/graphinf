@@ -175,7 +175,7 @@ namespace GraphInf
         if (move.level == getDepth() - 1)
             return true;
         // new blockCount at level is lesser than blockCount in upper level
-        if (getNestedBlockCount(move.level) + move.addedLabels <= getNestedBlockCount(move.level + 1) and move.level < getDepth() - 2)
+        if (getNestedBlockCount(move.level) + move.addedLabels <= getNestedBlockCount(move.level + 1) and move.level < getDepth() - 3)
             return false;
         // {std::cout << "CODE 4" << std::endl; return false;}
         // block creation does not destroy block

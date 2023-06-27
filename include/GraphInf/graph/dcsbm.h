@@ -75,6 +75,7 @@ namespace GraphInf
         void sampleOnlyLabels() override
         {
             m_degreePriorPtr->samplePartition();
+            m_labelProposerPtr->setUpWithPrior(*this);
             computationFinished();
         }
         void setLabels(const std::vector<BlockIndex> &labels, bool reduce = false) override

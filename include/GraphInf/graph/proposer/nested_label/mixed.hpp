@@ -76,10 +76,15 @@ namespace GraphInf
             Label neighborLabel = MixedNestedSampler<Label>::sampleNeighborLabelAtLevel(vertex, level);
             const auto &Et = (*m_nestedGraphPriorPtrPtr)->getNestedLabelGraph(level).getDegree(neighborLabel);
             double probUniformSampling = m_shift * B / (Et + m_shift * B);
+            probUniformSampling = 0;
             if (m_uniform01(rng) < probUniformSampling)
+            {
                 nextLabel = sampleLabelUniformlyAtLevel(level);
+            }
             else
+            {
                 nextLabel = sampleLabelFromNeighborLabelAtLevel(neighborLabel, level);
+            }
         }
         return {vertex, prevLabel, nextLabel, 0, level};
     }

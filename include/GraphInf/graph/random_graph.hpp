@@ -287,7 +287,6 @@ namespace GraphInf
             if (m_uniform(rng) < acceptProb)
             {
                 isAccepted = true;
-
                 applyLabelMove(move);
             }
             return {move.display(), acceptProb, isAccepted};

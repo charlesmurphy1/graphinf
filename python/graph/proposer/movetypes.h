@@ -15,8 +15,8 @@ namespace GraphInf
     py::class_<LabelMove<Label>> declareLabelMove(py::module &m, std::string pyName)
     {
         return py::class_<LabelMove<Label>>(m, pyName.c_str())
-            .def(py::init<BaseGraph::VertexIndex, Label, Label, int>(),
-                 py::arg("vertex_index"), py::arg("prev_label"), py::arg("next_label"), py::arg("added_labels"))
+            .def(py::init<BaseGraph::VertexIndex, Label, Label, int, int>(),
+                 py::arg("vertex_index"), py::arg("prev_label"), py::arg("next_label"), py::arg("added_labels") = 0, py::arg("level") = 0)
             .def_readonly("vertex_id", &BlockMove::vertexIndex)
             .def_readonly("prev_label", &BlockMove::prevLabel)
             .def_readonly("next_label", &BlockMove::nextLabel)
