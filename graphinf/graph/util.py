@@ -54,7 +54,6 @@ def mcmc_on_labels(
         )
     for i in range(n_sweeps):
         t0 = time.time()
-        print(model.get_nested_label_count())
         success = model.metropolis_sweep(
             n_steps, beta_prior=beta_prior, beta_likelihood=beta_likelihood
         )
