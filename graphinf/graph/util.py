@@ -16,6 +16,7 @@ from graphinf.utility import (
     log_sum_exp,
 )
 from scipy.special import loggamma
+from importlib.util import find_spec
 
 
 def mcmc_on_labels(
@@ -27,6 +28,7 @@ def mcmc_on_labels(
     beta_likelihood: float = 1,
     start_from_original: bool = False,
     reset_original: bool = False,
+    resample_rate: float = 0.01,
     callback: Optional[Callable[[RandomGraph], None]] = None,
     verbose: bool = False,
     **kwargs,
@@ -54,6 +56,9 @@ def mcmc_on_labels(
         )
     for i in range(n_sweeps):
         t0 = time.time()
+        if np.random.rand() < resample_rate:
+            model.sample_only_labels()
+
         success = model.metropolis_sweep(
             n_steps, beta_prior=beta_prior, beta_likelihood=beta_likelihood
         )

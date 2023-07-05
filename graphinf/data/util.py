@@ -30,6 +30,7 @@ def mcmc_on_graph(
     graph_rate: Optional[float] = None,
     prior_rate: Optional[float] = None,
     param_rate: Optional[float] = None,
+    resample_rate: float = 0.01,
     verbose: bool = False,
 ) -> None:
     if sweep_type == "metropolis":
@@ -68,6 +69,8 @@ def mcmc_on_graph(
         sweep(burn, beta_prior=beta_prior, beta_likelihood=beta_likelihood)
     for i in range(n_sweeps):
         t0 = time.time()
+        if np.random.rand() < resample_rate:
+            model.sample_prior()
         success = sweep(
             n_steps, beta_prior=beta_prior, beta_likelihood=beta_likelihood
         )

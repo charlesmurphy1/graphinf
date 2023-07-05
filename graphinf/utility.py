@@ -2,6 +2,7 @@ import importlib
 from collections import defaultdict
 from itertools import combinations_with_replacement
 
+from importlib.util import find_spec
 import networkx as nx
 import numpy as np
 from basegraph import core as bs
@@ -149,7 +150,7 @@ def convert_basegraph_to_networkx(
 
 
 def convert_basegraph_to_graphtool(bs_graph: bs.UndirectedMultigraph):
-    if importlib.find_spec("graph_tool"):
+    if find_spec("graph_tool"):
         import graph_tool.all as gt
     else:
         raise RuntimeError("Could not find `graph_tool`.")
