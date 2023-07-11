@@ -38,7 +38,7 @@ namespace GraphInf
         void computeConsistentState() override { PYBIND11_OVERRIDE(void, BaseClass, computeConsistentState, ); }
         const MCMCSummary metropolisGraphStep(const double b = 1, const double c = 1) override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisGraphStep, b, c); }
         const MCMCSummary metropolisPriorStep() override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisPriorStep, ); }
-        const MCMCSummary metropolisParamStep() override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisParamStep, ); }
+        const MCMCSummary metropolisParamStep(const double b = 1, const double c = 1) override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisParamStep, b, c); }
         void applyParamMove(const ParamMove &move) override { PYBIND11_OVERRIDE(void, BaseClass, applyParamMove, move); }
         bool isValidParamMove(const ParamMove &move) const override { PYBIND11_OVERRIDE(bool, BaseClass, isValidParamMove, move); }
 

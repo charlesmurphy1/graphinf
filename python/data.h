@@ -75,21 +75,7 @@ namespace GraphInf
             .def("is_valid_param_move", &DataModel::isValidParamMove, py::arg("move"))
             .def("get_log_acceptance_prob_from_graph_move", &DataModel::getLogAcceptanceProbFromGraphMove, py::arg("move"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
             .def("metropolis_graph_sweep", &DataModel::metropolisGraphSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            .def("metropolis_param_sweep", &DataModel::metropolisParamSweep, py::arg("num_steps"))
-            // .def("metropolis_graph_step", &DataModel::metropolisGraphStep, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            // .def("metropolis_prior_step", &DataModel::metropolisPriorStep)
-            // .def("metropolis_param_step", &DataModel::metropolisParamStep)
-            // .def("gibbs_sweep", &DataModel::gibbsSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            // .def("metropolis_sweep", &DataModel::metropolisSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            // .def("freeze_graph", &DataModel::freezeGraph)
-            // .def("unfreeze_graph", &DataModel::unfreezeGraph, py::arg("rate") = 1)
-            // .def("freeze_graph_prior", &DataModel::freezeGraphPrior)
-            // .def("unfreeze_graph_prior", &DataModel::unfreezeGraphPrior, py::arg("rate") = 1)
-            // .def("freeze_param", py::overload_cast<>(&DataModel::freezeParam))
-            // .def("freeze_param", py::overload_cast<std::string>(&DataModel::freezeParam), py::arg("key"))
-            // .def("unfreeze_param", py::overload_cast<double>(&DataModel::unfreezeParam), py::arg("rate") = 1)
-            // .def("unfreeze_param", py::overload_cast<std::string, double>(&DataModel::unfreezeParam), py::arg("key"), py::arg("rate") = 1);
-            ;
+            .def("metropolis_param_sweep", &DataModel::metropolisParamSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
 
         py::module dynamics = m.def_submodule("dynamics");
         py::class_<Dynamics, DataModel, PyDynamics<>>(dynamics, "Dynamics")
