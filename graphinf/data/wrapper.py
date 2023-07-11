@@ -84,21 +84,28 @@ class DataModelWrapper(_Wrapper):
         n_steps_per_vertex: int = 1,
         beta_likelihood: float = 1,
         beta_prior: float = 1,
+        sample_prior: bool = False,
+        sample_params: bool = False,
         **kwargs,
     ):
         n_success = 0
-        for i in range(n_sweeps):
+        for _ in range(n_sweeps):
             n_success += self.wrap.metropolis_graph_sweep(
                 num_steps=n_steps_per_vertex * self.get_size(),
                 beta_likelihood=beta_likelihood,
                 beta_prior=beta_prior,
                 **kwargs,
             )
-            if self.graph_prior.labeled:
-                _ds, t, m = self.graph_prior.metropolis_sweep(**kwargs)
-            else:
-                m = 0
-            n_success += m
+            if self.graph_prior.labeled and sample_prior:
+                _, _, m = self.graph_prior.metropolis_sweep(**kwargs)
+                n_success += m
+            if sample_params:
+                n_success += self.wrap.metropolis_param_sweep(
+                    n_steps_per_vertex,
+                    beta_prior=beta_prior,
+                    beta_likelihood=beta_likelihood,
+                )
+        return n_success
 
     def log_posterior(
         self,

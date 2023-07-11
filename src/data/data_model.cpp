@@ -94,13 +94,13 @@ namespace GraphInf
         }
         return numSuccesses;
     }
-    const int DataModel::metropolisParamSweep(size_t numSteps)
+    const int DataModel::metropolisParamSweep(size_t numSteps, double betaPrior, double betaLikelihood)
     {
         int numSuccesses = 0;
         for (size_t i = 0; i < numSteps; i++)
         {
             MCMCSummary summary;
-            summary = metropolisParamStep();
+            summary = metropolisParamStep(betaLikelihood, betaPrior);
             if (summary.isAccepted)
                 numSuccesses += 1;
         }

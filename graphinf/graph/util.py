@@ -23,13 +23,11 @@ from importlib.util import find_spec
 def mcmc_on_labels(
     model: RandomGraph,
     n_sweeps: int = 1000,
-    n_steps: int = 10,
-    burn: int = 0,
-    beta_prior: float = 1,
-    beta_likelihood: float = 1,
+    n_steps_per_vertex: int = 5,
+    n_gibbs_sweeps: int = 10,
+    burn_sweeps: int = 1,
     start_from_original: bool = False,
     reset_original: bool = False,
-    resample_rate: float = 0.01,
     callback: Optional[Callable[[RandomGraph], None]] = None,
     verbose: bool = False,
     **kwargs,
@@ -47,88 +45,24 @@ def mcmc_on_labels(
     else:
         logger = None
 
+    if "metropolis_sweep" not in model.__dict__:
+        return
+    sweep = partial(
+        model.metropolis_sweep,
+        n_steps_per_vertex=n_steps_per_vertex,
+        n_gibbs=n_gibbs_sweeps,
+    )
+
     original = model.get_labels()
     if not start_from_original:
         model.sample_only_labels()
 
-    if burn > 0:
-        model.metropolis_sweep(
-            burn, beta_prior=beta_prior, beta_likelihood=beta_likelihood
-        )
+    for _ in range(burn_sweeps):
+        sweep()
     for i in range(n_sweeps):
         t0 = time.time()
-        if np.random.rand() < resample_rate:
-            model.sample_only_labels()
 
-        success = model.metropolis_sweep(
-            n_steps * model.get_size(),
-            beta_prior=beta_prior,
-            beta_likelihood=beta_likelihood,
-        )
-        model.reduce_labels()
-        t1 = time.time()
-        if logger is not None:
-            logger.info(
-                f"Epoch {i}: "
-                f"time={t1 - t0: 0.4f}, "
-                f"accepted={success}, "
-                f"log(likelihood)={model.log_likelihood(): 0.4f}, "
-                f"log(prior)={model.log_prior(): 0.4f}"
-            )
-
-        if callback is not None:
-            callback(model)
-
-    if reset_original:
-        model.set_labels(original)
-
-
-def mcmc_on_labels_with_gt(
-    model: RandomGraph,
-    n_sweeps: int = 1000,
-    n_steps: int = 10,
-    reset_original: bool = False,
-    callback: Optional[Callable[[RandomGraph], None]] = None,
-    verbose: bool = False,
-    flip_args: Optional[dict] = None,
-):
-    if verbose:
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)s - %(message)s"
-        )
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-    else:
-        logger = None
-    if find_spec("graph_tool") is not None:
-        import graph_tool.all as gt
-    else:
-        raise ModuleNotFoundError(
-            "Module `graph_tool` has not been installed."
-        )
-
-    original = model.get_labels()
-    blockstate = model.blockstate()
-
-    flip_args = flip_args or {}
-    flip_args["entropy_args"] = model.gt_entropy_args()
-    flip_type = flip_args.pop("type", "multiflip")
-    for i in range(n_sweeps):
-        t0 = time.time()
-        success = 0
-        for _ in range(n_steps):
-            if flip_type == "gibbs":
-                _, _, s = blockstate.gibbs_sweep(**flip_args)
-            elif flip_type == "multiflip":
-                _, _, s = blockstate.multiflip_mcmc_sweep(**flip_args)
-            else:
-                _, _, s = blockstate.mcmc_sweep(**flip_args)
-            success += s
-        model.sync_with_blockstate(blockstate)
+        success = sweep()
         t1 = time.time()
         if logger is not None:
             logger.info(

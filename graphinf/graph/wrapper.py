@@ -414,7 +414,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
 
     def metropolis_sweep(
         self,
-        n_steps_per_vertex: int,
+        n_steps_per_vertex: int = 5,
         n_gibbs=10,
     ):
         blockstate = self.blockstate()

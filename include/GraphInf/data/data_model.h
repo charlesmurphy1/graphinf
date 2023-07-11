@@ -76,7 +76,7 @@ namespace GraphInf
         }
         const double getLogAcceptanceProbFromGraphMove(const GraphMove &move, double betaPrior = 1, double betaLikelihood = 1) const;
         virtual const MCMCSummary metropolisGraphStep(const double betaPrior = 1, const double betaLikelihood = 1);
-        virtual const MCMCSummary metropolisParamStep()
+        virtual const MCMCSummary metropolisParamStep(const double betaPrior = 1, const double betaLikelihood = 1)
         {
             if (m_paramProposer.size() == 0)
                 return {"ParamMove()", 0, true};
@@ -86,7 +86,9 @@ namespace GraphInf
             if (not isValidParamMove(move))
                 return {move.display(), -INFINITY, false};
 
-            double likelihoodRatio = getLogLikelihoodRatioFromParaMove(move);
+            double likelihoodRatio = 0;
+            if (betaLikelihood > 0)
+                likelihoodRatio = betaLikelihood * getLogLikelihoodRatioFromParaMove(move);
             double proposalRatio = m_paramProposer.logProposalRatio(move);
             double acceptProb = exp(likelihoodRatio + proposalRatio);
             if (m_uniform(rng) < acceptProb)
@@ -104,7 +106,7 @@ namespace GraphInf
         const int gibbsSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1);
         const int metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1);
         const int metropolisGraphSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1);
-        const int metropolisParamSweep(size_t nSteps);
+        const int metropolisParamSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1);
 
         void applyGraphMove(const GraphMove &move)
         {

@@ -19,28 +19,18 @@ from graphinf.utility import (
 def mcmc_on_graph(
     model: DataModel,
     n_sweeps: int = 1000,
-    sweep_type: Literal["metropolis", "gibbs"] = "metropolis",
-    n_steps: int = 1000,
-    burn: int = 0,
+    n_gibbs_sweeps=4,
+    n_steps_per_vertex: int = 1,
+    burn_sweeps: int = 0,
     beta_prior: float = 1,
     beta_likelihood: float = 1,
+    sample_prior: bool = True,
+    sample_params: bool = False,
     start_from_original: bool = False,
     reset_original: bool = False,
     callback: Optional[Callable[[DataModel], None]] = None,
-    graph_rate: Optional[float] = None,
-    prior_rate: Optional[float] = None,
-    param_rate: Optional[float] = None,
-    resample_rate: float = 0.01,
     verbose: bool = False,
 ) -> None:
-    if sweep_type == "metropolis":
-        sweep = model.metropolis_sweep
-
-    elif sweep_type == "gibbs":
-        sweep = model.gibbs_sweep
-    else:
-        raise ValueError()
-
     if verbose:
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
@@ -54,26 +44,26 @@ def mcmc_on_graph(
     else:
         logger = None
 
+    sweep = partial(
+        model.gibbs_sweep(
+            n_sweeps=n_gibbs_sweeps,
+            n_steps_per_vertex=n_steps_per_vertex,
+            beta_prior=beta_prior,
+            beta_likelihood=beta_likelihood,
+            sample_prior=sample_prior,
+            sample_params=sample_params,
+        )
+    )
+
     original = model.get_graph()
     if not start_from_original:
         model.sample_prior()
 
-    if graph_rate is not None and graph_rate >= 0:
-        model.unfreeze_graph(graph_rate)
-    if prior_rate is not None and prior_rate >= 0:
-        model.unfreeze_graph_prior(prior_rate)
-    if param_rate is not None and param_rate >= 0:
-        model.unfreeze_param(param_rate)
-
-    if burn > 0:
-        sweep(burn, beta_prior=beta_prior, beta_likelihood=beta_likelihood)
+    for _ in range(burn_sweeps):
+        sweep()
     for i in range(n_sweeps):
         t0 = time.time()
-        if np.random.rand() < resample_rate:
-            model.sample_prior()
-        success = sweep(
-            n_steps, beta_prior=beta_prior, beta_likelihood=beta_likelihood
-        )
+        success = sweep()
         t1 = time.time()
         if logger is not None:
             logger.info(
