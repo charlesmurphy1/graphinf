@@ -67,11 +67,11 @@ namespace GraphInf
         }
 
     public:
-        void fromGraph(const MultiGraph &graph) override
-        {
-            BlockLabeledRandomGraph::fromGraph(graph);
-            m_degreePriorPtr->setGraph(m_state);
-        }
+        // void fromGraph(const MultiGraph &graph) override
+        // {
+        //     BlockLabeledRandomGraph::fromGraph(graph);
+        //     m_degreePriorPtr->setGraph(m_state);
+        // }
         void sampleOnlyLabels() override
         {
             m_degreePriorPtr->samplePartition();

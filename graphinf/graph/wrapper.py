@@ -1,12 +1,16 @@
 import logging
 from typing import Callable, Optional
+import numpy as np
 
-from basegraph import core
+from basegraph import core as bg
 from graphinf._graphinf import graph as _graph
 from graphinf.wrapper import Wrapper as _Wrapper
+from graphinf.utility import convert_basegraph_to_graphtool
+from functools import partial
 
 from .degree_sequences import nbinom_degreeseq, poisson_degreeseq
 from .util import (
+    reduce_partition,
     log_evidence_annealed,
     log_evidence_exact,
     log_evidence_iid_meanfield,
@@ -34,10 +38,11 @@ class OptionError(ValueError):
 
 
 class RandomGraphWrapper(_Wrapper):
-    def __init__(self, graph_model, labeled=False, nested=False, **kwargs):
+    def __init__(self, model, labeled=False, nested=False, **kwargs):
         self.labeled = labeled
         self.nested = nested
-        super().__init__(graph_model, params=kwargs)
+        self._state = model.get_state()
+        super().__init__(model, params=kwargs)
 
     def __repr__(self):
         str_format = f"{self.__class__.__name__}("
@@ -52,6 +57,20 @@ class RandomGraphWrapper(_Wrapper):
         str_format += "\n)"
         return str_format
 
+    def from_graph(self, graph: bg.UndirectedGraph):
+        if self.constructor is None:
+            return
+        args = self.format_graph_into_args(graph)
+        self.__wrapped__ = self.constructor(**args)
+        self.set_state(graph)
+        self.__buildmethods__()
+        for k, v in args.items():
+            if k in self.__others__["params"]:
+                self.__others__["params"][k] = v
+
+    def format_graph_into_args(self, graph: bg.UndirectedGraph):
+        return dict()
+
     @property
     def size(self):
         return self.get_size()
@@ -60,12 +79,16 @@ class RandomGraphWrapper(_Wrapper):
     def edge_count(self):
         return self.get_edge_count()
 
+    def set_state(self, state):
+        self._state = state
+        self.wrap.set_state(state)
+
     def post_init(self):
         self.wrap.sample()
 
     def log_evidence(
         self,
-        graph: Optional[core.UndirectedMultigraph] = None,
+        graph: Optional[bg.UndirectedMultigraph] = None,
         method: Optional[str] = None,
         n_sweeps: int = 1000,
         n_steps_per_vertex: int = 10,
@@ -94,7 +117,7 @@ class RandomGraphWrapper(_Wrapper):
         if graph is None:
             graph = self.get_state()
         kwargs["n_sweeps"] = n_sweeps
-        kwargs["n_steps"] = n_steps_per_vertex * self.get_size()
+        kwargs["n_steps"] = n_steps_per_vertex
         kwargs["burn"] = burn
         kwargs["start_from_original"] = start_from_original
         kwargs["reset_original"] = reset_original
@@ -122,7 +145,7 @@ class RandomGraphWrapper(_Wrapper):
 
 
 class DeltaGraph(RandomGraphWrapper):
-    def __init__(self, graph: core.UndirectedMultigraph):
+    def __init__(self, graph: bg.UndirectedMultigraph):
         wrapped = _graph.DeltaGraph(graph)
         super().__init__(wrapped)
 
@@ -145,14 +168,18 @@ class ErdosRenyiModel(RandomGraphWrapper):
         multigraph: bool = True,
         edge_proposer_type: str = "uniform",
     ):
-        wrapped = _graph.ErdosRenyiModel(
-            size,
-            edge_count,
+        self.constructor = partial(
+            _graph.ErdosRenyiModel,
             canonical=canonical,
-            with_self_loops=loopy,
-            with_parallel_edges=multigraph,
             edge_proposer_type=edge_proposer_type,
         )
+        wrapped = self.constructor(
+            size,
+            edge_count,
+            with_self_loops=loopy,
+            with_parallel_edges=multigraph,
+        )
+
         super().__init__(
             wrapped,
             size=size,
@@ -161,6 +188,11 @@ class ErdosRenyiModel(RandomGraphWrapper):
             loopy=loopy,
             multigraph=multigraph,
             edge_proposer_type=edge_proposer_type,
+        )
+
+    def format_graph_into_args(self, graph: bg.UndirectedGraph):
+        return dict(
+            size=graph.get_size(), edge_count=graph.get_total_edge_number()
         )
 
 
@@ -180,6 +212,9 @@ class ConfigurationModelFamily(RandomGraphWrapper):
             raise OptionError(
                 degree_prior_type, self.available_degree_prior_types
             )
+        self.constructor = partial(
+            _graph.ConfigurationModelFamily, canonical=canonical
+        )
         wrapped = _graph.ConfigurationModelFamily(
             size,
             edge_count,
@@ -195,6 +230,11 @@ class ConfigurationModelFamily(RandomGraphWrapper):
             degree_prior_type=degree_prior_type,
             degree_constrained=degree_constrained,
             canonical=canonical,
+        )
+
+    def format_graph_into_args(self, graph: bg.UndirectedGraph):
+        return dict(
+            size=graph.get_size(), edge_count=graph.get_total_edge_number()
         )
 
     @property
@@ -275,17 +315,13 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         edge_count: float = 250,
         block_count: Optional[int] = None,
         likelihood_type: str = "uniform",
-        block_prior_type: str = "uniform",
         label_graph_prior_type: str = "uniform",
         degree_prior_type: str = "uniform",
         canonical: bool = False,
-        loopy: bool = True,
-        multigraph: bool = True,
         edge_proposer_type: str = "uniform",
-        block_proposer_type: str = "mixed",
-        sample_label_count_prob: float = 0.1,
-        label_creation_prob: float = 0.5,
+        block_proposer_type: str = "multiflip",
         shift: float = 1,
+        sample_label_count_prob: float = 0.1,
     ):
         labeled = True
         nested = False
@@ -293,10 +329,6 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         if likelihood_type not in self.available_likelihood_types:
             raise OptionError(
                 likelihood_type, self.available_likelihood_types
-            )
-        if block_prior_type not in self.available_block_prior_types:
-            raise OptionError(
-                block_prior_type, self.available_block_prior_types
             )
         if (
             label_graph_prior_type
@@ -312,85 +344,150 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
 
         if likelihood_type == "degree_corrected":
             if label_graph_prior_type == "nested":
-                wrapped = (
-                    _graph.NestedDegreeCorrectedStochasticBlockModelFamily(
-                        size,
-                        edge_count,
-                        degree_hyperprior=(degree_prior_type == "hyper"),
-                        canonical=canonical,
-                        edge_proposer_type=edge_proposer_type,
-                        block_proposer_type=block_proposer_type,
-                        sample_label_count_prob=sample_label_count_prob,
-                        label_creation_prob=label_creation_prob,
-                        shift=shift,
-                    )
+                self.constructor = partial(
+                    _graph.NestedDegreeCorrectedStochasticBlockModelFamily,
+                    canonical=canonical,
+                    degree_hyperprior=(degree_prior_type == "hyper"),
+                    edge_proposer_type=edge_proposer_type,
                 )
                 nested = True
             else:
-                wrapped = _graph.DegreeCorrectedStochasticBlockModelFamily(
-                    size,
-                    edge_count,
+                self.constructor = partial(
+                    _graph.DegreeCorrectedStochasticBlockModelFamily,
                     block_count=block_count,
-                    block_hyperprior=(block_prior_type == "hyper"),
+                    block_hyperprior=True,
                     degree_hyperprior=(degree_prior_type == "hyper"),
                     planted=(label_graph_prior_type == "planted"),
                     canonical=canonical,
                     edge_proposer_type=edge_proposer_type,
-                    block_proposer_type=block_proposer_type,
-                    sample_label_count_prob=sample_label_count_prob,
-                    label_creation_prob=label_creation_prob,
-                    shift=shift,
                 )
         else:
             if label_graph_prior_type == "nested":
-                wrapped = _graph.NestedStochasticBlockModelFamily(
-                    size,
-                    edge_count,
+                self.constructor = partial(
+                    _graph.NestedStochasticBlockModelFamily,
                     stub_labeled=(likelihood_type == "stub_labeled"),
                     canonical=canonical,
-                    with_self_loops=loopy,
-                    with_parallel_edges=multigraph,
+                    with_self_loops=True,
+                    with_parallel_edges=True,
                     edge_proposer_type=edge_proposer_type,
-                    block_proposer_type=block_proposer_type,
-                    sample_label_count_prob=sample_label_count_prob,
-                    label_creation_prob=label_creation_prob,
-                    shift=shift,
                 )
                 nested = True
             else:
-                wrapped = _graph.StochasticBlockModelFamily(
-                    size,
-                    edge_count,
+                self.constructor = partial(
+                    _graph.StochasticBlockModelFamily,
                     block_count=block_count,
-                    block_hyperprior=(block_prior_type == "hyper"),
+                    block_hyperprior=True,
                     planted=(label_graph_prior_type == "planted"),
                     stub_labeled=(likelihood_type == "stub_labeled"),
                     canonical=canonical,
-                    with_self_loops=loopy,
-                    with_parallel_edges=multigraph,
+                    with_self_loops=True,
+                    with_parallel_edges=True,
                     edge_proposer_type=edge_proposer_type,
-                    block_proposer_type=block_proposer_type,
-                    sample_label_count_prob=sample_label_count_prob,
-                    label_creation_prob=label_creation_prob,
-                    shift=shift,
                 )
+        wrapped = self.constructor(size, edge_count)
         super().__init__(
             wrapped,
             size=size,
             edge_count=edge_count,
             block_count=None if block_count == 0 else block_count,
             likelihood_type=likelihood_type,
-            block_prior_type=block_prior_type,
             label_graph_prior_type=label_graph_prior_type,
             degree_prior_type=degree_prior_type,
             canonical=canonical,
-            loopy=loopy,
-            multigraph=multigraph,
             edge_proposer_type=edge_proposer_type,
             block_proposer_type=block_proposer_type,
             sample_label_count_prob=sample_label_count_prob,
-            label_creation_prob=label_creation_prob,
             shift=shift,
             labeled=labeled,
             nested=nested,
         )
+        self._labels = self.get_labels()
+
+    def format_graph_into_args(self, graph: bg.UndirectedGraph):
+        return dict(
+            size=graph.get_size(), edge_count=graph.get_total_edge_number()
+        )
+
+    def set_labels(self, labels):
+        self._labels = labels
+        self.wrap.set_labels(labels)
+
+    def metropolis_sweep(
+        self,
+        n_steps_per_vertex: int,
+        n_gibbs=10,
+    ):
+        blockstate = self.blockstate()
+        if self.params["block_proposer_type"] == "multiflip":
+            out = blockstate.multiflip_mcmc_sweep(
+                psingle=self.size,
+                psplit=1,
+                pmergesplit=1,
+                niter=n_steps_per_vertex,
+                d=self.params["sample_label_count_prob"],
+                c=self.params["shift"],
+                entropy_args=self.gt_entropy_args(),
+                gibbs_sweeps=n_gibbs,
+            )
+
+        elif self.params["block_proposer_type"] == "singleflip":
+            out = blockstate.mcmc_sweep(
+                c=self.params["shift"],
+                d=self.params["sample_label_count_prob"],
+                niter=n_steps_per_vertex,
+                entropy_args=self.gt_entropy_args(),
+                sequential=False,
+                deterministic=False,
+            )
+        self.sync_with_blockstate(blockstate)
+        return out
+
+    def gt_entropy_args(self):
+        return dict(
+            adjacency=True,
+            dl=True,
+            partition_dl=True,
+            degree_dl=True,
+            degree_dl_kind="distributed"
+            if self.params["degree_prior_type"] == "hyper"
+            else "uniform",
+            edges_dl=True,
+            dense=self.params["likelihood_type"] == "uniform",
+            # multigraph=self.params["multigraph"],
+            exact=True,
+        )
+
+    def blockstate(self):
+        bg = self.get_state()
+        gt_graph = convert_basegraph_to_graphtool(bg)
+        from importlib.util import find_spec
+
+        if find_spec("graph_tool") is None:
+            raise ModuleNotFoundError(
+                "Module `graph_tool` has not been installed, cannot use `blockstate` method."
+            )
+        import graph_tool.all as gt
+
+        if self.params["label_graph_prior_type"] == "uniform":
+            b = gt_graph.new_vp("int", vals=self.get_labels())
+            return gt.BlockState(
+                g=gt_graph,
+                b=b,
+                deg_corr=self.params["likelihood_type"] == "degree_corrected",
+            )
+        bs = [np.array(b) for b in self.get_nested_labels()]
+        return gt.NestedBlockState(
+            g=gt_graph,
+            bs=bs,
+            state_args=dict(
+                deg_corr=self.params["likelihood_type"] == "degree_corrected"
+            ),
+        )
+
+    def sync_with_blockstate(self, blockstate):
+        if self.params["label_graph_prior_type"] == "nested":
+            bs = reduce_partition([list(b) for b in blockstate.get_state()])
+            self.set_nested_labels(bs)
+        else:
+            b = reduce_partition(list(blockstate.get_blocks().a))[0]
+            self.set_labels(b)

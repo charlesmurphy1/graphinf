@@ -69,11 +69,11 @@ namespace GraphInf
         const CounterMap<BlockIndex> &getNestedEdgeLabelCounts(Level level) const override { return m_nestedLabelGraphPrior.getNestedEdgeCounts(level); }
         const std::vector<MultiGraph> &getNestedLabelGraph() const override { return m_nestedLabelGraphPrior.getNestedState(); }
         const MultiGraph &getNestedLabelGraph(Level level) const override { return m_nestedLabelGraphPrior.getNestedState(level); }
-        void fromGraph(const MultiGraph &graph) override
-        {
-            RandomGraph::fromGraph(graph);
-            m_degreePriorPtr->setGraph(m_state);
-        }
+        // void fromGraph(const MultiGraph &graph) override
+        // {
+        //     RandomGraph::fromGraph(graph);
+        //     m_degreePriorPtr->setGraph(m_state);
+        // }
 
         void sampleOnlyLabels() override
         {

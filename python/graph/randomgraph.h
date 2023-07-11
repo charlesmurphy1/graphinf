@@ -91,7 +91,6 @@ namespace GraphInf
               .def("get_average_degree", &RandomGraph::getAverageDegree)
               .def("get_edge_proposer", &RandomGraph::getEdgeProposer, py::return_value_policy::reference_internal)
               .def("set_edge_proposer", &RandomGraph::setEdgeProposer, py::arg("proposer"))
-              .def("from_graph", &RandomGraph::fromGraph, py::arg("graph"))
               .def("with_self_loops", [](const RandomGraph &self)
                    { return self.withSelfLoops(); })
               .def("with_self_loops", [](RandomGraph &self, bool condition)
@@ -113,9 +112,7 @@ namespace GraphInf
               .def("apply_graph_move", &RandomGraph::applyGraphMove, py::arg("move"))
               .def("propose_graph_move", &RandomGraph::proposeGraphMove)
               .def("is_compatible", &RandomGraph::isCompatible)
-              .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"))
-              .def("metropolis_step", &RandomGraph::metropolisStep, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-              .def("metropolis_sweep", &RandomGraph::metropolisSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
+              .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"));
 
           py::class_<DeltaGraph, RandomGraph>(m, "DeltaGraph")
               .def(py::init<const MultiGraph>(), py::arg("graph"));

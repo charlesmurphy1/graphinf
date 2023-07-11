@@ -14,6 +14,7 @@ from graphinf.utility import (
     enumerate_all_partitions,
     log_mean_exp,
     log_sum_exp,
+    convert_basegraph_to_graphtool,
 )
 from scipy.special import loggamma
 from importlib.util import find_spec
@@ -22,7 +23,7 @@ from importlib.util import find_spec
 def mcmc_on_labels(
     model: RandomGraph,
     n_sweeps: int = 1000,
-    n_steps: int = 1000,
+    n_steps: int = 10,
     burn: int = 0,
     beta_prior: float = 1,
     beta_likelihood: float = 1,
@@ -60,7 +61,9 @@ def mcmc_on_labels(
             model.sample_only_labels()
 
         success = model.metropolis_sweep(
-            n_steps, beta_prior=beta_prior, beta_likelihood=beta_likelihood
+            n_steps * model.get_size(),
+            beta_prior=beta_prior,
+            beta_likelihood=beta_likelihood,
         )
         model.reduce_labels()
         t1 = time.time()
@@ -78,6 +81,97 @@ def mcmc_on_labels(
 
     if reset_original:
         model.set_labels(original)
+
+
+def mcmc_on_labels_with_gt(
+    model: RandomGraph,
+    n_sweeps: int = 1000,
+    n_steps: int = 10,
+    reset_original: bool = False,
+    callback: Optional[Callable[[RandomGraph], None]] = None,
+    verbose: bool = False,
+    flip_args: Optional[dict] = None,
+):
+    if verbose:
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s"
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    else:
+        logger = None
+    if find_spec("graph_tool") is not None:
+        import graph_tool.all as gt
+    else:
+        raise ModuleNotFoundError(
+            "Module `graph_tool` has not been installed."
+        )
+
+    original = model.get_labels()
+    blockstate = model.blockstate()
+
+    flip_args = flip_args or {}
+    flip_args["entropy_args"] = model.gt_entropy_args()
+    flip_type = flip_args.pop("type", "multiflip")
+    for i in range(n_sweeps):
+        t0 = time.time()
+        success = 0
+        for _ in range(n_steps):
+            if flip_type == "gibbs":
+                _, _, s = blockstate.gibbs_sweep(**flip_args)
+            elif flip_type == "multiflip":
+                _, _, s = blockstate.multiflip_mcmc_sweep(**flip_args)
+            else:
+                _, _, s = blockstate.mcmc_sweep(**flip_args)
+            success += s
+        model.sync_with_blockstate(blockstate)
+        t1 = time.time()
+        if logger is not None:
+            logger.info(
+                f"Epoch {i}: "
+                f"time={t1 - t0: 0.4f}, "
+                f"accepted={success}, "
+                f"log(likelihood)={model.log_likelihood(): 0.4f}, "
+                f"log(prior)={model.log_prior(): 0.4f}"
+            )
+
+        if callback is not None:
+            callback(model)
+
+    if reset_original:
+        model.set_labels(original)
+
+
+def reduce_partition(partition):
+    reduced = []
+    mapping = []
+    if not isinstance(partition[0], list):
+        partition = [partition]
+    for i, bb in enumerate(partition):
+        reduced.append([])
+        mapping.append(dict())
+
+        inverse = (
+            None if i == 0 else {v: k for k, v in mapping[i - 1].items()}
+        )
+        idx = 0
+        for j, _bb in enumerate(bb):
+            if inverse is not None and j not in inverse:
+                continue
+            if _bb not in mapping[i]:
+                mapping[i][_bb] = idx
+                idx += 1
+            if inverse is None:
+                reduced[i].append(mapping[i][_bb])
+            else:
+                reduced[i].append(mapping[i][_bb])
+        if len(reduced[i]) == 1:
+            break
+    return reduced
 
 
 def log_evidence_exact(
@@ -147,7 +241,10 @@ def log_evidence_partition_meanfield(
     partitions = [original]
     callback = lambda model: partitions.append(get_labels())
 
-    mcmc_on_labels(model, callback=callback, **kwargs)
+    if kwargs.get("sample_with_gt", True):
+        mcmc_on_labels_with_gt(model, callback=callback, **kwargs)
+    else:
+        mcmc_on_labels(model, callback=callback, **kwargs)
 
     pmodes = ModeClusterState(partitions, nested=model.nested)
     if kwargs.get("equilibriate_mode_cluster", False):

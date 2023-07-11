@@ -82,4 +82,28 @@ namespace GraphInf
         }
         return numSuccesses;
     }
+    const int DataModel::metropolisGraphSweep(size_t numSteps, const double betaPrior, const double betaLikelihood)
+    {
+        int numSuccesses = 0;
+        for (size_t i = 0; i < numSteps; i++)
+        {
+            MCMCSummary summary;
+            summary = metropolisGraphStep(betaPrior, betaLikelihood);
+            if (summary.isAccepted)
+                numSuccesses += 1;
+        }
+        return numSuccesses;
+    }
+    const int DataModel::metropolisParamSweep(size_t numSteps)
+    {
+        int numSuccesses = 0;
+        for (size_t i = 0; i < numSteps; i++)
+        {
+            MCMCSummary summary;
+            summary = metropolisParamStep();
+            if (summary.isAccepted)
+                numSuccesses += 1;
+        }
+        return numSuccesses;
+    }
 }

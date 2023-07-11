@@ -61,7 +61,7 @@ class DataModelWrapper(_Wrapper):
             return "labeled"
         return "normal"
 
-    def set_state_from(self, other: DataModelWrapper):
+    def from_model(self, other: DataModelWrapper):
         if issubclass(other.__class__, DataModelWrapper):
             self.wrap.set_state_from(other.wrap)
         elif issubclass(other.__class__, DataModel):
@@ -77,6 +77,28 @@ class DataModelWrapper(_Wrapper):
         self.graph_prior = graph_prior
         self.wrap.set_graph_prior(graph_prior.wrap)
         self.__wrapped__.sample()
+
+    def gibbs_sweep(
+        self,
+        n_sweeps: int = 4,
+        n_steps_per_vertex: int = 1,
+        beta_likelihood: float = 1,
+        beta_prior: float = 1,
+        **kwargs,
+    ):
+        n_success = 0
+        for i in range(n_sweeps):
+            n_success += self.wrap.metropolis_graph_sweep(
+                num_steps=n_steps_per_vertex * self.get_size(),
+                beta_likelihood=beta_likelihood,
+                beta_prior=beta_prior,
+                **kwargs,
+            )
+            if self.graph_prior.labeled:
+                _ds, t, m = self.graph_prior.metropolis_sweep(**kwargs)
+            else:
+                m = 0
+            n_success += m
 
     def log_posterior(
         self,

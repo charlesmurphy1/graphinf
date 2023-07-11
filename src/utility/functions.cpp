@@ -12,14 +12,15 @@ using namespace std;
 namespace GraphInf
 {
 
-    const size_t MAX_INTEGER_THRESHOLD = 500;
+    const size_t MAX_INTEGER_THRESHOLD = 5000;
 
     double logFactorial(size_t n)
     {
-        if (n < MAX_INTEGER_THRESHOLD)
-            return lgamma(n + 1);
-        else
-            return 0.5 * sqrt(2 * PI * n) + n * (log(n) - 1);
+        return lgamma(n + 1);
+        // if (n < MAX_INTEGER_THRESHOLD)
+        //     return lgamma(n + 1);
+        // else
+        //     return 0.5 * sqrt(2 * PI * n) + n * (log(n) - 1);
     }
 
     double logDoubleFactorial(size_t n)

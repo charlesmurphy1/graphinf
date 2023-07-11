@@ -20,8 +20,12 @@ namespace GraphInf
     {
         if (m_graphPtr->getSize() != m_blockPriorPtr->getSize())
         {
-            m_blockPriorPtr->setSize(m_graphPtr->getSize());
-            m_blockPriorPtr->sample();
+            // m_blockPriorPtr->setSize(m_graphPtr->getSize());
+            // m_blockPriorPtr->sample();
+            throw ConsistencyError(
+                "LabelGraphPrior",
+                "m_graphPtr->getSize()", std::to_string(m_graphPtr->getSize()),
+                "m_blockPriorPtr->getSize()", std::to_string(m_blockPriorPtr->getSize()));
         }
 
         MultiGraph state(m_blockPriorPtr->getMaxBlockCount());

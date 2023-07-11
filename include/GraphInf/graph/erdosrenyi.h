@@ -54,11 +54,11 @@ namespace GraphInf
 
         const EdgeCountPrior &getEdgeCountPrior() { return *m_edgeCountPriorPtr; }
         void setEdgeCountPrior(EdgeCountPrior &edgeCountPrior) { m_edgeCountPriorPtr = &edgeCountPrior; }
-        void fromGraph(const MultiGraph &graph) override
-        {
-            RandomGraph::fromGraph(graph);
-            m_edgeCountPriorPtr->setState(graph.getTotalEdgeNumber());
-        }
+        // void fromGraph(const MultiGraph &graph) override
+        // {
+        //     RandomGraph::fromGraph(graph);
+        //     m_edgeCountPriorPtr->setState(graph.getTotalEdgeNumber());
+        // }
 
         // const bool isCompatible(const MultiGraph& graph) const override{
         //     return RandomGraph::isCompatible(graph) and graph.getTotalEdgeNumber() == getEdgeCount();

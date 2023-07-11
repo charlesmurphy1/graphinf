@@ -103,6 +103,8 @@ namespace GraphInf
 
         const int gibbsSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1);
         const int metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1);
+        const int metropolisGraphSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1);
+        const int metropolisParamSweep(size_t nSteps);
 
         void applyGraphMove(const GraphMove &move)
         {

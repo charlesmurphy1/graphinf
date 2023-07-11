@@ -57,11 +57,11 @@ namespace GraphInf
             m_degreePriorPtr = &prior;
             m_degreePriorPtr->isRoot(false);
         }
-        void fromGraph(const MultiGraph &graph) override
-        {
-            RandomGraph::fromGraph(graph);
-            m_degreePriorPtr->setGraph(graph);
-        }
+        // void fromGraph(const MultiGraph &graph) override
+        // {
+        //     RandomGraph::fromGraph(graph);
+        //     m_degreePriorPtr->setGraph(graph);
+        // }
 
         const size_t getEdgeCount() const override { return m_degreePriorPtr->getEdgeCount(); }
         const size_t getDegree(BaseGraph::VertexIndex vertex) const { return m_degreePriorPtr->getDegree(vertex); }
