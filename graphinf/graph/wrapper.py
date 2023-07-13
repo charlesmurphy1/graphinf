@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 import numpy as np
 
 from basegraph import core as bg
@@ -31,7 +31,7 @@ __all__ = (
 
 
 class OptionError(ValueError):
-    def __init__(self, value: str, avail_options: list[str]) -> None:
+    def __init__(self, value: str, avail_options: List[str]) -> None:
         super().__init__(
             f"Option {value} is unavailable, possible options are {avail_options}."
         )
@@ -247,7 +247,7 @@ class ConfigurationModelFamily(RandomGraphWrapper):
 
 
 class ConfigurationModel(RandomGraphWrapper):
-    def __init__(self, degree_seq: list[int]):
+    def __init__(self, degree_seq: List[int]):
         wrapped = _graph.ConfigurationModel(degree_seq)
         self.degrees = degree_seq
         super().__init__(
@@ -466,17 +466,17 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             raise ModuleNotFoundError(
                 "Module `graph_tool` has not been installed, cannot use `blockstate` method."
             )
-        import graph_tool.all as gt
+        from graph_tool.inference import BlockState, NestedBlockState
 
         if self.params["label_graph_prior_type"] == "uniform":
             b = gt_graph.new_vp("int", vals=self.get_labels())
-            return gt.BlockState(
+            return BlockState(
                 g=gt_graph,
                 b=b,
                 deg_corr=self.params["likelihood_type"] == "degree_corrected",
             )
         bs = [np.array(b) for b in self.get_nested_labels()]
-        return gt.NestedBlockState(
+        return NestedBlockState(
             g=gt_graph,
             bs=bs,
             state_args=dict(

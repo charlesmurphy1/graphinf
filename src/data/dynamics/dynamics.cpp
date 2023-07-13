@@ -5,6 +5,10 @@ namespace GraphInf
 
     void Dynamics::computeConsistentState()
     {
+        if (m_state.size() != m_graphPriorPtr->getSize() or m_state.size() == 0){
+            sampleState();
+            return;
+        }
         if (m_state.size() != 0)
             m_neighborsState = computeNeighborsState(m_state);
         if (m_pastStateSequence.size() != 0)

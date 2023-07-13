@@ -150,12 +150,12 @@ def convert_basegraph_to_networkx(
 
 
 def convert_basegraph_to_graphtool(bs_graph: bs.UndirectedMultigraph):
-    if find_spec("graph_tool"):
-        import graph_tool.all as gt
+    if find_spec("graph_tool") is not None:
+        from graph_tool import Graph
     else:
         raise RuntimeError("Could not find `graph_tool`.")
 
-    gt_graph = gt.Graph(directed=False)
+    gt_graph = Graph(directed=False)
     gt_graph.add_vertex(n=bs_graph.get_size())
     for e in bs_graph.edges():
         for m in range(bs_graph.get_edge_multiplicity(*e)):

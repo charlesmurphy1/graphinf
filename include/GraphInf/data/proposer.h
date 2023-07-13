@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+#include <memory>
 #include "GraphInf/utility/polylog2_integral.h"
 #include "GraphInf/rng.h"
 #include "SamplableSet.hpp"
