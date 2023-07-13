@@ -45,14 +45,13 @@ def mcmc_on_graph(
         logger = None
 
     sweep = partial(
-        model.gibbs_sweep(
-            n_sweeps=n_gibbs_sweeps,
-            n_steps_per_vertex=n_steps_per_vertex,
-            beta_prior=beta_prior,
-            beta_likelihood=beta_likelihood,
-            sample_prior=sample_prior,
-            sample_params=sample_params,
-        )
+        model.gibbs_sweep,
+        n_sweeps=n_gibbs_sweeps,
+        n_steps_per_vertex=n_steps_per_vertex,
+        beta_prior=beta_prior,
+        beta_likelihood=beta_likelihood,
+        sample_prior=sample_prior,
+        sample_params=sample_params,
     )
 
     original = model.get_graph()

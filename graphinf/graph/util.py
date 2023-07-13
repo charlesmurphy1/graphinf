@@ -18,6 +18,7 @@ from graphinf.utility import (
 )
 from scipy.special import loggamma
 from importlib.util import find_spec
+from functools import partial
 
 
 def mcmc_on_labels(
@@ -175,10 +176,7 @@ def log_evidence_partition_meanfield(
     partitions = [original]
     callback = lambda model: partitions.append(get_labels())
 
-    if kwargs.get("sample_with_gt", True):
-        mcmc_on_labels_with_gt(model, callback=callback, **kwargs)
-    else:
-        mcmc_on_labels(model, callback=callback, **kwargs)
+    mcmc_on_labels(model, callback=callback, **kwargs)
 
     pmodes = ModeClusterState(partitions, nested=model.nested)
     if kwargs.get("equilibriate_mode_cluster", False):

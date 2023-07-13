@@ -37,8 +37,6 @@ class DataModelWrapper(_Wrapper):
         self.nested = graph_prior.nested
         data_model = self.constructor(graph_prior.wrap, **kwargs)
         data_model.sample()
-        if not graph_prior.labeled:
-            data_model.freeze_graph_prior()
         super().__init__(data_model, graph_prior=graph_prior, params=kwargs)
 
     def __repr__(self):
@@ -111,10 +109,12 @@ class DataModelWrapper(_Wrapper):
         self,
         graph: Optional[core.UndirectedMultigraph] = None,
         method: Optional[str] = None,
-        sweep_type: Literal["metropolis", "gibbs"] = "metropolis",
         n_sweeps: int = 1000,
-        n_steps_per_vertex: int = 10,
-        burn: int = 0,
+        n_gibbs_sweeps: int = 10,
+        n_steps_per_vertex: int = 1,
+        burn_sweeps: int = 0,
+        sample_prior: bool = True,
+        sample_params: bool = False,
         start_from_original: bool = False,
         reset_original: bool = False,
         verbose: bool = False,
@@ -126,10 +126,12 @@ class DataModelWrapper(_Wrapper):
                 f"Cannot parse method '{method}', available options are {all_methods}."
             )
 
-        kwargs["sweep_type"] = sweep_type
         kwargs["n_sweeps"] = n_sweeps
-        kwargs["n_steps"] = n_steps_per_vertex * self.get_size()
-        kwargs["burn"] = burn
+        kwargs["n_gibbs_sweeps"] = n_gibbs_sweeps
+        kwargs["n_steps_per_vertex"] = n_steps_per_vertex
+        kwargs["burn_sweeps"] = burn_sweeps
+        kwargs["sample_prior"] = sample_prior
+        kwargs["sample_params"] = sample_params
         kwargs["start_from_original"] = start_from_original
         kwargs["reset_original"] = reset_original
         kwargs["verbose"] = verbose
@@ -157,10 +159,12 @@ class DataModelWrapper(_Wrapper):
     def log_evidence(
         self,
         method: Optional[str] = None,
-        sweep_type: Literal["metropolis", "gibbs"] = "metropolis",
         n_sweeps: int = 1000,
-        n_steps_per_vertex: int = 10,
-        burn: int = 0,
+        n_gibbs_sweeps: int = 10,
+        n_steps_per_vertex: int = 1,
+        burn_sweeps: int = 0,
+        sample_prior: bool = True,
+        sample_params: bool = False,
         start_from_original: bool = False,
         reset_original: bool = False,
         verbose: bool = False,
@@ -171,10 +175,12 @@ class DataModelWrapper(_Wrapper):
                 f"Cannot parse method '{method}', available options are ['exact', 'meanfield', 'annealed']."
             )
 
-        kwargs["sweep_type"] = sweep_type
         kwargs["n_sweeps"] = n_sweeps
-        kwargs["n_steps"] = n_steps_per_vertex * self.get_size()
-        kwargs["burn"] = burn
+        kwargs["n_gibbs_sweeps"] = n_gibbs_sweeps
+        kwargs["n_steps_per_vertex"] = n_steps_per_vertex
+        kwargs["burn_sweeps"] = burn_sweeps
+        kwargs["sample_prior"] = sample_prior
+        kwargs["sample_params"] = sample_params
         kwargs["start_from_original"] = start_from_original
         kwargs["reset_original"] = reset_original
         kwargs["verbose"] = verbose
