@@ -92,7 +92,7 @@ class RandomGraphWrapper(_Wrapper):
         method: Optional[str] = None,
         n_sweeps: int = 1000,
         n_steps_per_vertex: int = 10,
-        burn: int = 0,
+        burn_sweeps: int = 5,
         start_from_original: bool = False,
         reset_original: bool = False,
         verbose: bool = False,
@@ -117,8 +117,8 @@ class RandomGraphWrapper(_Wrapper):
         if graph is None:
             graph = self.get_state()
         kwargs["n_sweeps"] = n_sweeps
-        kwargs["n_steps"] = n_steps_per_vertex
-        kwargs["burn"] = burn
+        kwargs["n_steps_per_vertex"] = n_steps_per_vertex
+        kwargs["burn_sweeps"] = burn_sweeps
         kwargs["start_from_original"] = start_from_original
         kwargs["reset_original"] = reset_original
         kwargs["verbose"] = verbose

@@ -46,7 +46,7 @@ def mcmc_on_labels(
     else:
         logger = None
 
-    if "metropolis_sweep" not in model.__dict__:
+    if "metropolis_sweep" not in dir(model):
         return
     sweep = partial(
         model.metropolis_sweep,
@@ -62,7 +62,6 @@ def mcmc_on_labels(
         sweep()
     for i in range(n_sweeps):
         t0 = time.time()
-
         success = sweep()
         t1 = time.time()
         if logger is not None:
