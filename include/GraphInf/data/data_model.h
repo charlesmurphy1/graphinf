@@ -26,6 +26,8 @@ namespace GraphInf
         const MultiGraph &getGraph() const { return m_graphPriorPtr->getState(); }
         void setGraph(const MultiGraph &graph)
         {
+            if (graph.getSize() != m_graphPriorPtr->getSize())
+                throw std::invalid_argument("Graph size does not match prior size.");
             m_graphPriorPtr->setState(graph);
             computeConsistentState();
         }
