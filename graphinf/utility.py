@@ -121,8 +121,10 @@ class EdgeCollector:
 
 
 def load_graph(path):
-    edgelist = np.load(path)
-    g = bs.UndirectedMultigraph(edgelist.max() + 1)
+    data = np.load(path)
+    edgelist = data["edgelist"]
+    nodelist = data["nodelist"]
+    g = bs.UndirectedMultigraph(max(nodelist) + 1)
     for e in edgelist:
         i, j, m = e
         g.add_multiedge(i, j, m)
@@ -130,10 +132,11 @@ def load_graph(path):
 
 
 def save_graph(graph, path):
+    nodelist = np.array([v for v in graph])
     edgelist = np.array(
         [(*e, graph.get_edge_multiplicity(*e)) for e in graph.edges()]
     )
-    np.save(path, edgelist)
+    np.save(path, dict(nodelist=nodelist, edgelist=edgelist))
 
 
 def convert_basegraph_to_networkx(
