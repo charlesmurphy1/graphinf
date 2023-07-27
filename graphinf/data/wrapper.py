@@ -1,15 +1,20 @@
 from __future__ import annotations
+import numpy as np
 
 from typing import Literal, Optional
+from collections import defaultdict
 
 from basegraph import core
 from graphinf._graphinf.data import DataModel
+from graphinf._graphinf.utility import enumerate_all_graphs
 from graphinf.graph import DeltaGraph as _DeltaGraph
 from graphinf.graph import ErdosRenyiModel as _ErdosRenyiModel
 from graphinf.graph import RandomGraphWrapper as _RandomGraphWrapper
 from graphinf.wrapper import Wrapper as _Wrapper
+from graphinf.utility import EdgeCollector
 
 from .util import (
+    mcmc_on_graph,
     log_evidence_annealed,
     log_evidence_exact,
     log_posterior_exact_meanfield,
@@ -105,10 +110,71 @@ class DataModelWrapper(_Wrapper):
                 )
         return n_success
 
+    def posterior_entropy(
+        self,
+        method: Literal["exact", "meanfield"] = "exact",
+        n_sweeps: int = 1000,
+        n_gibbs_sweeps: int = 10,
+        n_steps_per_vertex: int = 1,
+        burn_sweeps: int = 0,
+        sample_prior: bool = True,
+        sample_params: bool = False,
+        start_from_original: bool = False,
+        reset_original: bool = True,
+        verbose: bool = False,
+        **kwargs,
+    ):
+        kwargs["n_sweeps"] = n_sweeps
+        kwargs["n_gibbs_sweeps"] = n_gibbs_sweeps
+        kwargs["n_steps_per_vertex"] = n_steps_per_vertex
+        kwargs["burn_sweeps"] = burn_sweeps
+        kwargs["sample_prior"] = sample_prior
+        kwargs["sample_params"] = sample_params
+        kwargs["start_from_original"] = start_from_original
+        kwargs["reset_original"] = reset_original
+        kwargs["verbose"] = verbose
+
+        graph = self.get_graph()
+        N, M, loopy, multigraph = (
+            self.graph_prior.get_size(),
+            self.graph_prior.get_edge_count(),
+            self.graph_prior.loppy,
+            self.graph_prior.multigraph,
+        )
+        if graph.get_size() > 6 or method == "meanfield":
+            collector = EdgeCollector()
+            callback = lambda model: collector.update(model.get_graph())
+
+            self.set_graph(graph)
+            callback(self)
+            mcmc_on_graph(self, callback=callback, **kwargs)
+            self.set_graph(graph)
+            entropy = collector.entropy()
+        elif method == "exact_meanfield":
+            logprob = defaultdict(float)
+            log_evidence = self.log_evidence(method="exact", **kwargs)
+            for g in enumerate_all_graphs(N, M, loopy, multigraph):
+                self.set_graph(g)
+                for e in g.edges():
+                    logprob[e] += np.exp(self.log_joint() - log_evidence)
+            entropy = -np.sum([p * np.log(p) for p in logprob.values()])
+        else:
+            entropy = 0
+            log_evidence = self.log_evidence(method="exact", **kwargs)
+            for g in enumerate_all_graphs(N, M, loopy, multigraph):
+                self.set_graph(g)
+                logp = self.log_joint() - log_evidence
+                entropy -= np.exp(logp) * logp
+        if reset_original:
+            self.set_graph(graph)
+        return entropy
+
     def log_posterior(
         self,
         graph: Optional[core.UndirectedMultigraph] = None,
-        method: Optional[str] = None,
+        method: Literal[
+            "exact", "meanfield", "exact_meanfield", "annealed"
+        ] = "exact",
         n_sweeps: int = 1000,
         n_gibbs_sweeps: int = 10,
         n_steps_per_vertex: int = 1,
@@ -193,3 +259,6 @@ class DataModelWrapper(_Wrapper):
         likelihood = self.log_likelihood()
         posterior = log_posterior_meanfield(self, self.get_graph(), **kwargs)
         return prior + likelihood - posterior
+
+
+# MDP: DQMJQLy8oZzQegR2aZh2

@@ -86,6 +86,30 @@ class RandomGraphWrapper(_Wrapper):
     def post_init(self):
         self.wrap.sample()
 
+    def joint_entropy(
+        self, n_samples: int = 25, reset_original: bool = False
+    ):
+        entropy = np.zeros(n_samples)
+        state = self.get_state()
+        for i in range(n_samples):
+            self.sample()
+            entropy[i] = -self.log_joint()
+        if reset_original:
+            self.set_state(state)
+        return entropy.mean()
+
+    def state_entropy(
+        self, n_samples: int = 25, reset_original: bool = False, **kwargs
+    ):
+        state = self.get_state()
+        entropy = np.zeros(n_samples)
+        for i in range(n_samples):
+            self.sample_prior()
+            entropy[i] = self.log_evidence(**kwargs)
+        if reset_original:
+            self.set_state(state)
+        return entropy.mean()
+
     def log_evidence(
         self,
         graph: Optional[bg.UndirectedMultigraph] = None,

@@ -2,6 +2,7 @@ import importlib
 from collections import defaultdict
 from itertools import combinations_with_replacement
 
+import pandas as pd
 from importlib.util import find_spec
 import networkx as nx
 import numpy as np
@@ -121,7 +122,7 @@ class EdgeCollector:
 
 
 def load_graph(path):
-    data = np.load(path)
+    data = pd.read_pickle(path)
     edgelist = data["edgelist"]
     nodelist = data["nodelist"]
     g = bs.UndirectedMultigraph(max(nodelist) + 1)
@@ -136,7 +137,7 @@ def save_graph(graph, path):
     edgelist = np.array(
         [(*e, graph.get_edge_multiplicity(*e)) for e in graph.edges()]
     )
-    np.save(path, dict(nodelist=nodelist, edgelist=edgelist))
+    pd.to_pickle(dict(nodelist=nodelist, edgelist=edgelist), path)
 
 
 def convert_basegraph_to_networkx(

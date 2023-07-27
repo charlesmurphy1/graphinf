@@ -14,8 +14,6 @@ __all__ = (
     "CowanDynamics",
 )
 
-# _Dynamics = _dynamics.Dynamics
-
 
 class Dynamics(_DataModelWrapper):
     @property
