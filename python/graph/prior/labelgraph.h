@@ -20,17 +20,17 @@ namespace GraphInf
         py::class_<LabelGraphPrior, BlockLabeledPrior<LabelGraph>, PyLabelGraphPrior<>>(m, "LabelGraphPrior")
             .def(py::init<>())
             .def(py::init<EdgeCountPrior &, BlockPrior &>(), py::arg("edge_count_prior"), py::arg("block_prior"))
-            .def("get_edge_count", &LabelGraphPrior::getEdgeCount)
-            .def("get_edge_counts", &LabelGraphPrior::getEdgeCounts)
-            .def("get_block_count", &LabelGraphPrior::getBlockCount)
-            .def("get_blocks", &LabelGraphPrior::getBlocks)
-            .def("get_block", &LabelGraphPrior::getBlock, py::arg("vertex"))
-            .def("get_graph", &LabelGraphPrior::getGraph)
+            .def("edge_count", &LabelGraphPrior::getEdgeCount)
+            .def("edge_counts", &LabelGraphPrior::getEdgeCounts, py::return_value_policy::reference_internal)
+            .def("block_count", &LabelGraphPrior::getBlockCount)
+            .def("blocks", &LabelGraphPrior::getBlocks, py::return_value_policy::reference_internal)
+            .def("block", &LabelGraphPrior::getBlock, py::arg("vertex"))
+            .def("graph", &LabelGraphPrior::getGraph, py::return_value_policy::reference_internal)
             .def("set_graph", &LabelGraphPrior::setGraph, py::arg("graph"))
             .def("set_partition", &LabelGraphPrior::setPartition)
-            .def("get_edge_count_prior", &LabelGraphPrior::getEdgeCountPrior, py::return_value_policy::reference_internal)
+            .def("edge_count_prior", &LabelGraphPrior::getEdgeCountPrior, py::return_value_policy::reference_internal)
             .def("set_edge_count_prior", &LabelGraphPrior::setEdgeCountPrior, py::arg("prior"))
-            .def("get_block_prior", &LabelGraphPrior::getBlockPrior, py::return_value_policy::reference_internal)
+            .def("block_prior", &LabelGraphPrior::getBlockPrior, py::return_value_policy::reference_internal)
             .def("set_block_prior", &LabelGraphPrior::setBlockPrior, py::arg("prior"))
             .def("reduce_partition", &LabelGraphPrior::reducePartition);
 
@@ -45,8 +45,8 @@ namespace GraphInf
         py::class_<LabelGraphPlantedPartitionPrior, LabelGraphPrior>(m, "LabelGraphPlantedPartitionPrior")
             .def(py::init<>())
             .def(py::init<EdgeCountPrior &, BlockPrior &>(), py::arg("edge_count_prior"), py::arg("block_prior"))
-            .def("get_edge_count_in", &LabelGraphPlantedPartitionPrior::getEdgeCountIn)
-            .def("get_edge_count_out", &LabelGraphPlantedPartitionPrior::getEdgeCountOut);
+            .def("edge_count_in", &LabelGraphPlantedPartitionPrior::getEdgeCountIn)
+            .def("edge_count_out", &LabelGraphPlantedPartitionPrior::getEdgeCountOut);
     }
 
 }

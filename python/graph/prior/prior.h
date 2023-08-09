@@ -27,15 +27,15 @@ namespace GraphInf
     {
         return py::class_<Prior<StateType>, NestedRandomVariable, PyPrior<StateType>>(m, pyName.c_str())
             .def(py::init<>())
-            .def("get_state", &Prior<StateType>::getState)
-            .def("set_state", &Prior<StateType>::setState, py::arg("state"))
+            .def("state", &Prior<StateType>::getState)
+            .def("set_state", &Prior<StateType>::setState, py::arg("state"), py::return_value_policy::reference_internal)
             .def("sample_state", &Prior<StateType>::sampleState)
             .def("sample_priors", &Prior<StateType>::samplePriors)
             .def("sample", &Prior<StateType>::sample)
-            .def("get_log_likelihood", &Prior<StateType>::getLogLikelihood)
-            .def("get_log_prior", &Prior<StateType>::getLogPrior)
-            .def("get_log_joint", &Prior<StateType>::getLogJoint)
-            .def("get_log_joint_ratio_from_graph_move", &Prior<StateType>::getLogJointRatioFromGraphMove, py::arg("move"))
+            .def("log_likelihood", &Prior<StateType>::getLogLikelihood)
+            .def("log_prior", &Prior<StateType>::getLogPrior)
+            .def("log_joint", &Prior<StateType>::getLogJoint)
+            .def("log_joint_ratio_from_graph_move", &Prior<StateType>::getLogJointRatioFromGraphMove, py::arg("move"))
             .def("apply_graph_move", &Prior<StateType>::applyGraphMove, py::arg("move"));
     }
 
@@ -45,7 +45,7 @@ namespace GraphInf
     {
         return py::class_<VertexLabeledPrior<StateType, Label>, Prior<StateType>, PyVertexLabeledPrior<StateType, Label>>(m, pyName.c_str())
             .def(py::init<>())
-            .def("get_log_joint_ratio_from_label_move", &VertexLabeledPrior<StateType, Label>::getLogJointRatioFromLabelMove, py::arg("move"))
+            .def("log_joint_ratio_from_label_move", &VertexLabeledPrior<StateType, Label>::getLogJointRatioFromLabelMove, py::arg("move"))
             .def("apply_label_move", &VertexLabeledPrior<StateType, Label>::applyGraphMove, py::arg("move"));
     }
 

@@ -19,11 +19,11 @@ namespace GraphInf
         py::class_<DegreePrior, Prior<std::vector<size_t>>, PyDegreePrior<>>(m, "DegreePrior")
             .def(py::init<size_t>(), py::arg("size"))
             .def(py::init<size_t, EdgeCountPrior &>(), py::arg("size"), py::arg("edge_count_prior"))
-            .def("get_size", &DegreePrior::getSize)
-            .def("get_edge_count", &DegreePrior::getEdgeCount)
-            .def("get_degree_of_idx", &DegreePrior::getDegree)
-            .def("get_degree_counts", &DegreePrior::getDegreeCounts)
-            .def("get_edge_count_prior", &DegreePrior::getEdgeCountPrior, py::return_value_policy::reference_internal)
+            .def("size", &DegreePrior::getSize)
+            .def("edge_count", &DegreePrior::getEdgeCount)
+            .def("degree_of_idx", &DegreePrior::getDegree)
+            .def("degree_counts", &DegreePrior::getDegreeCounts, py::return_value_policy::reference_internal)
+            .def("edge_count_prior", &DegreePrior::getEdgeCountPrior, py::return_value_policy::reference_internal)
             .def("set_edge_count_prior", &DegreePrior::setEdgeCountPrior, py::arg("edge_count_prior"));
 
         py::class_<DegreeDeltaPrior, DegreePrior>(m, "DegreeDeltaPrior")

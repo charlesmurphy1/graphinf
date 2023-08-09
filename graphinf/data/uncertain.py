@@ -20,12 +20,12 @@ class PoissonUncertainGraph(_DataModelWrapper):
 
     def __init__(
         self,
-        graph_prior: RandomGraph | Wrapper = None,
+        prior: RandomGraph | Wrapper = None,
         mu: int = 5,
         mu_no_edge: float = 0.0,
     ):
         super().__init__(
-            graph_prior=graph_prior,
+            prior=prior,
             mu=mu,
             mu_no_edge=mu_no_edge,
         )

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
 
-from typing import Literal, Optional
+from typing import Literal, Optional, Callable
 from collections import defaultdict
 
 from basegraph import core
@@ -27,31 +27,29 @@ class DataModelWrapper(_Wrapper):
 
     def __init__(
         self,
-        graph_prior: _RandomGraphWrapper or core.UndirectedMultigraph = None,
+        prior: _RandomGraphWrapper or core.UndirectedMultigraph = None,
         **kwargs,
     ):
-        if graph_prior is None:
-            graph_prior = (
-                _ErdosRenyiModel(100, 250)
-                if graph_prior is None
-                else graph_prior
-            )
-        elif isinstance(graph_prior, core.UndirectedMultigraph):
-            graph_prior = _DeltaGraph(graph_prior)
-        self.labeled = graph_prior.labeled
-        self.nested = graph_prior.nested
-        data_model = self.constructor(graph_prior.wrap, **kwargs)
+        if prior is None:
+            prior = _ErdosRenyiModel(100, 250) if prior is None else prior
+        elif isinstance(prior, core.UndirectedMultigraph):
+            prior = _DeltaGraph(prior)
+        self.labeled = prior.labeled
+        self.nested = prior.nested
+        data_model = self.constructor(prior.wrap, **kwargs)
         data_model.sample()
-        super().__init__(data_model, graph_prior=graph_prior, params=kwargs)
+        super().__init__(data_model, prior=prior, params=kwargs)
 
     def __repr__(self):
-        str_format = f"{self.__class__.__name__ }(\n\tprior={self.graph_prior.__class__.__name__},"
+        str_format = f"{self.__class__.__name__ }(\n\tprior={self.prior.__class__.__name__},"
 
         for k, v in self.params.items():
             if isinstance(v, str):
                 v = f"'{v}'"
             if k in dir(self):
                 v = getattr(self, k)
+            if isinstance(v, Callable):
+                v = v()
             str_format += f"\n\t{k}={v},"
         str_format += "\n)"
         return str_format
@@ -74,11 +72,11 @@ class DataModelWrapper(_Wrapper):
                 f"Model `{other}` has an invalid type `{other.__class__.__name__}`"
             )
 
-    def set_graph_prior(self, graph_prior: _RandomGraphWrapper):
-        self.labeled = graph_prior.labeled
-        self.nested = graph_prior.nested
-        self.graph_prior = graph_prior
-        self.wrap.set_graph_prior(graph_prior.wrap)
+    def set_prior(self, prior: _RandomGraphWrapper):
+        self.labeled = prior.labeled
+        self.nested = prior.nested
+        self.prior = prior
+        self.wrap.set_graph_prior(prior.wrap)
         self.__wrapped__.sample()
 
     def gibbs_sweep(
@@ -94,13 +92,13 @@ class DataModelWrapper(_Wrapper):
         n_success = 0
         for _ in range(n_sweeps):
             n_success += self.wrap.metropolis_graph_sweep(
-                num_steps=n_steps_per_vertex * self.get_size(),
+                num_steps=n_steps_per_vertex * self.size(),
                 beta_likelihood=beta_likelihood,
                 beta_prior=beta_prior,
                 **kwargs,
             )
-            if self.graph_prior.labeled and sample_prior:
-                _, _, m = self.graph_prior.metropolis_sweep(**kwargs)
+            if self.prior.labeled and sample_prior:
+                _, _, m = self.prior.metropolis_sweep(**kwargs)
                 n_success += m
             if sample_params:
                 n_success += self.wrap.metropolis_param_sweep(
@@ -134,16 +132,16 @@ class DataModelWrapper(_Wrapper):
         kwargs["reset_original"] = reset_original
         kwargs["verbose"] = verbose
 
-        graph = self.get_graph()
+        graph = self.graph_copy()
         N, M, loopy, multigraph = (
-            self.graph_prior.get_size(),
-            self.graph_prior.get_edge_count(),
-            self.graph_prior.loppy,
-            self.graph_prior.multigraph,
+            self.prior.size(),
+            self.prior.edge_count(),
+            self.prior.with_self_loops(),
+            self.prior.with_parallel_edges(),
         )
         if graph.get_size() > 6 or method == "meanfield":
             collector = EdgeCollector()
-            callback = lambda model: collector.update(model.get_graph())
+            callback = lambda model: collector.update(model.graph_copy())
 
             self.set_graph(graph)
             callback(self)
@@ -202,16 +200,14 @@ class DataModelWrapper(_Wrapper):
         kwargs["reset_original"] = reset_original
         kwargs["verbose"] = verbose
 
-        graph = self.get_graph() if graph is None else graph
+        graph = self.graph_copy() if graph is None else graph
         if method == "meanfield":
             posterior = log_posterior_meanfield(self, graph, **kwargs)
         elif method == "exact_meanfield":
             posterior = log_posterior_exact_meanfield(self, graph, **kwargs)
         else:
             self.set_graph(graph)
-            prior = self.graph_prior.log_evidence(
-                **kwargs.get("prior_args", {})
-            )
+            prior = self.prior.log_evidence(**kwargs.get("prior_args", {}))
             likelihood = self.log_likelihood()
             if method == "exact":
                 posterior = prior + likelihood - log_evidence_exact(self)
@@ -255,10 +251,7 @@ class DataModelWrapper(_Wrapper):
             return log_evidence_exact(self)
         if method == "annealed":
             return log_evidence_annealed(self, **kwargs)
-        prior = self.graph_prior.log_evidence(**kwargs.get("prior_args", {}))
+        prior = self.prior.log_evidence(**kwargs.get("prior_args", {}))
         likelihood = self.log_likelihood()
-        posterior = log_posterior_meanfield(self, self.get_graph(), **kwargs)
+        posterior = log_posterior_meanfield(self, self.graph_copy(), **kwargs)
         return prior + likelihood - posterior
-
-
-# MDP: DQMJQLy8oZzQegR2aZh2

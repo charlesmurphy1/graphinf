@@ -21,7 +21,7 @@ namespace GraphInf
             //     py::arg("with_self_loops")=true,
             //     py::arg("with_parallel_edges")=true
             // )
-            .def("get_label_graph_prior", &StochasticBlockModelBase::getLabelGraphPrior, py::return_value_policy::reference_internal)
+            .def("label_graph_prior", &StochasticBlockModelBase::getLabelGraphPrior, py::return_value_policy::reference_internal)
             .def("set_label_graph_prior", &StochasticBlockModelBase::setLabelGraphPrior, py::arg("prior"));
 
         py::class_<StochasticBlockModel, StochasticBlockModelBase>(m, "StochasticBlockModel")

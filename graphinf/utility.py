@@ -91,7 +91,7 @@ class EdgeCollector:
             self.counts[edge] += 1
 
     def mle(self, edge, multiplicity=1):
-        if self.counts[edge] == 0:
+        if edge not in self.counts:
             return 0
 
         if multiplicity == 0:

@@ -41,7 +41,7 @@ class RandomGraphWrapper(_Wrapper):
     def __init__(self, model, labeled=False, nested=False, **kwargs):
         self.labeled = labeled
         self.nested = nested
-        self._state = model.get_state()
+        self._state = model.state()
         super().__init__(model, params=kwargs)
 
     def __repr__(self):
@@ -53,6 +53,8 @@ class RandomGraphWrapper(_Wrapper):
                 v = f"'{v}'"
             if k in dir(self):
                 v = getattr(self, k)
+            if isinstance(v, Callable):
+                v = v()
             str_format += f"\n\t{k}={v},"
         str_format += "\n)"
         return str_format
@@ -71,13 +73,13 @@ class RandomGraphWrapper(_Wrapper):
     def format_graph_into_args(self, graph: bg.UndirectedGraph):
         return dict()
 
-    @property
-    def size(self):
-        return self.get_size()
+    # @property
+    # def size(self):
+    #     return self.get_size()
 
-    @property
-    def edge_count(self):
-        return self.get_edge_count()
+    # @property
+    # def edge_count(self):
+    #     return self.get_edge_count()
 
     def set_state(self, state):
         self._state = state
@@ -90,7 +92,7 @@ class RandomGraphWrapper(_Wrapper):
         self, n_samples: int = 25, reset_original: bool = False
     ):
         entropy = np.zeros(n_samples)
-        state = self.get_state()
+        state = self.state()
         for i in range(n_samples):
             self.sample()
             entropy[i] = -self.log_joint()
@@ -101,7 +103,7 @@ class RandomGraphWrapper(_Wrapper):
     def state_entropy(
         self, n_samples: int = 25, reset_original: bool = False, **kwargs
     ):
-        state = self.get_state()
+        state = self.state()
         entropy = np.zeros(n_samples)
         for i in range(n_samples):
             self.sample_prior()
@@ -131,7 +133,7 @@ class RandomGraphWrapper(_Wrapper):
         if method is None:
             method = (
                 "exact"
-                if (self.get_size() <= 5 or not self.labeled)
+                if (self.size() <= 5 or not self.labeled)
                 else "iid_meanfield"
             )
         if method not in all_methods:
@@ -139,7 +141,7 @@ class RandomGraphWrapper(_Wrapper):
                 f"Cannot parse method '{method}', available options are {all_methods}."
             )
         if graph is None:
-            graph = self.get_state()
+            graph = self.state()
         kwargs["n_sweeps"] = n_sweeps
         kwargs["n_steps_per_vertex"] = n_steps_per_vertex
         kwargs["burn_sweeps"] = burn_sweeps
@@ -154,7 +156,7 @@ class RandomGraphWrapper(_Wrapper):
             self.set_state(graph)
             return evidence
 
-        original = self.get_labels()
+        original = self.labels()
         if method == "exact":
             evidence = log_evidence_exact(self, graph)
         elif method == "iid_meanfield":
@@ -172,14 +174,6 @@ class DeltaGraph(RandomGraphWrapper):
     def __init__(self, graph: bg.UndirectedMultigraph):
         wrapped = _graph.DeltaGraph(graph)
         super().__init__(wrapped)
-
-    @property
-    def size(self):
-        return self.get_size()
-
-    @property
-    def edge_count(self):
-        return self.get_edge_count()
 
 
 class ErdosRenyiModel(RandomGraphWrapper):
@@ -260,14 +254,6 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         return dict(
             size=graph.get_size(), edge_count=graph.get_total_edge_number()
         )
-
-    @property
-    def size(self):
-        return self.get_size()
-
-    @property
-    def edge_count(self):
-        return self.get_edge_count()
 
 
 class ConfigurationModel(RandomGraphWrapper):
@@ -425,16 +411,16 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             labeled=labeled,
             nested=nested,
         )
-        self._labels = self.get_labels()
+        # self._labels = self.labels()
 
     def format_graph_into_args(self, graph: bg.UndirectedGraph):
         return dict(
             size=graph.get_size(), edge_count=graph.get_total_edge_number()
         )
 
-    def set_labels(self, labels):
-        self._labels = labels
-        self.wrap.set_labels(labels)
+    # def set_labels(self, labels):
+    #     self._labels = labels
+    #     self.wrap.set_labels(labels)
 
     def metropolis_sweep(
         self,
@@ -444,7 +430,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         blockstate = self.blockstate()
         if self.params["block_proposer_type"] == "multiflip":
             out = blockstate.multiflip_mcmc_sweep(
-                psingle=self.size,
+                psingle=self.size(),
                 psplit=1,
                 pmergesplit=1,
                 niter=n_steps_per_vertex,
@@ -482,7 +468,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         )
 
     def blockstate(self):
-        bg = self.get_state()
+        bg = self.state()
         gt_graph = convert_basegraph_to_graphtool(bg)
         from importlib.util import find_spec
 
@@ -493,13 +479,13 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         from graph_tool.inference import BlockState, NestedBlockState
 
         if self.params["label_graph_prior_type"] == "uniform":
-            b = gt_graph.new_vp("int", vals=self.get_labels())
+            b = gt_graph.new_vp("int", vals=self.labels_copy())
             return BlockState(
                 g=gt_graph,
                 b=b,
                 deg_corr=self.params["likelihood_type"] == "degree_corrected",
             )
-        bs = [np.array(b) for b in self.get_nested_labels()]
+        bs = [np.array(b) for b in self.nested_labels_copy()]
         return NestedBlockState(
             g=gt_graph,
             bs=bs,

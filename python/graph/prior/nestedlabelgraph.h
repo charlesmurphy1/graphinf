@@ -22,47 +22,55 @@ namespace GraphInf
                 { return self.sampleState(level); },
                 py::arg("level"))
             .def(
-                "get_log_likelihood_at_level", [](const NestedLabelGraphPrior &self, Level level)
+                "log_likelihood_at_level", [](const NestedLabelGraphPrior &self, Level level)
                 { return self.getLogLikelihoodAtLevel(level); },
                 py::arg("level"))
-            .def("get_nested_state", [](const NestedLabelGraphPrior &self)
-                 { return self.getNestedState(); })
             .def(
-                "get_nested_state", [](const NestedLabelGraphPrior &self, Level level)
+                "nested_state", [](const NestedLabelGraphPrior &self)
+                { return self.getNestedState(); },
+                py::return_value_policy::reference_internal)
+            .def(
+                "nested_state", [](const NestedLabelGraphPrior &self, Level level)
                 { return self.getNestedState(level); },
-                py::arg("level"))
+                py::arg("level"), py::return_value_policy::reference_internal)
             .def("set_nested_state", &NestedLabelGraphPrior::setNestedState, py::arg("state"))
-            .def("get_nested_block_prior", &NestedLabelGraphPrior::getNestedBlockPrior, py::return_value_policy::reference_internal)
+            .def("nested_block_prior", &NestedLabelGraphPrior::getNestedBlockPrior, py::return_value_policy::reference_internal)
             .def("set_nested_block_prior", &NestedLabelGraphPrior::setNestedBlockPrior, py::arg("prior"))
-            .def("get_nested_block_count", [](const NestedLabelGraphPrior &self)
+            .def("nested_block_count", [](const NestedLabelGraphPrior &self)
                  { return self.getNestedBlockCount(); })
             .def(
-                "get_nested_block_count", [](const NestedLabelGraphPrior &self, Level level)
+                "nested_block_count", [](const NestedLabelGraphPrior &self, Level level)
                 { return self.getNestedBlockCount(level); },
                 py::arg("level"))
-            .def("get_nested_blocks", [](const NestedLabelGraphPrior &self)
-                 { return self.getNestedBlocks(); })
             .def(
-                "get_nested_blocks", [](const NestedLabelGraphPrior &self, Level level)
+                "nested_blocks", [](const NestedLabelGraphPrior &self)
+                { return self.getNestedBlocks(); },
+                py::return_value_policy::reference_internal)
+            .def(
+                "nested_blocks", [](const NestedLabelGraphPrior &self, Level level)
                 { return self.getNestedBlocks(level); },
-                py::arg("level"))
-            .def("get_nested_vertex_counts", [](const NestedLabelGraphPrior &self)
-                 { return self.getNestedVertexCounts(); })
+                py::arg("level"), py::return_value_policy::reference_internal)
             .def(
-                "get_nested_vertex_counts", [](const NestedLabelGraphPrior &self, Level level)
+                "nested_vertex_counts", [](const NestedLabelGraphPrior &self)
+                { return self.getNestedVertexCounts(); },
+                py::return_value_policy::reference_internal)
+            .def(
+                "nested_vertex_counts", [](const NestedLabelGraphPrior &self, Level level)
                 { return self.getNestedVertexCounts(level); },
-                py::arg("level"))
-            .def("get_nested_edge_counts", [](const NestedLabelGraphPrior &self)
-                 { return self.getNestedEdgeCounts(); })
+                py::arg("level"), py::return_value_policy::reference_internal)
             .def(
-                "get_nested_edge_counts", [](const NestedLabelGraphPrior &self, Level level)
+                "nested_edge_counts", [](const NestedLabelGraphPrior &self)
+                { return self.getNestedEdgeCounts(); },
+                py::return_value_policy::reference_internal)
+            .def(
+                "nested_edge_counts", [](const NestedLabelGraphPrior &self, Level level)
                 { return self.getNestedEdgeCounts(level); },
-                py::arg("level"))
-            .def("get_block_of_id", [](const NestedLabelGraphPrior &self, BaseGraph::VertexIndex vertex, Level level)
+                py::arg("level"), py::return_value_policy::reference_internal)
+            .def("block", [](const NestedLabelGraphPrior &self, BaseGraph::VertexIndex vertex, Level level)
                  { return self.getBlock(vertex, level); })
-            .def("get_nested_block_of_id", [](const NestedLabelGraphPrior &self, BlockIndex vertex, Level level)
+            .def("nested_block", [](const NestedLabelGraphPrior &self, BlockIndex vertex, Level level)
                  { return self.getNestedBlock(vertex, level); })
-            .def("get_depth", &NestedLabelGraphPrior::getDepth)
+            .def("depth", &NestedLabelGraphPrior::getDepth)
             .def("set_nested_partition", &NestedLabelGraphPrior::setNestedPartition, py::arg("nested_partition"))
             .def(
                 "reduce_partition", [](NestedLabelGraphPrior &self, Level minLevel)

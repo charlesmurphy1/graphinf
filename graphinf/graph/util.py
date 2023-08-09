@@ -54,7 +54,7 @@ def mcmc_on_labels(
         n_gibbs=n_gibbs_sweeps,
     )
 
-    original = model.get_labels()
+    original = model.labels()
     if not start_from_original:
         model.sample_only_labels()
 
@@ -116,16 +116,16 @@ def log_evidence_exact(
     if model.nested:
         raise TypeError("`model` must not be nested for exact evaluation.")
 
-    if model.get_size() > 6:
+    if model.size() > 6:
         warn(
-            f"A model with size {model.get_size()} is being used"
+            f"A model with size {model.size()} is being used"
             f"for exact evaluation, which might not finish."
         )
 
-    original = model.get_labels()
+    original = model.labels()
     model.set_state(graph)
     samples = []
-    partitions = enumerate_all_partitions(model.get_size())
+    partitions = enumerate_all_partitions(model.size())
     if verbose:
         partitions = tqdm.tqdm(partitions)
     for p in partitions:
@@ -148,7 +148,7 @@ def log_evidence_iid_meanfield(
         sweeps = tqdm.tqdm(sweeps)
     for _ in sweeps:
         model.sample()
-        collector.update(model.get_state())
+        collector.update(model.state_copy())
     return collector.log_prob_estimate(graph)
 
 
@@ -163,12 +163,12 @@ def log_evidence_partition_meanfield(
         )
 
     get_labels = (
-        model.get_labels if not model.nested else model.get_nested_labels
+        model.labels_copy if not model.nested else model.nested_labels_copy
     )
     set_labels = (
         model.set_labels if not model.nested else model.set_nested_labels
     )
-    original = model.get_labels()
+    original = model.labels_copy()
 
     if not kwargs.get("start_from_original", False):
         model.sample_only_labels()

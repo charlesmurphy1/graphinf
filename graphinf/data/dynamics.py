@@ -16,9 +16,10 @@ __all__ = (
 
 
 class Dynamics(_DataModelWrapper):
-    @property
-    def length(self):
-        return self.get_length()
+    pass
+    # @property
+    # def length(self):
+    #     return self.length()
 
 
 class SISDynamics(Dynamics):
@@ -26,7 +27,7 @@ class SISDynamics(Dynamics):
 
     def __init__(
         self,
-        graph_prior: RandomGraph | Wrapper = None,
+        prior: RandomGraph | Wrapper = None,
         length: int = 10,
         infection_prob: float = 0.5,
         recovery_prob: float = 0.5,
@@ -34,7 +35,7 @@ class SISDynamics(Dynamics):
         auto_deactivation_prob: float = 0.0,
     ):
         super().__init__(
-            graph_prior=graph_prior,
+            prior=prior,
             length=length,
             infection_prob=infection_prob,
             recovery_prob=recovery_prob,
@@ -48,14 +49,14 @@ class GlauberDynamics(Dynamics):
 
     def __init__(
         self,
-        graph_prior: RandomGraph = None,
+        prior: RandomGraph = None,
         length: int = 10,
         coupling: float = 1,
         auto_activation_prob: float = 0.0,
         auto_deactivation_prob: float = 0.0,
     ):
         super().__init__(
-            graph_prior=graph_prior,
+            prior=prior,
             length=length,
             coupling=coupling,
             auto_activation_prob=auto_activation_prob,
@@ -68,7 +69,7 @@ class CowanDynamics(Dynamics):
 
     def __init__(
         self,
-        graph_prior: RandomGraph = None,
+        prior: RandomGraph = None,
         length: int = 10,
         nu: float = 1,
         a: float = 1,
@@ -78,7 +79,7 @@ class CowanDynamics(Dynamics):
         auto_deactivation_prob: float = 0.0,
     ):
         super().__init__(
-            graph_prior=graph_prior,
+            prior=prior,
             length=length,
             nu=nu,
             a=a,
@@ -93,6 +94,6 @@ class DegreeDynamics(Dynamics):
     constructor = _dynamics.DegreeDynamics
 
     def __init__(
-        self, graph_prior: RandomGraph = None, length: int = 10, C: float = 10
+        self, prior: RandomGraph = None, length: int = 10, C: float = 10
     ):
-        super().__init__(graph_prior=graph_prior, length=length, C=C)
+        super().__init__(prior=prior, length=length, C=C)

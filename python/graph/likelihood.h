@@ -18,14 +18,14 @@ namespace GraphInf
     py::class_<VertexLabeledGraphLikelihoodModel<Label>, GraphLikelihoodModel, PyVertexLabeledGraphLikelihoodModel<Label>> declareVertexLabeledGraphLikelihoodBaseClass(py::module &m, std::string pyName)
     {
         return py::class_<VertexLabeledGraphLikelihoodModel<Label>, GraphLikelihoodModel, PyVertexLabeledGraphLikelihoodModel<Label>>(m, pyName.c_str())
-            .def("get_log_likelihood_ratio_from_label_move", &VertexLabeledGraphLikelihoodModel<Label>::getLogLikelihoodRatioFromLabelMove, py::arg("move"));
+            .def("log_likelihood_ratio_from_label_move", &VertexLabeledGraphLikelihoodModel<Label>::getLogLikelihoodRatioFromLabelMove, py::arg("move"));
     }
 
     void initGraphLikelihoods(py::module &m)
     {
         py::class_<GraphLikelihoodModel, NestedRandomVariable, PyGraphLikelihoodModel<>>(m, "GraphLikelihoodModel")
-            .def("get_log_likelihood", &GraphLikelihoodModel::getLogLikelihood)
-            .def("get_log_likelihood_ratio_from_graph_move", &GraphLikelihoodModel::getLogLikelihoodRatioFromGraphMove, py::arg("move"))
+            .def("log_likelihood", &GraphLikelihoodModel::getLogLikelihood)
+            .def("log_likelihood_ratio_from_graph_move", &GraphLikelihoodModel::getLogLikelihoodRatioFromGraphMove, py::arg("move"))
             .def("sample", &GraphLikelihoodModel::sample);
 
         declareVertexLabeledGraphLikelihoodBaseClass<BlockIndex>(m, "BlockLabeledGraphLikelihoodBaseClass");

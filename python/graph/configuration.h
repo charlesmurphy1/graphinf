@@ -15,10 +15,11 @@ namespace GraphInf
         py::class_<ConfigurationModelBase, RandomGraph>(m, "ConfigurationModelBase")
             // .def(py::init<size_t>(), py::arg("size"))
             // .def(py::init<size_t, DegreePrior&>(), py::arg("size"), py::arg("degree_prior"))
-            .def("get_degree_prior", &ConfigurationModelBase::getDegreePrior, py::return_value_policy::reference_internal)
+            .def("degree_prior", &ConfigurationModelBase::getDegreePrior, py::return_value_policy::reference_internal)
             .def("set_degree_prior", &ConfigurationModelBase::setDegreePrior, py::arg("prior"))
-            .def("get_degree", &ConfigurationModelBase::getDegree, py::arg("vertex"))
-            .def("get_degrees", &ConfigurationModelBase::getDegrees);
+            .def("degree", &ConfigurationModelBase::getDegree, py::arg("vertex"))
+            .def("degrees", &ConfigurationModelBase::getDegrees, py::return_value_policy::reference_internal)
+            .def("degrees_copy", &ConfigurationModelBase::getDegrees, py::return_value_policy::copy);
 
         py::class_<ConfigurationModel, ConfigurationModelBase>(m, "ConfigurationModel")
             .def(py::init<std::vector<size_t>>(), py::arg("degrees"))

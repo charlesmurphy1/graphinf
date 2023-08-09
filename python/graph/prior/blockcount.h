@@ -23,21 +23,21 @@ namespace GraphInf
         py::class_<BlockCountPoissonPrior, BlockCountPrior>(m, "BlockCountPoissonPrior")
             .def(py::init<>())
             .def(py::init<double>(), py::arg("mean"))
-            .def("get_mean", &BlockCountPoissonPrior::getMean)
+            .def("mean", &BlockCountPoissonPrior::getMean)
             .def("set_mean", &BlockCountPoissonPrior::setMean, py::arg("mean"));
         py::class_<BlockCountUniformPrior, BlockCountPrior>(m, "BlockCountUniformPrior")
             .def(py::init<>())
             .def(py::init<size_t, size_t>(), py::arg("min"), py::arg("max"))
-            .def("get_min", &BlockCountUniformPrior::getMin)
-            .def("get_max", &BlockCountUniformPrior::getMax)
+            .def("min", &BlockCountUniformPrior::getMin)
+            .def("max", &BlockCountUniformPrior::getMax)
             .def("set_min", &BlockCountUniformPrior::setMin, py::arg("min"))
             .def("set_max", &BlockCountUniformPrior::setMax, py::arg("max"))
             .def("set_min_max", &BlockCountUniformPrior::setMinMax, py::arg("min"), py::arg("max"));
 
         py::class_<NestedBlockCountPrior, BlockCountPrior, PyNestedBlockCountPrior<>>(m, "NestedBlockCountPrior")
             .def(py::init<>())
-            .def("get_depth", &NestedBlockCountPrior::getDepth)
-            .def("get_nested_state", [](const NestedBlockCountPrior &self)
+            .def("depth", &NestedBlockCountPrior::getDepth)
+            .def("nested_state", [](const NestedBlockCountPrior &self)
                  { return self.getNestedState(); })
             .def(
                 "get_nested_state", [](const NestedBlockCountPrior &self, Level level)
@@ -57,7 +57,7 @@ namespace GraphInf
 
         py::class_<NestedBlockCountUniformPrior, NestedBlockCountPrior>(m, "NestedBlockCountUniformPrior")
             .def(py::init<size_t>(), py::arg("graph_size"))
-            .def("get_graph_size", &NestedBlockCountUniformPrior::getGraphSize)
+            .def("graph_size", &NestedBlockCountUniformPrior::getGraphSize)
             .def("set_graph_size", &NestedBlockCountUniformPrior::setGraphSize, py::arg("graph_size"));
     }
 

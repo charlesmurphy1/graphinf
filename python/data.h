@@ -58,22 +58,23 @@ namespace GraphInf
 
         py::class_<DataModel, NestedRandomVariable, PyDataModel<>>(m, "DataModel")
             .def(py::init<RandomGraph &>(), py::arg("graph_prior"))
-            .def("get_size", &DataModel::getSize)
-            .def("get_graph", &DataModel::getGraph)
+            .def("size", &DataModel::getSize)
+            .def("graph", &DataModel::getGraph, py::return_value_policy::reference_internal)
+            .def("graph_copy", &DataModel::getGraph, py::return_value_policy::copy)
             .def("set_graph", &DataModel::setGraph, py::arg("graph"))
-            .def("get_graph_prior", &DataModel::getGraphPrior, py::return_value_policy::reference_internal)
+            .def("graph_prior", &DataModel::getGraphPrior, py::return_value_policy::reference_internal)
             .def("set_graph_prior", &DataModel::setGraphPrior, py::arg("prior"))
             .def("sample_prior", &DataModel::samplePrior)
             .def("log_likelihood", &DataModel::getLogLikelihood)
             .def("log_prior", &DataModel::getLogPrior)
             .def("log_joint", &DataModel::getLogJoint)
-            .def("get_log_likelihood_ratio_from_graph_move", &DataModel::getLogLikelihoodRatioFromGraphMove, py::arg("move"))
-            .def("get_log_prior_ratio_from_graph_move", &DataModel::getLogPriorRatioFromGraphMove, py::arg("move"))
-            .def("get_log_joint_ratio_from_graph_move", &DataModel::getLogJointRatioFromGraphMove, py::arg("move"))
+            .def("log_likelihood_ratio_from_graph_move", &DataModel::getLogLikelihoodRatioFromGraphMove, py::arg("move"))
+            .def("log_prior_ratio_from_graph_move", &DataModel::getLogPriorRatioFromGraphMove, py::arg("move"))
+            .def("log_joint_ratio_from_graph_move", &DataModel::getLogJointRatioFromGraphMove, py::arg("move"))
             .def("apply_graph_move", &DataModel::applyGraphMove, py::arg("move"))
             .def("apply_param_move", &DataModel::applyParamMove, py::arg("move"))
             .def("is_valid_param_move", &DataModel::isValidParamMove, py::arg("move"))
-            .def("get_log_acceptance_prob_from_graph_move", &DataModel::getLogAcceptanceProbFromGraphMove, py::arg("move"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+            .def("log_acceptance_prob_from_graph_move", &DataModel::getLogAcceptanceProbFromGraphMove, py::arg("move"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
             .def("metropolis_graph_sweep", &DataModel::metropolisGraphSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
             .def("metropolis_param_sweep", &DataModel::metropolisParamSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
 
@@ -99,7 +100,8 @@ namespace GraphInf
                 "sample", [](Dynamics &self, bool asyncMode = false, size_t initialBurn = 0)
                 { self.sample({}, asyncMode, initialBurn); },
                 py::arg("async_mode") = false, py::arg("initial_burn") = 0)
-            .def("get_state", &Dynamics::getState)
+            .def("state", &Dynamics::getState, py::return_value_policy::reference_internal)
+            .def("state_copy", &Dynamics::getState, py::return_value_policy::copy)
             .def("set_current_state", &Dynamics::setCurrentState, py::arg("state"))
             .def("set_state_from", [](Dynamics &self, const Dynamics &other)
                  { 
@@ -107,15 +109,19 @@ namespace GraphInf
                     self.setState(other.getPastStates(), other.getFutureStates()); })
             .def("set_state", py::overload_cast<Matrix<VertexState>>(&Dynamics::setState), py::arg("state"))
             .def("set_state", py::overload_cast<Matrix<VertexState>, Matrix<VertexState>>(&Dynamics::setState), py::arg("past"), py::arg("future"))
-            .def("get_neighbors_state", &Dynamics::getNeighborsState)
-            .def("get_past_states", &Dynamics::getPastStates)
-            .def("get_past_neighbors_states", &Dynamics::getNeighborsPastStates)
-            .def("get_future_states", &Dynamics::getFutureStates)
-            .def("get_num_states", &Dynamics::getNumStates)
-            .def("get_length", &Dynamics::getLength)
+            .def("neighbors_state", &Dynamics::getNeighborsState, py::return_value_policy::reference_internal)
+            .def("past_states", &Dynamics::getPastStates, py::return_value_policy::reference_internal)
+            .def("past_neighbors_states", &Dynamics::getNeighborsPastStates, py::return_value_policy::reference_internal)
+            .def("future_states", &Dynamics::getFutureStates, py::return_value_policy::reference_internal)
+            .def("neighbors_state_copy", &Dynamics::getNeighborsState, py::return_value_policy::copy)
+            .def("past_states_copy", &Dynamics::getPastStates, py::return_value_policy::copy)
+            .def("past_neighbors_states_copy", &Dynamics::getNeighborsPastStates, py::return_value_policy::copy)
+            .def("future_states_copy", &Dynamics::getFutureStates, py::return_value_policy::copy)
+            .def("num_states", &Dynamics::getNumStates)
+            .def("length", &Dynamics::getLength)
             .def("set_length", &Dynamics::setLength)
-            .def("get_random_state", &Dynamics::getRandomState)
-            .def("get_transition_matrix", &Dynamics::getTransitionMatrix, py::arg("out_state") = -1)
+            .def("random_state", &Dynamics::getRandomState)
+            .def("transition_matrix", &Dynamics::getTransitionMatrix, py::arg("out_state") = -1)
             .def("accept_selfloops", [](Dynamics &self)
                  { return self.acceptSelfLoops(); })
             .def(
@@ -125,10 +131,10 @@ namespace GraphInf
             .def("sync_update_state", &Dynamics::syncUpdateState)
             .def("async_update_state", &Dynamics::asyncUpdateState,
                  py::arg("num_updates") = 1)
-            .def("get_transition_prob", &Dynamics::getTransitionProb,
+            .def("transition_prob", &Dynamics::getTransitionProb,
                  py::arg("prev_vertex_state"), py::arg("next_vertex_state"), py::arg("neighbor_state"))
             .def(
-                "get_transition_probs",
+                "transition_probs",
                 [](const Dynamics &self, BaseGraph::VertexIndex vertex)
                 {
                     return self.getTransitionProbs(vertex);
@@ -139,16 +145,16 @@ namespace GraphInf
             .def(py::init<RandomGraph &, size_t, double, double>(),
                  py::arg("graph_prior"), py::arg("length"),
                  py::arg("auto_activation_prob") = 0., py::arg("auto_deactivation_prob") = 0.)
-            .def("get_activation_prob", &BinaryDynamics::getActivationProb, py::arg("neighbor_state"))
-            .def("get_deactivation_prob", &BinaryDynamics::getDeactivationProb, py::arg("neighbor_state"))
+            .def("activation_prob", &BinaryDynamics::getActivationProb, py::arg("neighbor_state"))
+            .def("deactivation_prob", &BinaryDynamics::getDeactivationProb, py::arg("neighbor_state"))
             .def("set_auto_activation_prob", &BinaryDynamics::setAutoActivationProb, py::arg("auto_activation_prob"))
             .def("set_auto_deactivation_prob", &BinaryDynamics::setAutoDeactivationProb, py::arg("auto_deactivation_prob"))
-            .def("get_auto_activation_prob", &BinaryDynamics::getAutoActivationProb)
-            .def("get_auto_deactivation_prob", &BinaryDynamics::getAutoDeactivationProb)
-            .def("get_random_state", [](const BinaryDynamics &self)
+            .def("auto_activation_prob", &BinaryDynamics::getAutoActivationProb)
+            .def("auto_deactivation_prob", &BinaryDynamics::getAutoDeactivationProb)
+            .def("random_state", [](const BinaryDynamics &self)
                  { return self.getRandomState(); })
             .def(
-                "get_random_state", [](const BinaryDynamics &self, int initial)
+                "random_state", [](const BinaryDynamics &self, int initial)
                 { return self.getRandomState(initial); },
                 py::arg("initial_active"))
             .def(
@@ -181,35 +187,35 @@ namespace GraphInf
                  py::arg("graph_prior"), py::arg("length"), py::arg("nu") = 1,
                  py::arg("a") = 1, py::arg("mu") = 1, py::arg("eta") = 0.5,
                  py::arg("auto_activation_prob") = 1e-6, py::arg("auto_deactivation_prob") = 0.)
-            .def("get_a", &CowanDynamics::getA)
+            .def("a", &CowanDynamics::getA)
             .def("set_a", &CowanDynamics::setA, py::arg("a"))
-            .def("get_nu", &CowanDynamics::getNu)
+            .def("nu", &CowanDynamics::getNu)
             .def("set_nu", &CowanDynamics::setNu, py::arg("nu"))
-            .def("get_mu", &CowanDynamics::getMu)
+            .def("mu", &CowanDynamics::getMu)
             .def("set_mu", &CowanDynamics::setMu, py::arg("mu"))
-            .def("get_eta", &CowanDynamics::getEta)
+            .def("eta", &CowanDynamics::getEta)
             .def("set_eta", &CowanDynamics::setEta, py::arg("eta"));
 
         py::class_<DegreeDynamics, BinaryDynamics>(dynamics, "DegreeDynamics")
             .def(py::init<RandomGraph &, size_t, double>(),
                  py::arg("graph_prior"), py::arg("length"), py::arg("C"))
-            .def("get_c", &DegreeDynamics::getC)
+            .def("c", &DegreeDynamics::getC)
             .def("set_c", &DegreeDynamics::setC, py::arg("c"));
 
         py::class_<GlauberDynamics, BinaryDynamics>(dynamics, "GlauberDynamics")
             .def(py::init<RandomGraph &, int, float, float, float>(),
                  py::arg("random_graph"), py::arg("length"), py::arg("coupling") = 1,
                  py::arg("auto_activation_prob") = 0., py::arg("auto_deactivation_prob") = 0.)
-            .def("get_coupling", &GlauberDynamics::getCoupling)
+            .def("coupling", &GlauberDynamics::getCoupling)
             .def("set_coupling", &GlauberDynamics::setCoupling, py::arg("coupling"));
 
         py::class_<SISDynamics, BinaryDynamics>(dynamics, "SISDynamics")
             .def(py::init<RandomGraph &, size_t, double, double, double, double>(),
                  py::arg("random_graph"), py::arg("length"), py::arg("infection_prob") = 0.5, py::arg("recovery_prob") = 0.5,
                  py::arg("auto_activation_prob") = 1e-6, py::arg("auto_deactivation_prob") = 0.)
-            .def("get_infection_prob", &SISDynamics::getInfectionProb)
+            .def("infection_prob", &SISDynamics::getInfectionProb)
             .def("set_infection_prob", &SISDynamics::setInfectionProb, py::arg("infection_prob"))
-            .def("get_recovery_prob", &SISDynamics::getRecoveryProb)
+            .def("recovery_prob", &SISDynamics::getRecoveryProb)
             .def("set_recovery_prob", &SISDynamics::setRecoveryProb, py::arg("recovery_prob"));
 
         auto uncertain = m.def_submodule("uncertain");
@@ -222,7 +228,8 @@ namespace GraphInf
                  {
                 self.setGraph(other.getGraph());
                 self.setState(other.getState()); })
-            .def("get_state", &UncertainGraph::getState);
+            .def("state", &UncertainGraph::getState, py::return_value_policy::reference_internal)
+            .def("state_copy", &UncertainGraph::getState, py::return_value_policy::copy);
 
         py::class_<PoissonUncertainGraph, UncertainGraph>(uncertain, "PoissonUncertainGraph")
             .def(py::init<RandomGraph &, double, double>(), py::arg("prior"), py::arg("mu"), py::arg("mu_no_edge") = 0);

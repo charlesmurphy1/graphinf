@@ -22,11 +22,11 @@ namespace GraphInf
             .def("set_graph", &VertexLabeledDegreePrior::setGraph)
             .def("set_partition", &VertexLabeledDegreePrior::setPartition)
             .def("sample_partition", &VertexLabeledDegreePrior::samplePartition)
-            .def("get_degree", &VertexLabeledDegreePrior::getDegree)
-            .def("get_degree_counts", &VertexLabeledDegreePrior::getDegreeCounts)
-            .def("get_block_prior", &VertexLabeledDegreePrior::getBlockPrior)
+            .def("degree", &VertexLabeledDegreePrior::getDegree)
+            .def("degree_counts", &VertexLabeledDegreePrior::getDegreeCounts, py::return_value_policy::reference_internal)
+            .def("block_prior", &VertexLabeledDegreePrior::getBlockPrior, py::return_value_policy::reference_internal)
             .def("set_block_prior", &VertexLabeledDegreePrior::setBlockPrior, py::arg("block_prior"))
-            .def("get_label_graph_prior", &VertexLabeledDegreePrior::getLabelGraphPrior, py::return_value_policy::reference_internal)
+            .def("label_graph_prior", &VertexLabeledDegreePrior::getLabelGraphPrior, py::return_value_policy::reference_internal)
             .def("set_label_graph_prior", &VertexLabeledDegreePrior::setLabelGraphPrior, py::arg("label_graph_prior"));
 
         py::class_<VertexLabeledDegreeDeltaPrior, VertexLabeledDegreePrior>(m, "VertexLabeledDegreeDeltaPrior")

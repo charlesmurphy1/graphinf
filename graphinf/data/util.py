@@ -84,7 +84,7 @@ def log_posterior_meanfield(
     model: DataModel, graph: core.UndirectedMultigraph, **kwargs
 ):
     collector = EdgeCollector()
-    callback = lambda model: collector.update(model.get_graph())
+    callback = lambda model: collector.update(model.graph_copy())
 
     model.set_graph(graph)
     callback(model)
@@ -96,22 +96,22 @@ def log_posterior_meanfield(
 def log_posterior_exact_meanfield(
     model: DataModel, graph: core.UndirectedMultigraph, **kwargs
 ):
-    g = model.graph_prior
-    N, M = g.get_size(), g.get_edge_count()
+    g = model.prior
+    N, M = g.size(), g.edge_count()
     ws, wp = g.with_self_loops(), g.with_parallel_edges()
     if N > 7:
         warn(
             f"A model with size {N} is being used"
             f"for exact evaluation, which might not finish."
         )
-    original = model.get_graph()
+    original = model.graph_copy()
     evidence = []
 
     logits = dict()
     for g in enumerate_all_graphs(N, M, selfloops=ws, parallel_edges=wp):
         model.set_graph(g)
         likelihood = model.log_likelihood()
-        prior = model.graph_prior.log_evidence(method="exact")
+        prior = model.prior.log_evidence(method="exact")
         evidence.append(likelihood + prior)
         for e in g.edges():
             logits[e] = likelihood + prior
@@ -125,20 +125,20 @@ def log_posterior_exact_meanfield(
 
 
 def log_evidence_exact(model: DataModel, **kwargs):
-    g = model.graph_prior
-    N, M = g.get_size(), g.get_edge_count()
+    g = model.prior
+    N, M = g.size(), g.edge_count()
     ws, wp = g.with_self_loops(), g.with_parallel_edges()
     if N > 7:
         warn(
             f"A model with size {N} is being used"
             f"for exact evaluation, which might not finish."
         )
-    original = model.get_graph()
+    original = model.graph_copy()
     samples = []
     for g in enumerate_all_graphs(N, M, selfloops=ws, parallel_edges=wp):
         model.set_graph(g)
         likelihood = model.log_likelihood()
-        prior = model.graph_prior.log_evidence(method="exact")
+        prior = model.prior.log_evidence(method="exact")
         samples.append(likelihood + prior)
     model.set_graph(original)
     return log_sum_exp(samples)

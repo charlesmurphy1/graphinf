@@ -71,11 +71,6 @@ namespace GraphInf
         }
         const size_t getSize() const { return m_size; }
         void setSize(const size_t size) { m_size = size; }
-        // virtual void fromGraph(const MultiGraph &graph)
-        // {
-        //     setSize(graph.getSize());
-        //     setState(graph);
-        // }
         virtual const size_t getEdgeCount() const = 0;
         const double getAverageDegree() const
         {
@@ -104,10 +99,6 @@ namespace GraphInf
 
         void sample()
         {
-            // processRecursiveFunction([&]()
-            //                          { sampleOnlyPrior(); });
-            // sampleState();
-            // setUp();
             try
             {
                 processRecursiveFunction([&]()

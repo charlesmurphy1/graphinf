@@ -13,10 +13,11 @@ namespace GraphInf
     void initDegreeCorrectedStochasticBlockModel(py::module &m)
     {
         py::class_<DegreeCorrectedStochasticBlockModelBase, BlockLabeledRandomGraph>(m, "DegreeCorrectedStochasticBlockModelBase")
-            .def("get_degree_prior", &DegreeCorrectedStochasticBlockModelBase::getDegreePrior, py::return_value_policy::reference_internal)
+            .def("degree_prior", &DegreeCorrectedStochasticBlockModelBase::getDegreePrior, py::return_value_policy::reference_internal)
             .def("set_degree_prior", &DegreeCorrectedStochasticBlockModelBase::setDegreePrior, py::arg("prior"))
-            .def("get_degree", &DegreeCorrectedStochasticBlockModelBase::getDegree, py::arg("vertex"))
-            .def("get_degrees", &DegreeCorrectedStochasticBlockModelBase::getDegrees);
+            .def("degree", &DegreeCorrectedStochasticBlockModelBase::getDegree, py::arg("vertex"))
+            .def("degrees", &DegreeCorrectedStochasticBlockModelBase::getDegrees, py::return_value_policy::reference_internal)
+            .def("degrees_copy", &DegreeCorrectedStochasticBlockModelBase::getDegrees, py::return_value_policy::copy);
 
         py::class_<DegreeCorrectedStochasticBlockModelFamily, DegreeCorrectedStochasticBlockModelBase>(m, "DegreeCorrectedStochasticBlockModelFamily")
             .def(

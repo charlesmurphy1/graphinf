@@ -19,7 +19,7 @@ namespace GraphInf
             //     py::arg("edge_count_prior"),
             //     py::arg("degree_prior")
             // )
-            .def("get_degree_prior", &NestedDegreeCorrectedStochasticBlockModelBase::getDegreePrior, py::return_value_policy::reference_internal)
+            .def("degree_prior", &NestedDegreeCorrectedStochasticBlockModelBase::getDegreePrior, py::return_value_policy::reference_internal)
             .def("set_degree_prior", &NestedDegreeCorrectedStochasticBlockModelBase::setDegreePrior, py::arg("prior"));
 
         py::class_<NestedDegreeCorrectedStochasticBlockModelFamily, NestedDegreeCorrectedStochasticBlockModelBase>(m, "NestedDegreeCorrectedStochasticBlockModelFamily")
