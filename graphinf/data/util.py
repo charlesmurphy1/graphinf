@@ -19,7 +19,7 @@ from graphinf.utility import (
 def mcmc_on_graph(
     model: DataModel,
     n_sweeps: int = 1000,
-    n_gibbs_sweeps=4,
+    n_gibbs_sweeps: int = 4,
     n_steps_per_vertex: int = 1,
     burn_sweeps: int = 0,
     beta_prior: float = 1,
@@ -54,7 +54,7 @@ def mcmc_on_graph(
         sample_params=sample_params,
     )
 
-    original = model.get_graph()
+    original = model.graph()
     if not start_from_original:
         model.sample_prior()
 
