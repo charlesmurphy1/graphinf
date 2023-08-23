@@ -36,9 +36,7 @@ def mcmc_on_graph(
         logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
     else:
@@ -144,9 +142,7 @@ def log_evidence_exact(model: DataModel, **kwargs):
     return log_sum_exp(samples)
 
 
-def log_evidence_annealed(
-    model: DataModel, betas: List[float] = None, **kwargs
-):
+def log_evidence_annealed(model: DataModel, betas: List[float] = None, **kwargs):
     if betas is None:
         betas = np.linspace(0, 1, 11) ** (1.0 / 2)
 
