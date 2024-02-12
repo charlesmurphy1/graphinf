@@ -72,6 +72,9 @@ class DataModelWrapper(_Wrapper):
                 f"Model `{other}` has an invalid type `{other.__class__.__name__}`"
             )
 
+    def graph_copy(self):
+        return self.graph().get_deep_copy()
+
     def set_prior(self, prior: _RandomGraphWrapper):
         self.labeled = prior.labeled
         self.nested = prior.nested

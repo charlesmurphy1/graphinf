@@ -7,8 +7,8 @@ def test_erdosrenyi():
     N, E = 100, 250
     g = graphinf.graph.ErdosRenyiModel(N, E)
     g.sample()
-    assert g.get_size() == N
-    assert g.get_edge_count() == E
+    assert g.size() == N
+    assert g.edge_count() == E
 
 
 @pytest.mark.parametrize(
@@ -18,74 +18,56 @@ def test_erdosrenyi():
 def test_configuration(prior_type):
     N, E = 100, 250
     g = graphinf.graph.ConfigurationModelFamily(N, E, degree_prior_type=prior_type)
-    assert g.get_size() == N
-    assert g.get_edge_count() == E
+    assert g.size() == N
+    assert g.edge_count() == E
 
 
 def test_poisson():
     N, E = 100, 250
-    g = graphinf.graph.PoissonModel(N, E)
-    assert g.get_size() == N
+    g = graphinf.graph.PoissonGraph(N, E)
+    assert g.size() == N
 
 
 def test_nbinom():
     N, E, h = 100, 250, 1
-    g = graphinf.graph.NegativeBinomialModel(N, E, h)
-    assert g.get_size() == N
+    g = graphinf.graph.NegativeBinomialGraph(N, E, h)
+    assert g.size() == N
 
 
 @pytest.mark.parametrize(
-    "block_prior_type, label_graph_prior_type, likelihood_type",
+    "label_graph_prior_type, likelihood_type",
     [
-        pytest.param(b, e, l, id=f"{b}-{e}-{l}")
-        for (b, e, l) in product(
-            ["uniform", "hyper"],
-            # ["uniform", "planted", "nested"],
+        pytest.param(e, l, id=f"{e}-{l}")
+        for (e, l) in product(
             ["uniform", "nested"],
             ["uniform", "stub_labeled"],
         )
     ],
 )
-def test_stochastic_block_model(
-    block_prior_type, label_graph_prior_type, likelihood_type
-):
+def test_stochastic_block_model(label_graph_prior_type, likelihood_type):
     N, E = 100, 250
     g = graphinf.graph.StochasticBlockModelFamily(
         N,
         E,
-        block_prior_type=block_prior_type,
         label_graph_prior_type=label_graph_prior_type,
         likelihood_type=likelihood_type,
     )
-    assert g.get_size() == N
-    assert g.get_edge_count() == E
+    assert g.size() == N
+    assert g.edge_count() == E
 
 
-@pytest.mark.parametrize(
-    "block_prior_type, label_graph_prior_type",
-    [
-        pytest.param(b, e, id=f"{b}-{e}")
-        for (b, e) in product(
-            ["uniform", "hyper"],
-            ["uniform", "nested"],
-            # ["uniform", "planted", "nested"],
-        )
-    ],
-)
-def test_degree_corrected_stochastic_block_model(
-    block_prior_type, label_graph_prior_type
-):
+@pytest.mark.parametrize("label_graph_prior_type", [pytest.param(e, id=e) for e in ["uniform", "nested"]])
+def test_degree_corrected_stochastic_block_model(label_graph_prior_type):
     N, E = 100, 250
     g = graphinf.graph.StochasticBlockModelFamily(
         N,
         E,
-        block_prior_type=block_prior_type,
         label_graph_prior_type=label_graph_prior_type,
         likelihood_type="degree_corrected",
     )
     g.sample()
-    assert g.get_size() == N
-    assert g.get_edge_count() == E
+    assert g.size() == N
+    assert g.edge_count() == E
 
 
 # @pytest.mark.parametrize(

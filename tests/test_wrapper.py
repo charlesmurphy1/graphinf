@@ -15,7 +15,7 @@ def wrapper():
 
 
 def test_access_wrapped_method(wrapper):
-    assert wrapper.get_size() == 10
+    assert wrapper.size() == 10
     wrapper.sample()
 
 

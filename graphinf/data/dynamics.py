@@ -8,7 +8,6 @@ _dynamics = _graphinf.data.dynamics
 from graphinf.data import DataModelWrapper as _DataModelWrapper
 
 __all__ = (
-    "Dynamics",
     "SISDynamics",
     "GlauberDynamics",
     "CowanDynamics",
@@ -93,7 +92,5 @@ class CowanDynamics(Dynamics):
 class DegreeDynamics(Dynamics):
     constructor = _dynamics.DegreeDynamics
 
-    def __init__(
-        self, prior: RandomGraph = None, length: int = 10, C: float = 10
-    ):
+    def __init__(self, prior: RandomGraph = None, length: int = 10, C: float = 10):
         super().__init__(prior=prior, length=length, C=C)

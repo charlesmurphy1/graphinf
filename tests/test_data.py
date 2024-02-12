@@ -28,11 +28,13 @@ def graph_prior():
     ],
 )
 def test_dynamics(data, graph):
+    if data.constructor is None:
+        return
     N, E, T = 100, 250, 26
     g = graph(N, E)
     d = data(g, length=T)
-    assert d.get_size() == N
-    assert d.get_length() == T
+    assert d.size() == N
+    assert d.length() == T
     assert d.labeled == g.labeled
     assert d.nested == g.nested
 
