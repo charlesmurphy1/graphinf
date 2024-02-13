@@ -26,7 +26,9 @@ jobs:
     - name: Install dependencies
       run: |
             pip install --upgrade pip
-            pip install pybind11 pytest numpy scipy networkx psutil pandas SamplableSet
+              pip install pybind11==2.10.0 pytest numpy scipy networkx psutil pandas
+              git clone git@github.com:gstonge/SamplableSet.git
+              pip install SamplableSet/
 
 
     - name: Installing basegraph
