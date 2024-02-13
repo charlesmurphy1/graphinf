@@ -8,7 +8,6 @@ from importlib.util import find_spec
 import networkx as nx
 import numpy as np
 from basegraph import core as bg
-from SamplableSet import SamplableSet
 
 from graphinf._graphinf.utility import *
 
@@ -35,9 +34,7 @@ def to_nary(x, base=2, dim=None):
     return y
 
 
-def reduce_partition(
-    p: Union[np.ndarray, float], max_label: Optional[int] = None
-):
+def reduce_partition(p: Union[np.ndarray, float], max_label: Optional[int] = None):
     max_label = np.max(p) if max_label is None else max_label
     b = np.array(p)
     n = np.array([np.sum(b == r) for r in np.arange(max_label + 1)])
@@ -51,9 +48,7 @@ def reduce_partition(
     return tuple(index_map[_p] for _p in p)
 
 
-def enumerate_all_partitions(
-    size: int, block_count: Optional[int] = None, reduce: bool = True
-):
+def enumerate_all_partitions(size: int, block_count: Optional[int] = None, reduce: bool = True):
     B = size if block_count is None else block_count
     s = set()
     for i in range(B**size):
@@ -64,9 +59,7 @@ def enumerate_all_partitions(
 
         if reduce:
             p = reduce_partition(p)
-            if p in s or (
-                block_count is not None and len(labels) != block_count
-            ):
+            if p in s or (block_count is not None and len(labels) != block_count):
                 continue
             s.add(p)
         yield p
@@ -87,9 +80,7 @@ def log_mean_exp(x: Union[np.ndarray, float]):
 class EdgeCollector:
     def __init__(
         self,
-        graphs: Optional[
-            Union[List[bg.UndirectedMultigraph], bg.UndirectedMultigraph]
-        ] = None,
+        graphs: Optional[Union[List[bg.UndirectedMultigraph], bg.UndirectedMultigraph]] = None,
         epsilon: float = 0.0,
     ):
         self.epsilon = epsilon
@@ -117,9 +108,7 @@ class EdgeCollector:
         self._node_count = 0
         self._graph_collection = []
 
-    def update(
-        self, graph: bg.UndirectedMultigraph, keep_graph: bool = False
-    ) -> None:
+    def update(self, graph: bg.UndirectedMultigraph, keep_graph: bool = False) -> None:
         self._total_count += 1
         self._node_count = max(self.node_count, graph.get_size())
         for edge in graph.edges():
@@ -128,25 +117,15 @@ class EdgeCollector:
         if keep_graph:
             self._graph_collection.append(graph)
 
-    def mle(
-        self, edge: Tuple[int, int], multiplicity: Optional[int] = None
-    ) -> float:
+    def mle(self, edge: Tuple[int, int], multiplicity: Optional[int] = None) -> float:
         if edge not in self.counts:
-            return (
-                1.0
-                if multiplicity == 0
-                else self.epsilon / (self.total_count + self.epsilon)
-            )
-        p0 = 1 - (self.counts[edge] + self.epsilon) / (
-            self.total_count + self.epsilon
-        )
+            return 1.0 if multiplicity == 0 else self.epsilon / (self.total_count + self.epsilon)
+        p0 = 1 - (self.counts[edge] + self.epsilon) / (self.total_count + self.epsilon)
         if multiplicity == 0:
             return p0
         if multiplicity is None:
             return 1 - p0
-        return (self.multiplicities[edge][multiplicity] + self.epsilon) / (
-            self.total_count + self.epsilon
-        )
+        return (self.multiplicities[edge][multiplicity] + self.epsilon) / (self.total_count + self.epsilon)
 
     def log_prob_estimate(self, graph: bg.UndirectedMultigraph) -> float:
         logp = 0
@@ -173,9 +152,7 @@ class EdgeCollector:
         return entropy
 
     def sample_from_collection(self):
-        return self._graph_collection[
-            np.random.randint(len(self._graph_collection))
-        ]
+        return self._graph_collection[np.random.randint(len(self._graph_collection))]
 
     def sample(
         self,
@@ -184,25 +161,14 @@ class EdgeCollector:
         graph = bg.UndirectedMultigraph(self.node_count)
         assert self.total_count > 0, "No data to sample from."
         if edge_count is not None:
-            weights = {
-                e: self.mle(e)
-                for e in combinations_with_replacement(
-                    range(self.node_count), 2
-                )
-                if self.mle(e) > 0
-            }
-            sampler = SamplableSet(
-                min_weight=min(weights.values()),
-                max_weight=max(weights.values()),
-                elements_weights=weights,
-            )
-            for edge, _ in sampler.sample(edge_count):
-                graph.add_edge(*edge)
+            edges = [e for e in combinations_with_replacement(range(self.node_count), 2) if self.mle(e) > 0]
+            weights = np.array([self.mle(e) for e in edges])
+
+            for edge_idx in np.random.choice(len(edges), size=edge_count, p=weights / weights.sum(), replace=True):
+                graph.add_edge(*edges[edge_idx])
 
         else:
-            for edge in combinations_with_replacement(
-                range(self.node_count), 2
-            ):
+            for edge in combinations_with_replacement(range(self.node_count), 2):
                 mults = self.multiplicities[edge]
                 if len(mults) == 0 and np.random.rand() < self.epsilon:
                     graph.add_edge(*edge)
@@ -229,9 +195,7 @@ def load_graph(path: str):
 
 def save_graph(graph, path):
     nodelist = np.array([v for v in graph])
-    edgelist = np.array(
-        [(*e, graph.get_edge_multiplicity(*e)) for e in graph.edges()]
-    )
+    edgelist = np.array([(*e, graph.get_edge_multiplicity(*e)) for e in graph.edges()])
     pd.to_pickle(dict(nodelist=nodelist, edgelist=edgelist), path)
 
 
