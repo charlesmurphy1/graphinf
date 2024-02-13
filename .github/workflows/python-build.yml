@@ -26,12 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
             pip install --upgrade pip
-            pip install pybind11
-            pip install pytest
-            pip install numpy
-            pip install scipy
-            pip install networkx
-            pip install psutil
+            pip install pybind11 pytest numpy scipy networkx psutil pandas
 
 
     - name: Installing basegraph
