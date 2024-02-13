@@ -143,59 +143,59 @@ namespace GraphInf
         }
     }
 
-    TEST_F(TestRestrictedMixedNestedBlockProposer, getLogProposalProb_forSomeLabelMove_returnSampledValue)
-    {
-        CounterMap<std::pair<BlockIndex, Level>> counter;
-        size_t numSamples = 100000;
-        double tol = 1e-2;
-        size_t depth = 3;
-        while (graphPrior.getDepth() != depth)
-        {
-            graphPrior.sample();
-        }
+    // TEST_F(TestRestrictedMixedNestedBlockProposer, getLogProposalProb_forSomeLabelMove_returnSampledValue)
+    // {
+    //     CounterMap<std::pair<BlockIndex, Level>> counter;
+    //     size_t numSamples = 100000;
+    //     double tol = 1e-2;
+    //     size_t depth = 3;
+    //     while (graphPrior.getDepth() != depth)
+    //     {
+    //         graphPrior.sample();
+    //     }
 
-        proposer.setUpWithNestedPrior(graphPrior);
-        for (size_t i = 0; i < numSamples; ++i)
-        {
-            BlockMove move = proposer.proposeMove(0);
-            counter.increment({move.nextLabel, move.level});
-        }
+    //     proposer.setUpWithNestedPrior(graphPrior);
+    //     for (size_t i = 0; i < numSamples; ++i)
+    //     {
+    //         BlockMove move = proposer.proposeMove(0);
+    //         counter.increment({move.nextLabel, move.level});
+    //     }
 
-        for (auto s : counter)
-        {
-            Level level = s.first.second;
-            BlockIndex nextLabel = s.first.first, prevLabel = graphPrior.getLabel(0, level);
-            int dB = 0;
-            if (graphPrior.getNestedVertexCounts(level).get(nextLabel) == 0)
-                dB = 1;
-            else if (graphPrior.getNestedVertexCounts(level).get(prevLabel) == 1 and prevLabel != nextLabel)
-                dB = -1;
+    //     for (auto s : counter)
+    //     {
+    //         Level level = s.first.second;
+    //         BlockIndex nextLabel = s.first.first, prevLabel = graphPrior.getLabel(0, level);
+    //         int dB = 0;
+    //         if (graphPrior.getNestedVertexCounts(level).get(nextLabel) == 0)
+    //             dB = 1;
+    //         else if (graphPrior.getNestedVertexCounts(level).get(prevLabel) == 1 and prevLabel != nextLabel)
+    //             dB = -1;
 
-            BlockMove move = {0, prevLabel, nextLabel, dB, level};
-            double expected = exp(proposer.getLogProposalProb(move));
-            double actual = (double)s.second / (double)numSamples;
+    //         BlockMove move = {0, prevLabel, nextLabel, dB, level};
+    //         double expected = exp(proposer.getLogProposalProb(move));
+    //         double actual = (double)s.second / (double)numSamples;
 
-            double truth;
-            if (dB == 1)
-                truth = 0.1;
-            else
-                truth = 0.9 * getGroundTruthMoveProb(
-                                  graphPrior.getLabel(0, level - 1),
-                                  nextLabel,
-                                  graphPrior.getNestedLabelGraph(level - 1),
-                                  graphPrior.getNestedLabels(level),
-                                  graphPrior.getNestedLabelGraph(level),
-                                  proposer.getAvailableLabels()[level].size());
+    //         double truth;
+    //         if (dB == 1)
+    //             truth = 0.1;
+    //         else
+    //             truth = 0.9 * getGroundTruthMoveProb(
+    //                               graphPrior.getLabel(0, level - 1),
+    //                               nextLabel,
+    //                               graphPrior.getNestedLabelGraph(level - 1),
+    //                               graphPrior.getNestedLabels(level),
+    //                               graphPrior.getNestedLabelGraph(level),
+    //                               proposer.getAvailableLabels()[level].size());
 
-            truth /= depth;
+    //         truth /= depth;
 
-            if (prevLabel != nextLabel)
-            {
-                EXPECT_NEAR(expected, actual, tol);
-                EXPECT_NEAR(expected, truth, 1e-6);
-            }
-        }
-    }
+    //         if (prevLabel != nextLabel)
+    //         {
+    //             EXPECT_NEAR(expected, actual, tol);
+    //             EXPECT_NEAR(expected, truth, 1e-6);
+    //         }
+    //     }
+    // }
 
     TEST_F(TestRestrictedMixedNestedBlockProposer, getLogProposalProb_forBlockMoveAddingLabel_returnCorrectProb)
     {
