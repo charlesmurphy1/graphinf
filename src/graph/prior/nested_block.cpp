@@ -9,14 +9,17 @@ namespace GraphInf
         if (move.prevLabel == move.nextLabel)
             return;
         BlockIndex nestedIndex = getBlock(move.vertexIndex, move.level - 1);
+
         m_nestedState[move.level][nestedIndex] = move.nextLabel;
 
         // checking if move creates new label
         if (move.addedLabels == 1)
             createNewBlock(move);
 
+        // Update block count
         m_nestedBlockCountPriorPtr->setNestedState(m_nestedBlockCountPriorPtr->getNestedState(move.level) + move.addedLabels, move.level);
 
+        // Update vertex counts
         m_nestedVertexCounts[move.level].decrement(move.prevLabel);
         m_nestedVertexCounts[move.level].increment(move.nextLabel);
 
@@ -24,6 +27,7 @@ namespace GraphInf
         m_nestedAbsVertexCounts[move.level].decrement(move.prevLabel, nr);
         m_nestedAbsVertexCounts[move.level].increment(move.nextLabel, nr);
 
+        // Update base level state and vertex counts
         if (move.level == 0)
         {
             m_vertexCounts.decrement(move.prevLabel);
@@ -31,6 +35,7 @@ namespace GraphInf
             m_state[move.vertexIndex] = move.nextLabel;
         }
 
+        // checking if move destroys label
         if (move.addedLabels == -1)
             destroyBlock(move);
     }

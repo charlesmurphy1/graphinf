@@ -26,9 +26,9 @@ private:
 public:
     DummyBlockPrior(size_t size, size_t blockCount) : BlockPrior()
     {
-        setSize(size);
         m_blockCountDeltaPrior.setState(blockCount);
         setBlockCountPrior(m_blockCountDeltaPrior);
+        setSize(size);
     }
     void sampleState() override
     {

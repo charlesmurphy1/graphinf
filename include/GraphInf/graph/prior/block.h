@@ -83,6 +83,7 @@ namespace GraphInf
         virtual void setSize(size_t size)
         {
             m_size = size;
+
             m_blockCountPriorPtr->setMaxBlockCount(m_size);
         }
 

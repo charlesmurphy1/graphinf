@@ -16,9 +16,6 @@ __all__ = (
 
 class Dynamics(_DataModelWrapper):
     pass
-    # @property
-    # def length(self):
-    #     return self.length()
 
 
 class SISDynamics(Dynamics):

@@ -24,8 +24,9 @@ namespace GraphInf
         }
         void _applyLabelMove(const BlockMove &move) override
         {
+
             m_nestedLabelGraphPrior.applyLabelMove(move);
-            reduceLabels();
+            // reduceLabels();
         }
         const double _getLogPrior() const override { return m_nestedLabelGraphPrior.getLogJoint(); }
         const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const override { return m_nestedLabelGraphPrior.getLogJointRatioFromGraphMove(move); }

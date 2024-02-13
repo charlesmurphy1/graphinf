@@ -176,8 +176,9 @@ TEST_P(HSBMParametrizedTest, applyLabelMove_forBlockMoveWithNoBlockCreation_chan
 
     GraphInf::BlockMove move = proposeNestedBlockMove(vertex, 0, 3);
     randomGraph.applyLabelMove(move);
-    EXPECT_NE(randomGraph.getLabel(vertex), move.prevLabel);
-    EXPECT_EQ(randomGraph.getLabel(vertex), move.nextLabel);
+
+    EXPECT_NE(randomGraph.getLabel(vertex, 0), move.prevLabel);
+    EXPECT_EQ(randomGraph.getLabel(vertex, 0), move.nextLabel);
 }
 
 // TEST_P(HSBMParametrizedTest, applyMove_forBlockMoveWithBlockCreation_changeBlockIdxAndBlockCount){
