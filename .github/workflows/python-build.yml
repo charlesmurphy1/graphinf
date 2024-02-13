@@ -31,8 +31,8 @@ jobs:
     - name: Installing basegraph
       run: pip install ${{github.workspace}}/ext/base_graph
 
-    - name: Installing SamplableSet==2.2.0
-      run: pip install ${{github.workspace}}/ext/SamplableSet
+    # - name: Installing SamplableSet==2.2.0
+    #   run: pip install ${{github.workspace}}/ext/SamplableSet
 
     - name: Installing graphinf
       run: pip install . -v
