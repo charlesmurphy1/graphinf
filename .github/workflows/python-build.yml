@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
             pip install --upgrade pip
-            pip install pybind11==2.10.0 pytest numpy scipy networkx psutil pandas
+            pip install pybind11==2.10.0 pytest numpy scipy networkx psutil pandas tqdm
 
     - name: Installing basegraph
       run: pip install ${{github.workspace}}/ext/base_graph
