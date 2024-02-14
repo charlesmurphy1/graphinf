@@ -4,4 +4,3 @@
 [submodule "ext/base_graph"]
 	path = ext/base_graph
 	url = git@github.com:antoineallard/base_graph.git
-	branch = performance-fix
