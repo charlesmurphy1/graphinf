@@ -1,5 +1,5 @@
-# fast-midynet
-Framework for graph inference.
+# GraphInf
+A C++ framework for graph inference.
 
 ![Test](https://github.com/charlesmurphy1/graphinf/actions/workflows/cpp-build-and-tests.yml/badge.svg)
 ![Test](https://github.com/charlesmurphy1/graphinf/actions/workflows/python-build.yml/badge.svg)
@@ -8,19 +8,24 @@ Framework for graph inference.
 
 ### Requirements
 
-- pybind11
-- scikit-build
-- numpy
-- scipy
-- networkx
-- pandas
-- pytest
+* `pybind11`
+* `scikit-build`
+* `numpy`
+* `scipy`
+* `networkx`
+* `pandas`
+* `pytest`
+* `basegraph`
 
 ### Installation with pip
 
 You can use pip to install the python module:
 ```bash
 pip install .
+```
+GraphInf is also available on PYPI:
+```bash
+pip install graphinf
 ```
 
 Note that the `basegraph` must be installed. You can either download it and install it yourself, or you can load the submodules and install it directly from the repository:
