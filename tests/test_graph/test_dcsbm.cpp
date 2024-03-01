@@ -179,16 +179,18 @@ TEST_P(DCSBMParametrizedTest, applyMove_forBlockMoveWithBlockCreation_changeBloc
     EXPECT_EQ(randomGraph.getLabel(vertexIdx), nextBlockIdx);
 }
 
-// TEST_P(DCSBMParametrizedTest, applyMove_forBlockMoveWithBlockDestruction_changeBlockIdxAndBlockCount){
-//     GraphInf::BlockIndex prevBlockIdx = randomGraph.getVertexCounts().size();
-//     GraphInf::BlockIndex nextBlockIdx = randomGraph.getLabel(vertexIdx);
-//     GraphInf::BlockMove move = {vertexIdx, nextBlockIdx, prevBlockIdx};
-//     randomGraph.applyLabelMove(move); // creating block before destroying it
-//     move = {vertexIdx, prevBlockIdx, nextBlockIdx};
-//     EXPECT_EQ(randomGraph.getLabel(vertexIdx), prevBlockIdx);
-//     randomGraph.applyLabelMove(move);
-//     EXPECT_EQ(randomGraph.getLabel(vertexIdx), nextBlockIdx);
-// }
+TEST_P(DCSBMParametrizedTest, applyMove_forBlockMoveWithBlockDestruction_changeBlockIdxAndBlockCount)
+{
+    GraphInf::BlockIndex prevBlockIdx = randomGraph.getVertexCounts().size();
+    GraphInf::BlockIndex nextBlockIdx = randomGraph.getLabel(vertexIdx);
+    GraphInf::BlockMove move = {vertexIdx, nextBlockIdx, prevBlockIdx};
+    // TODO
+    // randomGraph.applyLabelMove(move); // creating block before destroying it
+    // move = {vertexIdx, prevBlockIdx, nextBlockIdx};
+    // EXPECT_EQ(randomGraph.getLabel(vertexIdx), prevBlockIdx);
+    // randomGraph.applyLabelMove(move);
+    // EXPECT_EQ(randomGraph.getLabel(vertexIdx), nextBlockIdx);
+}
 
 TEST_P(DCSBMParametrizedTest, getLogLikelihoodRatio_forAddedSelfLoop_returnCorrectLogLikelihoodRatio)
 {
