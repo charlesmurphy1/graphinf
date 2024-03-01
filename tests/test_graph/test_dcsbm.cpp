@@ -184,7 +184,8 @@ TEST_P(DCSBMParametrizedTest, applyMove_forBlockMoveWithBlockDestruction_changeB
     GraphInf::BlockIndex prevBlockIdx = randomGraph.getVertexCounts().size();
     GraphInf::BlockIndex nextBlockIdx = randomGraph.getLabel(vertexIdx);
     GraphInf::BlockMove move = {vertexIdx, nextBlockIdx, prevBlockIdx};
-    // TODO
+
+    // TODO: repair thit test
     // randomGraph.applyLabelMove(move); // creating block before destroying it
     // move = {vertexIdx, prevBlockIdx, nextBlockIdx};
     // EXPECT_EQ(randomGraph.getLabel(vertexIdx), prevBlockIdx);
