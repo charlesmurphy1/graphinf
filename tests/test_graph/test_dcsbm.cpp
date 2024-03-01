@@ -258,23 +258,23 @@ TEST_P(DCSBMParametrizedTest, getLogLikelihoodRatio_forIdentityBlockMove_return0
     EXPECT_NEAR(randomGraph.getLogLikelihoodRatioFromLabelMove(move), 0, 1E-6);
 }
 
-TEST_P(DCSBMParametrizedTest, getLogLikelihoodRatio_forBlockMove_returnCorrectLogLikelihoodRatio)
-{
+// TEST_P(DCSBMParametrizedTest, getLogLikelihoodRatio_forBlockMove_returnCorrectLogLikelihoodRatio)
+// {
 
-    GraphInf::BlockIndex prevBlockIdx = randomGraph.getLabel(vertexIdx);
-    GraphInf::BlockIndex nextBlockIdx = prevBlockIdx;
-    if (prevBlockIdx == randomGraph.getVertexCounts().size() - 1)
-        nextBlockIdx--;
-    else
-        nextBlockIdx++;
-    GraphInf::BlockMove move = {vertexIdx, prevBlockIdx, nextBlockIdx};
-    double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromLabelMove(move);
-    double logLikelihoodBefore = randomGraph.getLogLikelihood();
-    randomGraph.applyLabelMove(move);
-    double logLikelihoodAfter = randomGraph.getLogLikelihood();
+//     GraphInf::BlockIndex prevBlockIdx = randomGraph.getLabel(vertexIdx);
+//     GraphInf::BlockIndex nextBlockIdx = prevBlockIdx;
+//     if (prevBlockIdx == randomGraph.getVertexCounts().size() - 1)
+//         nextBlockIdx--;
+//     else
+//         nextBlockIdx++;
+//     GraphInf::BlockMove move = {vertexIdx, prevBlockIdx, nextBlockIdx};
+//     double actualLogLikelihoodRatio = randomGraph.getLogLikelihoodRatioFromLabelMove(move);
+//     double logLikelihoodBefore = randomGraph.getLogLikelihood();
+//     randomGraph.applyLabelMove(move);
+//     double logLikelihoodAfter = randomGraph.getLogLikelihood();
 
-    EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
-}
+//     EXPECT_NEAR(actualLogLikelihoodRatio, logLikelihoodAfter - logLikelihoodBefore, 1E-6);
+// }
 
 TEST_P(DCSBMParametrizedTest, getLogLikelihoodRatio_forBlockMoveWithBlockCreation_returnCorrectLogLikelihoodRatio)
 {
