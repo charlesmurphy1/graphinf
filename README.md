@@ -1,5 +1,5 @@
-# fast-midynet
-Framework for graph inference.
+# GraphInf
+A C++ framework for graph inference.
 
 ![Test](https://github.com/charlesmurphy1/graphinf/actions/workflows/cpp-build-and-tests.yml/badge.svg)
 ![Test](https://github.com/charlesmurphy1/graphinf/actions/workflows/python-build.yml/badge.svg)
