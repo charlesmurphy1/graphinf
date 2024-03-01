@@ -8,19 +8,24 @@ Framework for graph inference.
 
 ### Requirements
 
-- pybind11
-- scikit-build
-- numpy
-- scipy
-- networkx
-- pandas
-- pytest
+* `pybind11`
+* `scikit-build`
+* `numpy`
+* `scipy`
+* `networkx`
+* `pandas`
+* `pytest`
+* `basegraph`
 
 ### Installation with pip
 
 You can use pip to install the python module:
 ```bash
 pip install .
+```
+GraphInf is also available on PYPI:
+```bash
+pip install graphinf
 ```
 
 Note that the `basegraph` must be installed. You can either download it and install it yourself, or you can load the submodules and install it directly from the repository:
