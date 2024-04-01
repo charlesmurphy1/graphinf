@@ -68,9 +68,7 @@ class DataModelWrapper(_Wrapper):
         elif issubclass(other.__class__, DataModel):
             self.wrap.set_state_from(other)
         else:
-            raise TypeError(
-                f"Model `{other}` has an invalid type `{other.__class__.__name__}`"
-            )
+            raise TypeError(f"Model `{other}` has an invalid type `{other.__class__.__name__}`")
 
     def graph_copy(self):
         return self.graph().get_deep_copy()
@@ -173,9 +171,7 @@ class DataModelWrapper(_Wrapper):
     def log_posterior(
         self,
         graph: Optional[core.UndirectedMultigraph] = None,
-        method: Literal[
-            "exact", "meanfield", "exact_meanfield", "annealed"
-        ] = "exact",
+        method: Literal["exact", "meanfield", "exact_meanfield", "annealed"] = "exact",
         n_sweeps: int = 1000,
         n_gibbs_sweeps: int = 10,
         n_steps_per_vertex: int = 1,
@@ -189,9 +185,7 @@ class DataModelWrapper(_Wrapper):
     ):
         all_methods = ["exact", "meanfield", "annealed"]
         if method not in all_methods:
-            raise ValueError(
-                f"Cannot parse method '{method}', available options are {all_methods}."
-            )
+            raise ValueError(f"Cannot parse method '{method}', available options are {all_methods}.")
 
         kwargs["n_sweeps"] = n_sweeps
         kwargs["n_gibbs_sweeps"] = n_gibbs_sweeps
@@ -213,11 +207,9 @@ class DataModelWrapper(_Wrapper):
             prior = self.prior.log_evidence(**kwargs.get("prior_args", {}))
             likelihood = self.log_likelihood()
             if method == "exact":
-                posterior = prior + likelihood - log_evidence_exact(self)
+                posterior = prior + likelihood - log_evidence_exact(self, **kwargs)
             elif method == "annealed":
-                posterior = (
-                    prior + likelihood - log_evidence_annealed(**kwargs)
-                )
+                posterior = prior + likelihood - log_evidence_annealed(**kwargs)
         self.set_graph(graph)
         return posterior
 

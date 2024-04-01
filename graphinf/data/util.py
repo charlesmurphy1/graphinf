@@ -78,9 +78,7 @@ def mcmc_on_graph(
         model.set_graph(original)
 
 
-def log_posterior_meanfield(
-    model: DataModel, graph: core.UndirectedMultigraph, **kwargs
-):
+def log_posterior_meanfield(model: DataModel, graph: core.UndirectedMultigraph, **kwargs):
     collector = EdgeCollector()
     callback = lambda model: collector.update(model.graph_copy())
 
@@ -91,17 +89,12 @@ def log_posterior_meanfield(
     return collector.log_prob_estimate(graph)
 
 
-def log_posterior_exact_meanfield(
-    model: DataModel, graph: core.UndirectedMultigraph, **kwargs
-):
+def log_posterior_exact_meanfield(model: DataModel, graph: core.UndirectedMultigraph, **kwargs):
     g = model.prior
     N, M = g.size(), g.edge_count()
     ws, wp = g.with_self_loops(), g.with_parallel_edges()
     if N > 7:
-        warn(
-            f"A model with size {N} is being used"
-            f"for exact evaluation, which might not finish."
-        )
+        warn(f"A model with size {N} is being used" f"for exact evaluation, which might not finish.")
     original = model.graph_copy()
     evidence = []
 
@@ -126,20 +119,22 @@ def log_evidence_exact(model: DataModel, **kwargs):
     g = model.prior
     N, M = g.size(), g.edge_count()
     ws, wp = g.with_self_loops(), g.with_parallel_edges()
+    sample_params = kwargs.get("sample_params", False)
+    n_sweeps = 1 if not sample_params else kwargs.get("n_sweeps", 100)
     if N > 7:
-        warn(
-            f"A model with size {N} is being used"
-            f"for exact evaluation, which might not finish."
-        )
-    original = model.graph_copy()
+        warn(f"A model with size {N} is being used" f"for exact evaluation, which might not finish.")
     samples = []
-    for g in enumerate_all_graphs(N, M, selfloops=ws, parallel_edges=wp):
-        model.set_graph(g)
-        likelihood = model.log_likelihood()
-        prior = model.prior.log_evidence(method="exact")
-        samples.append(likelihood + prior)
-    model.set_graph(original)
-    return log_sum_exp(samples)
+    for _ in range(n_sweeps):
+        original = model.graph_copy()
+        if sample_params:
+            model.metropolis_param_sweep()
+        for g in enumerate_all_graphs(N, M, selfloops=ws, parallel_edges=wp):
+            model.set_graph(g)
+            likelihood = model.log_likelihood()
+            prior = model.prior.log_evidence(method="exact")
+            samples.append(likelihood + prior)
+        model.set_graph(original)
+    return log_sum_exp(samples) / n_sweeps
 
 
 def log_evidence_annealed(model: DataModel, betas: List[float] = None, **kwargs):
