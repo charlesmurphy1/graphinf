@@ -108,14 +108,14 @@ class EdgeCollector:
         self._node_count = 0
         self._graph_collection = []
 
-    def update(self, graph: bg.UndirectedMultigraph, keep_graph: bool = False) -> None:
+    def update(self, graph: bg.UndirectedMultigraph, keep_graph: bool = False, score: Optional[float] = None) -> None:
         self._total_count += 1
         self._node_count = max(self.node_count, graph.get_size())
         for edge in graph.edges():
             self.multiplicities[edge][graph.get_edge_multiplicity(*edge)] += 1
             self.counts[edge] += 1
         if keep_graph:
-            self._graph_collection.append(graph)
+            self._graph_collection.append((graph, score))
 
     def mle(self, edge: Tuple[int, int], multiplicity: Optional[int] = None) -> float:
         if edge not in self.counts:
@@ -152,7 +152,10 @@ class EdgeCollector:
         return entropy
 
     def sample_from_collection(self):
-        return self._graph_collection[np.random.randint(len(self._graph_collection))]
+        return self._graph_collection[np.random.randint(len(self._graph_collection))][0]
+
+    def sample_maximum_score(self):
+        return max(self._graph_collection, key=lambda x: x[1])[0]
 
     def sample(
         self,

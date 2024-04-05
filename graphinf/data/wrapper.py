@@ -72,6 +72,17 @@ class DataModelWrapper(_Wrapper):
 
     def graph_copy(self):
         return self.graph().get_deep_copy()
+    
+    def set_state(self, state: List[List[int]], future: Optional[List[List[int]]] = None):
+        if future is None:
+            past = [x[:-1] for x in state]
+            future = [x[1:] for x in state]
+        else:
+            past = state
+        
+        self.wrap.set_state(past, future)
+
+            
 
     def set_prior(self, prior: _RandomGraphWrapper):
         self.labeled = prior.labeled
