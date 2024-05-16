@@ -16,6 +16,16 @@ from graphinf.utility import (
 )
 
 
+def adj_matrix_to_graph(adj_matrix: np.ndarray) -> core.UndirectedMultigraph:
+    n = adj_matrix.shape[0]
+    g = core.UndirectedMultigraph(size=n)
+    for i in range(adj_matrix.shape[0]):
+        for j in range(i + 1, adj_matrix.shape[1]):
+            if adj_matrix[i, j] > 0:
+                g.add_multiedge(i, j, adj_matrix[i, j])
+    return g
+
+
 def mcmc_on_graph(
     model: DataModel,
     n_sweeps: int = 1000,
