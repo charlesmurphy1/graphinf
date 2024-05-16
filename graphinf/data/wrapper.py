@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
 
-from typing import Literal, Optional, Callable
+from typing import Literal, Optional, Callable, List
 from collections import defaultdict
 
 from basegraph import core
@@ -40,7 +40,7 @@ class DataModelWrapper(_Wrapper):
         data_model = self.constructor(prior.wrap, **kwargs)
         data_model.sample()
         super().__init__(data_model, prior=prior, params=kwargs)
-    
+
     @property
     def params(self):
         params = {}
@@ -54,7 +54,7 @@ class DataModelWrapper(_Wrapper):
                 v = v()
             params[k] = v
         return params
-    
+
     def set_params(self, **kwargs):
         for k, v in kwargs.items():
             attr = getattr(self, k, None)
@@ -68,7 +68,7 @@ class DataModelWrapper(_Wrapper):
     def __repr__(self):
         str_format = f"{self.__class__.__name__ }(\n\tprior={self.prior.__class__.__name__},"
 
-        for k, v in self.params.items():
+        for k, v in self.kwargs.items():
             if isinstance(v, str):
                 v = f"'{v}'"
             if k in dir(self):
@@ -87,6 +87,29 @@ class DataModelWrapper(_Wrapper):
             return "labeled"
         return "normal"
 
+    @property
+    def params(self):
+        out = {}
+        for k, v in self.kwargs.items():
+            if isinstance(v, str):
+                v = f"'{v}'"
+            if k in dir(self):
+                v = getattr(self, k)
+            if isinstance(v, Callable):
+                v = v()
+            out[k] = v
+        return out
+
+    def set_params(self, **kwargs):
+        for k, v in kwargs.items():
+            setter = f"set_{k}"
+            if hasattr(self.wrap, setter):
+                getattr(self.wrap, setter)(v)
+            elif hasattr(self.prior, setter):
+                getattr(self.prior, setter)(v)
+            else:
+                raise AttributeError(f"Model `{self.wrap}` has no attribute `{k}`")
+
     def from_model(self, other: DataModelWrapper):
         if issubclass(other.__class__, DataModelWrapper):
             self.wrap.set_state_from(other.wrap)
@@ -97,9 +120,15 @@ class DataModelWrapper(_Wrapper):
 
     def graph_copy(self):
         return self.graph().get_deep_copy()
-    
 
-            
+    def set_state(self, state: List[List[int]], future: Optional[List[List[int]]] = None):
+        if future is None:
+            past = [x[:-1] for x in state]
+            future = [x[1:] for x in state]
+        else:
+            past = state
+
+        self.wrap.set_state(past, future)
 
     def set_prior(self, prior: _RandomGraphWrapper):
         self.labeled = prior.labeled

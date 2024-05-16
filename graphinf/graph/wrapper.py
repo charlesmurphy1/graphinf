@@ -32,9 +32,7 @@ __all__ = (
 
 class OptionError(ValueError):
     def __init__(self, value: str, avail_options: List[str]) -> None:
-        super().__init__(
-            f"Option {value} is unavailable, possible options are {avail_options}."
-        )
+        super().__init__(f"Option {value} is unavailable, possible options are {avail_options}.")
 
 
 class RandomGraphWrapper(_Wrapper):
@@ -65,6 +63,7 @@ class RandomGraphWrapper(_Wrapper):
         args = self.format_graph_into_args(graph)
         self.__wrapped__ = self.constructor(**args)
         self.set_state(graph)
+        self.__others__["hidden_state"] = graph
         self.__buildmethods__()
         for k, v in args.items():
             if k in self.__others__["params"]:
@@ -88,9 +87,7 @@ class RandomGraphWrapper(_Wrapper):
     def post_init(self):
         self.wrap.sample()
 
-    def joint_entropy(
-        self, n_samples: int = 25, reset_original: bool = False
-    ):
+    def joint_entropy(self, n_samples: int = 25, reset_original: bool = False):
         entropy = np.zeros(n_samples)
         state = self.state()
         for i in range(n_samples):
@@ -100,9 +97,7 @@ class RandomGraphWrapper(_Wrapper):
             self.set_state(state)
         return entropy.mean()
 
-    def state_entropy(
-        self, n_samples: int = 25, reset_original: bool = False, **kwargs
-    ):
+    def state_entropy(self, n_samples: int = 25, reset_original: bool = False, **kwargs):
         state = self.state()
         entropy = np.zeros(n_samples)
         for i in range(n_samples):
@@ -131,15 +126,9 @@ class RandomGraphWrapper(_Wrapper):
             "annealed",
         ]
         if method is None:
-            method = (
-                "exact"
-                if (self.size() <= 5 or not self.labeled)
-                else "iid_meanfield"
-            )
+            method = "exact" if (self.size() <= 5 or not self.labeled) else "iid_meanfield"
         if method not in all_methods:
-            raise ValueError(
-                f"Cannot parse method '{method}', available options are {all_methods}."
-            )
+            raise ValueError(f"Cannot parse method '{method}', available options are {all_methods}.")
         if graph is None:
             graph = self.state()
         kwargs["n_sweeps"] = n_sweeps
@@ -209,9 +198,7 @@ class ErdosRenyiModel(RandomGraphWrapper):
         )
 
     def format_graph_into_args(self, graph: bg.UndirectedGraph):
-        return dict(
-            size=graph.get_size(), edge_count=graph.get_total_edge_number()
-        )
+        return dict(size=graph.get_size(), edge_count=graph.get_total_edge_number())
 
 
 class ConfigurationModelFamily(RandomGraphWrapper):
@@ -227,12 +214,8 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         edge_proposer_type: str = "degree",
     ):
         if degree_prior_type not in self.available_degree_prior_types:
-            raise OptionError(
-                degree_prior_type, self.available_degree_prior_types
-            )
-        self.constructor = partial(
-            _graph.ConfigurationModelFamily, canonical=canonical
-        )
+            raise OptionError(degree_prior_type, self.available_degree_prior_types)
+        self.constructor = partial(_graph.ConfigurationModelFamily, canonical=canonical)
         wrapped = _graph.ConfigurationModelFamily(
             size,
             edge_count,
@@ -251,18 +234,14 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         )
 
     def format_graph_into_args(self, graph: bg.UndirectedGraph):
-        return dict(
-            size=graph.get_size(), edge_count=graph.get_total_edge_number()
-        )
+        return dict(size=graph.get_size(), edge_count=graph.get_total_edge_number())
 
 
 class ConfigurationModel(RandomGraphWrapper):
     def __init__(self, degree_seq: List[int]):
         wrapped = _graph.ConfigurationModel(degree_seq)
         self.degrees = degree_seq
-        super().__init__(
-            wrapped, size=len(degree_seq), edge_count=int(sum(degree_seq) / 2)
-        )
+        super().__init__(wrapped, size=len(degree_seq), edge_count=int(sum(degree_seq) / 2))
 
 
 class PoissonGraph(ConfigurationModel):
@@ -337,20 +316,11 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         nested = False
         block_count = 0 if block_count is None else block_count
         if likelihood_type not in self.available_likelihood_types:
-            raise OptionError(
-                likelihood_type, self.available_likelihood_types
-            )
-        if (
-            label_graph_prior_type
-            not in self.available_label_graph_prior_types
-        ):
-            raise OptionError(
-                label_graph_prior_type, self.available_label_graph_prior_types
-            )
+            raise OptionError(likelihood_type, self.available_likelihood_types)
+        if label_graph_prior_type not in self.available_label_graph_prior_types:
+            raise OptionError(label_graph_prior_type, self.available_label_graph_prior_types)
         if degree_prior_type not in self.available_degree_prior_types:
-            raise OptionError(
-                degree_prior_type, self.available_degree_prior_types
-            )
+            raise OptionError(degree_prior_type, self.available_degree_prior_types)
 
         if likelihood_type == "degree_corrected":
             if label_graph_prior_type == "nested":
@@ -414,9 +384,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         # self._labels = self.labels()
 
     def format_graph_into_args(self, graph: bg.UndirectedGraph):
-        return dict(
-            size=graph.get_size(), edge_count=graph.get_total_edge_number()
-        )
+        return dict(size=graph.get_size(), edge_count=graph.get_total_edge_number())
 
     # def set_labels(self, labels):
     #     self._labels = labels
@@ -458,9 +426,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             dl=True,
             partition_dl=True,
             degree_dl=True,
-            degree_dl_kind="distributed"
-            if self.params["degree_prior_type"] == "hyper"
-            else "uniform",
+            degree_dl_kind="distributed" if self.params["degree_prior_type"] == "hyper" else "uniform",
             edges_dl=True,
             dense=self.params["likelihood_type"] == "uniform",
             # multigraph=self.params["multigraph"],
@@ -473,9 +439,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         from importlib.util import find_spec
 
         if find_spec("graph_tool") is None:
-            raise ModuleNotFoundError(
-                "Module `graph_tool` has not been installed, cannot use `blockstate` method."
-            )
+            raise ModuleNotFoundError("Module `graph_tool` has not been installed, cannot use `blockstate` method.")
         from graph_tool.inference import BlockState, NestedBlockState
 
         if self.params["label_graph_prior_type"] == "uniform":
@@ -489,9 +453,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         return NestedBlockState(
             g=gt_graph,
             bs=bs,
-            state_args=dict(
-                deg_corr=self.params["likelihood_type"] == "degree_corrected"
-            ),
+            state_args=dict(deg_corr=self.params["likelihood_type"] == "degree_corrected"),
         )
 
     def sync_with_blockstate(self, blockstate):
