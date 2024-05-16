@@ -1,6 +1,6 @@
 import importlib
 from collections import defaultdict
-from typing import Optional, Union, Tuple, List
+from typing import Optional, Union, Tuple, List, Any
 from itertools import combinations_with_replacement
 
 import pandas as pd
@@ -108,14 +108,20 @@ class EdgeCollector:
         self._node_count = 0
         self._graph_collection = []
 
-    def update(self, graph: bg.UndirectedMultigraph, keep_graph: bool = False, score: Optional[float] = None) -> None:
+    def update(
+        self,
+        graph: bg.UndirectedMultigraph,
+        keep_graph: bool = False,
+        score: Optional[float] = None,
+        extra: Optional[Any] = None,
+    ) -> None:
         self._total_count += 1
         self._node_count = max(self.node_count, graph.get_size())
         for edge in graph.edges():
             self.multiplicities[edge][graph.get_edge_multiplicity(*edge)] += 1
             self.counts[edge] += 1
         if keep_graph:
-            self._graph_collection.append((graph, score))
+            self._graph_collection.append((graph.get_deep_copy(), score, extra))
 
     def mle(self, edge: Tuple[int, int], multiplicity: Optional[int] = None) -> float:
         if edge not in self.counts:
@@ -152,10 +158,10 @@ class EdgeCollector:
         return entropy
 
     def sample_from_collection(self):
-        return self._graph_collection[np.random.randint(len(self._graph_collection))][0]
+        return self._graph_collection[np.random.randint(len(self._graph_collection))]
 
     def sample_maximum_score(self):
-        return max(self._graph_collection, key=lambda x: x[1])[0]
+        return max(self._graph_collection, key=lambda x: x[1])
 
     def sample(
         self,
