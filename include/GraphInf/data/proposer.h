@@ -98,11 +98,15 @@ namespace GraphInf
         ~MultiParamProposer() {}
         void insertStepProposer(std::string key, double rate = 1, double stepSize = 0.01, double p = 0.5)
         {
+            if (p <= 0 || p > 1)
+                return;
             m_proposersPtrMap.insert({key, std::shared_ptr<ParamProposer>(new StepParamProposer(stepSize, p))});
             m_moveSampler.insert(key, rate);
         }
         void insertGaussianProposer(std::string key, double rate = 1, double mean = 0, double scale = 0.1)
         {
+            if (scale <= 0)
+                return;
             m_proposersPtrMap.insert({key, std::shared_ptr<ParamProposer>(new GaussianParamProposer(mean, scale))});
             m_moveSampler.insert(key, rate);
         }

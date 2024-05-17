@@ -22,17 +22,18 @@ namespace GraphInf
             double autoActivationProb = 1e-6,
             double autoDeactivationProb = 0,
             double infectionStddev = 0.1,
-            double activationStddev = 0.1,
-            double deactivationStddev = 0.1) : BinaryDynamics(graphPrior,
+            double recoveryStddev = 0.1,
+            double activationStddev = 0.1) : BinaryDynamics(graphPrior,
                                                               numSteps,
                                                               autoActivationProb,
                                                               autoDeactivationProb,
                                                               activationStddev,
-                                                              deactivationStddev),
+                                                              0),
                                                m_infectionProb(infectionProb),
                                                m_recoveryProb(recoveryProb)
         {
             m_paramProposer.insertGaussianProposer("infection", 1.0, 0.0, infectionStddev);
+            m_paramProposer.insertGaussianProposer("recovery", 1.0, 0.0, recoveryStddev);
         }
 
         const double getActivationProb(const VertexNeighborhoodState &vertexNeighborState) const override
@@ -52,6 +53,8 @@ namespace GraphInf
         {
             if (move.key == "infection")
                 m_infectionProb += move.value;
+            else if (move.key == "recovery")
+                m_recoveryProb += move.value;
 
             BinaryDynamics::applyParamMove(move);
         }
@@ -59,6 +62,8 @@ namespace GraphInf
         {
             if (move.key == "infection")
                 return 0 <= m_infectionProb + move.value && m_infectionProb + move.value <= 1;
+            if (move.key == "recovery")
+                return 0 <= m_recoveryProb + move.value && m_recoveryProb + move.value <= 1;
             return BinaryDynamics::isValidParamMove(move);
         }
 

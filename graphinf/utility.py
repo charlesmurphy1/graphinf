@@ -1,13 +1,13 @@
-import importlib
+import pandas as pd
+import networkx as nx
+import numpy as np
+
 from collections import defaultdict
 from typing import Optional, Union, Tuple, List, Any
 from itertools import combinations_with_replacement
-
-import pandas as pd
 from importlib.util import find_spec
-import networkx as nx
-import numpy as np
 from basegraph import core as bg
+from sklearn import metrics as sk_metrics
 
 from graphinf._graphinf.utility import *
 
@@ -144,6 +144,23 @@ class EdgeCollector:
                     continue
             logp += np.log(self.mle(edge, m))
         return logp
+
+    def prediction_matrix(self):
+        matrix = np.zeros((self.node_count, self.node_count))
+        for edge in combinations_with_replacement(range(self.node_count), 2):
+            matrix[edge] = self.mle(edge)
+            if edge[0] != edge[1]:
+                matrix[edge[::-1]] = matrix[edge]
+        return matrix
+
+    def score(self, graph: bg.UndirectedMultigraph, metric: str = "roc_auc_score") -> float:
+        adj = np.array(graph.get_adjacency_matrix(True), dtype="bool").astype("float")
+        pred = self.prediction_matrix()
+        if metric == "log_prob":
+            return self.log_prob_estimate(graph)
+        if isinstance(metric, str):
+            metric = getattr(sk_metrics, metric)
+        return metric(adj.ravel(), pred.ravel())
 
     def entropy(self) -> float:
         entropy = 0

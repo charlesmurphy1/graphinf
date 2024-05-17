@@ -39,16 +39,13 @@ class DataModelWrapper(_Wrapper):
         self.nested = prior.nested
         data_model = self.constructor(prior.wrap, **kwargs)
         data_model.sample()
-        super().__init__(data_model, prior=prior, params=kwargs)
+        super().__init__(data_model, prior=prior, kwargs=kwargs)
 
     @property
     def params(self):
         params = {}
-
-        if self._param_list is None:
-            return params
-
-        for k in self._param_list:
+        print("here")
+        for k in self.__others__["kwargs"].keys():
             v = getattr(self, k)
             if isinstance(v, Callable):
                 v = v()

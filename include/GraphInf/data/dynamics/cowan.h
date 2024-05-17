@@ -24,14 +24,26 @@ namespace GraphInf
             double mu = 1,
             double eta = 0.5,
             double autoActivationProb = 1e-6,
-            double autoDeactivationProb = 0) : BinaryDynamics(graphPrior,
+            double autoDeactivationProb = 0,
+            double aStddev = 0.1,
+            double nuStddev = 0.1,
+            double muStddev = 0.1,
+            double etaStddev = 0.1,
+            double activationStddev = 0.1) : BinaryDynamics(graphPrior,
                                                               numSteps,
                                                               autoActivationProb,
-                                                              autoDeactivationProb),
+                                                              autoDeactivationProb,
+                                                              activationStddev,
+                                                              0),
                                                m_a(a),
                                                m_nu(nu),
                                                m_mu(mu),
-                                               m_eta(eta) {}
+                                               m_eta(eta) {
+                m_paramProposer.insertGaussianProposer("a", 1.0, 0.0, aStddev);
+                m_paramProposer.insertGaussianProposer("nu", 1.0, 0.0, nuStddev); 
+                m_paramProposer.insertGaussianProposer("mu", 1.0, 0.0, muStddev); 
+                m_paramProposer.insertGaussianProposer("eta", 1.0, 0.0, muStddev); 
+            }
 
         const double getActivationProb(const VertexNeighborhoodState &vertexNeighborState) const override
         {
@@ -49,6 +61,32 @@ namespace GraphInf
         void setMu(double mu) { m_mu = mu; }
         const double getEta() const { return m_eta; }
         void setEta(double eta) { m_eta = eta; }
+
+        void applyParamMove(const ParamMove &move) override
+        {
+            if (move.key == "a")
+                m_a += move.value;
+            else if (move.key == "nu")
+                m_nu += move.value;
+            else if (move.key == "mu")
+                m_mu += move.value;
+            else if (move.key == "eta")
+                m_eta += move.value;
+
+            BinaryDynamics::applyParamMove(move);
+        }
+        bool isValidParamMove(const ParamMove &move) const override
+        {
+            if (move.key == "a")
+                return 0 <= m_a + move.value;
+            else if (move.key == "nu")
+                return 0 <= m_nu + move.value;
+            else if (move.key == "mu")
+                return 0 <= m_mu + move.value;
+            else if (move.key == "eta")
+                return 0 <= m_eta + move.value && m_eta + move.value <= 1;
+            return BinaryDynamics::isValidParamMove(move);
+        }
     };
 
 } // namespace GraphInf

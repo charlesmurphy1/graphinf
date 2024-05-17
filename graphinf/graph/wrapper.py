@@ -18,7 +18,7 @@ from .util import (
 )
 
 __all__ = (
-    "OptionError",
+    "LiteralError",
     "RandomGraphWrapper",
     "ErdosRenyiModel",
     "ConfigurationModel",
@@ -30,9 +30,9 @@ __all__ = (
 )
 
 
-class OptionError(ValueError):
-    def __init__(self, value: str, avail_options: List[str]) -> None:
-        super().__init__(f"Option {value} is unavailable, possible options are {avail_options}.")
+class LiteralError(ValueError):
+    def __init__(self, value: str, avail_options: List[str] = None) -> None:
+        super().__init__(f"Literal {value} is invalid, possible values are {avail_options}.")
 
 
 class RandomGraphWrapper(_Wrapper):
@@ -214,7 +214,7 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         edge_proposer_type: str = "degree",
     ):
         if degree_prior_type not in self.available_degree_prior_types:
-            raise OptionError(degree_prior_type, self.available_degree_prior_types)
+            raise LiteralError(degree_prior_type, self.available_degree_prior_types)
         self.constructor = partial(_graph.ConfigurationModelFamily, canonical=canonical)
         wrapped = _graph.ConfigurationModelFamily(
             size,
@@ -316,11 +316,11 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         nested = False
         block_count = 0 if block_count is None else block_count
         if likelihood_type not in self.available_likelihood_types:
-            raise OptionError(likelihood_type, self.available_likelihood_types)
+            raise LiteralError(likelihood_type, self.available_likelihood_types)
         if label_graph_prior_type not in self.available_label_graph_prior_types:
-            raise OptionError(label_graph_prior_type, self.available_label_graph_prior_types)
+            raise LiteralError(label_graph_prior_type, self.available_label_graph_prior_types)
         if degree_prior_type not in self.available_degree_prior_types:
-            raise OptionError(degree_prior_type, self.available_degree_prior_types)
+            raise LiteralError(degree_prior_type, self.available_degree_prior_types)
 
         if likelihood_type == "degree_corrected":
             if label_graph_prior_type == "nested":
