@@ -1,22 +1,32 @@
 [build-system]
-requires = ["scikit-build-core>=0.2.1", "pybind11>=2.2", "numpy>=1.20.3", "scipy>=1.7.1", "psutil>=5.8.0", "networkx", "pandas", "tqdm"]
 build-backend = "scikit_build_core.build"
+requires = [
+  "scikit-build-core>=0.2.1",
+  "pybind11>=2.2",
+  "numpy>=1.20.3",
+  "scipy>=1.7.1",
+  "psutil>=5.8.0",
+  "networkx",
+  "pandas",
+  "tqdm",
+  "scikit-learn>=1.1.3",
+]
 
 [project]
-name = "graphinf"
-version = "0.3.1"
-description = "A Markov chain Monte-Carlo for graph inference."
-readme = "README.md"
 authors = [
-  { name = "Charles Murphy" },
+  {name = "Charles Murphy"},
 ]
-requires-python = ">=3.7"
 classifiers = [
   "Development Status :: 4 - Beta",
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
   "Programming Language :: Python :: 3 :: Only",
 ]
+description = "A Markov chain Monte-Carlo for graph inference."
+name = "graphinf"
+readme = "README.md"
+requires-python = ">=3.7"
+version = "0.3.1"
 
 [tool.scikit-build]
-wheel.expand-macos-universal-tags = true
 build-dir = "./build"
+wheel.expand-macos-universal-tags = true
