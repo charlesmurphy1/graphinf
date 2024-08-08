@@ -24,6 +24,7 @@ from .util import (
 
 class DataModelWrapper(_Wrapper):
     constructor = None
+    _param_list = None
 
     def __init__(
         self,
@@ -39,6 +40,27 @@ class DataModelWrapper(_Wrapper):
         data_model = self.constructor(prior.wrap, **kwargs)
         data_model.sample()
         super().__init__(data_model, prior=prior, kwargs=kwargs)
+
+    @property
+    def params(self):
+        params = {}
+        print("here")
+        for k in self.__others__["kwargs"].keys():
+            v = getattr(self, k)
+            if isinstance(v, Callable):
+                v = v()
+            params[k] = v
+        return params
+
+    def set_params(self, **kwargs):
+        for k, v in kwargs.items():
+            attr = getattr(self, k, None)
+            if attr is None or k not in self._param_list:
+                continue
+            if isinstance(attr, Callable):
+                getattr(self, "set_" + k)(v)
+            else:
+                setattr(self, k, v)
 
     def __repr__(self):
         str_format = f"{self.__class__.__name__ }(\n\tprior={self.prior.__class__.__name__},"

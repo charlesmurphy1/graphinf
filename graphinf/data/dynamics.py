@@ -1,5 +1,7 @@
 from __future__ import annotations
+import numpy as np
 
+from typing import List, Optional
 from graphinf import _graphinf
 from graphinf.graph import RandomGraph
 from graphinf.wrapper import Wrapper
@@ -16,11 +18,29 @@ __all__ = (
 
 
 class Dynamics(_DataModelWrapper):
-    pass
+    def set_state(self, state: np.ndarray | List[List[int]], future: Optional[np.ndarray | List[List[int]]] = None):
+        if future is None:
+            past = [x[:-1] for x in state]
+            future = [x[1:] for x in state]
+        else:
+            past = state
+
+        if isinstance(past, np.ndarray):
+            past = past.tolist()
+        if isinstance(future, np.ndarray):
+            future = future.tolist()
+
+        self.wrap.set_state(past, future)
 
 
 class SISDynamics(Dynamics):
     constructor = _dynamics.SISDynamics
+    _param_list = [
+        "infection_prob",
+        "recovery_prob",
+        "auto_activation_prob",
+        "auto_deactivation_prob",
+    ]
 
     def __init__(
         self,
@@ -43,6 +63,11 @@ class SISDynamics(Dynamics):
 
 class GlauberDynamics(Dynamics):
     constructor = _dynamics.GlauberDynamics
+    _param_list = [
+        "coupling",
+        "auto_activation_prob",
+        "auto_deactivation_prob",
+    ]
 
     def __init__(
         self,
@@ -63,6 +88,14 @@ class GlauberDynamics(Dynamics):
 
 class CowanDynamics(Dynamics):
     constructor = _dynamics.CowanDynamics
+    _param_list = [
+        "nu",
+        "a",
+        "mu",
+        "eta",
+        "auto_activation_prob",
+        "auto_deactivation_prob",
+    ]
 
     def __init__(
         self,

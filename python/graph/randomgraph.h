@@ -42,6 +42,7 @@ namespace GraphInf
               .def("propose_label_move", &VertexLabeledRandomGraph<Label>::proposeLabelMove)
               .def("is_valid_label_move", &VertexLabeledRandomGraph<Label>::isValidLabelMove, py::arg("move"))
               .def("reduce_labels", &VertexLabeledRandomGraph<Label>::reduceLabels);
+
      }
 
      template <typename Label>
@@ -114,7 +115,8 @@ namespace GraphInf
               .def("apply_graph_move", &RandomGraph::applyGraphMove, py::arg("move"))
               .def("propose_graph_move", &RandomGraph::proposeGraphMove)
               .def("is_compatible", &RandomGraph::isCompatible)
-              .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"));
+              .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"))
+              .def("metropolis_sweep", &RandomGraph::metropolisSweep, py::arg("n_steps"), py::arg("beta_prior")=1, py::arg("beta_likelihood")=1);
 
           py::class_<DeltaGraph, RandomGraph>(m, "DeltaGraph")
               .def(py::init<const MultiGraph>(), py::arg("graph"));
