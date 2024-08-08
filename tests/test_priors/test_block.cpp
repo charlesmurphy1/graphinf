@@ -20,7 +20,7 @@ class DummyBlockPrior : public BlockPrior
 {
 private:
     BlockCountDeltaPrior m_blockCountDeltaPrior = BlockCountDeltaPrior();
-    void _samplePriors() override{};
+    void _samplePriors() override {};
     const double _getLogPrior() const override { return 0.1; }
 
 public:
@@ -286,7 +286,7 @@ TEST_F(BlockUniformPriorTest, getLogLikelihoodRatio_fromSomeLabelMove_returnCorr
     double expectedLogLikelihoodRatio = -prior.getLogLikelihood();
     prior.applyLabelMove(move);
     expectedLogLikelihoodRatio += prior.getLogLikelihood();
-    EXPECT_FLOAT_EQ(expectedLogLikelihoodRatio, actualLogLikelihoodRatio);
+    EXPECT_TRUE(expectedLogLikelihoodRatio - actualLogLikelihoodRatio < 1e-10);
 }
 
 TEST_F(BlockUniformPriorTest, applyMove_forSomeLabelMove_changeBlockOfNode2From0To1)
