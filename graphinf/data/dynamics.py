@@ -11,6 +11,7 @@ __all__ = (
     "SISDynamics",
     "GlauberDynamics",
     "CowanDynamics",
+    "VoterDynamics",
 )
 
 
@@ -81,6 +82,26 @@ class CowanDynamics(Dynamics):
             a=a,
             mu=mu,
             eta=eta,
+            auto_activation_prob=auto_activation_prob,
+            auto_deactivation_prob=auto_deactivation_prob,
+        )
+
+
+class VoterDynamics(Dynamics):
+    constructor = _dynamics.VoterDynamics
+
+    def __init__(
+        self,
+        prior: RandomGraph = None,
+        random_flip_prob: float = 0.0,
+        length: int = 10,
+        auto_activation_prob: float = 0.0,
+        auto_deactivation_prob: float = 0.0,
+    ):
+        super().__init__(
+            prior=prior,
+            random_flip_prob=random_flip_prob,
+            length=length,
             auto_activation_prob=auto_activation_prob,
             auto_deactivation_prob=auto_deactivation_prob,
         )

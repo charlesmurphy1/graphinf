@@ -12,7 +12,6 @@ namespace GraphInf
     class GlauberDynamics : public BinaryDynamics
     {
         double m_coupling;
-        MultiParamProposer m_proposer;
 
     public:
         GlauberDynamics(

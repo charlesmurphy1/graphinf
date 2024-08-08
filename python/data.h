@@ -16,6 +16,7 @@
 #include "GraphInf/data/dynamics/glauber.h"
 #include "GraphInf/data/dynamics/cowan.h"
 #include "GraphInf/data/dynamics/sis.h"
+#include "GraphInf/data/dynamics/voter.h"
 
 #include "GraphInf/data/uncertain/uncertain.h"
 #include "GraphInf/data/uncertain/poisson.h"
@@ -208,6 +209,13 @@ namespace GraphInf
                  py::arg("auto_activation_prob") = 0., py::arg("auto_deactivation_prob") = 0.)
             .def("coupling", &GlauberDynamics::getCoupling)
             .def("set_coupling", &GlauberDynamics::setCoupling, py::arg("coupling"));
+
+        py::class_<VoterDynamics, BinaryDynamics>(dynamics, "VoterDynamics")
+            .def(py::init<RandomGraph &, int, float, float, float>(),
+                 py::arg("random_graph"), py::arg("length"), py::arg("random_flip_prob") = 0.,
+                 py::arg("auto_activation_prob") = 0., py::arg("auto_deactivation_prob") = 0.)
+            .def("random_flip_prob", &VoterDynamics::getRandomFlipProb)
+            .def("set_random_flip_prob", &VoterDynamics::setRandomFlipProb, py::arg("random_flip_prob"));
 
         py::class_<SISDynamics, BinaryDynamics>(dynamics, "SISDynamics")
             .def(py::init<RandomGraph &, size_t, double, double, double, double>(),
