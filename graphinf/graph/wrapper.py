@@ -116,7 +116,6 @@ class RandomGraphWrapper(_Wrapper):
         burn_sweeps: int = 5,
         start_from_original: bool = False,
         reset_original: bool = False,
-        verbose: bool = False,
         **kwargs,
     ) -> None:
         all_methods = [
@@ -136,7 +135,6 @@ class RandomGraphWrapper(_Wrapper):
         kwargs["burn_sweeps"] = burn_sweeps
         kwargs["start_from_original"] = start_from_original
         kwargs["reset_original"] = reset_original
-        kwargs["verbose"] = verbose
         if not self.labeled:
             if method == "iid_meanfield":
                 evidence = log_evidence_iid_meanfield(self, graph, **kwargs)
@@ -308,7 +306,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         degree_prior_type: str = "uniform",
         canonical: bool = False,
         edge_proposer_type: str = "uniform",
-        block_proposer_type: str = "multiflip",
+        block_proposer_type: str = "uniform",
         shift: float = 1,
         sample_label_count_prob: float = 0.1,
     ):
@@ -393,8 +391,14 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
     def metropolis_sweep(
         self,
         n_steps_per_vertex: int = 5,
-        n_gibbs=10,
+        n_gibbs: int = 10,
     ):
+        if self.params["block_proposer_type"] == "uniform":
+            n_steps = n_steps_per_vertex * self.size()
+            begin_log_joint = self.log_joint()
+            n_success = self.wrap.metropolis_sweep(n_steps)
+            end_log_joint = self.log_joint()
+            return end_log_joint - begin_log_joint, n_steps, n_success
         blockstate = self.blockstate()
         if self.params["block_proposer_type"] == "multiflip":
             out = blockstate.multiflip_mcmc_sweep(
@@ -417,6 +421,9 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                 sequential=False,
                 deterministic=False,
             )
+        else:
+            raise ValueError(f"Block proposer type {self.params['block_proposer_type']} is invalid.")
+
         self.sync_with_blockstate(blockstate)
         return out
 
@@ -429,9 +436,31 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             degree_dl_kind="distributed" if self.params["degree_prior_type"] == "hyper" else "uniform",
             edges_dl=True,
             dense=self.params["likelihood_type"] == "uniform",
-            # multigraph=self.params["multigraph"],
             exact=True,
         )
+
+    def gt_mcmc_args(self):
+        if self.params["block_proposer_type"] == "multiflip":
+            return dict(
+                psplit=1,
+                pmergesplit=1,
+                niter=5,
+                d=self.params["sample_label_count_prob"],
+                c=self.params["shift"],
+                entropy_args=self.gt_entropy_args(),
+                gibbs_sweeps=5,
+            )
+
+        elif self.params["block_proposer_type"] == "singleflip":
+            return dict(
+                c=self.params["shift"],
+                d=self.params["sample_label_count_prob"],
+                niter=5,
+                entropy_args=self.gt_entropy_args(),
+                sequential=False,
+                deterministic=False,
+            )
+        return {}
 
     def blockstate(self):
         bg = self.state()

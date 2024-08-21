@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pandas as pd
 import networkx as nx
 import numpy as np
@@ -77,12 +78,21 @@ def log_mean_exp(x: Union[np.ndarray, float]):
     return b + np.log(np.mean(np.exp(x - b)))
 
 
+def mean_accuracy(y_true: np.ndarray, y_preds: list[np.ndarray]):
+    acc = []
+    for y in y_preds:
+        acc.append(sk_metrics.accuracy_score(y_true.ravel(), y.ravel()))
+    return np.mean(acc)
+
+
 class EdgeCollector:
     def __init__(
         self,
+        model: "DataModelWrapper",
         graphs: Optional[Union[List[bg.UndirectedMultigraph], bg.UndirectedMultigraph]] = None,
         epsilon: float = 0.0,
     ):
+        self.model = model
         self.epsilon = epsilon
         self.clear()
         if graphs is None:
@@ -110,11 +120,12 @@ class EdgeCollector:
 
     def update(
         self,
-        graph: bg.UndirectedMultigraph,
+        graph: bg.UndirectedMultigraph = None,
         keep_graph: bool = False,
         score: Optional[float] = None,
-        extra: Optional[dict] = None,
+        extra: Optional[dict[str, Any]] = None,
     ) -> None:
+        graph = graph or self.model.graph_copy()
         self._total_count += 1
         self._node_count = max(self.node_count, graph.get_size())
         for edge in graph.edges():
@@ -125,13 +136,14 @@ class EdgeCollector:
 
     def mle(self, edge: Tuple[int, int], multiplicity: Optional[int] = None) -> float:
         if edge not in self.counts:
-            return 1.0 if multiplicity == 0 else self.epsilon / (self.total_count + self.epsilon)
-        p0 = 1 - (self.counts[edge] + self.epsilon) / (self.total_count + self.epsilon)
+            return 1 - self.epsilon if multiplicity == 0 else self.epsilon
+        p0 = np.clip(1 - self.counts[edge] / self.total_count, self.epsilon, 1 - self.epsilon)
+
         if multiplicity == 0:
             return p0
         if multiplicity is None:
             return 1 - p0
-        return (self.multiplicities[edge][multiplicity] + self.epsilon) / (self.total_count + self.epsilon)
+        return np.clip(self.multiplicities[edge][multiplicity] / self.total_count, self.epsilon, 1 - self.epsilon)
 
     def log_prob_estimate(self, graph: bg.UndirectedMultigraph) -> float:
         logp = 0
@@ -158,8 +170,19 @@ class EdgeCollector:
         pred = self.prediction_matrix()
         if metric == "log_prob":
             return self.log_prob_estimate(graph)
-        if isinstance(metric, str):
-            metric = getattr(sk_metrics, metric)
+        if metric == "mean_accuracy":
+            if self._graph_collection is None:
+                y_preds = [g.get_adjacency_matrix(True) for g, _, _ in self._graph_collection]
+            else:
+                y_preds = [(pred > np.random.rand(*pred.shape)).astype(int) for _ in range(100)]
+            return mean_accuracy(adj, y_preds)
+        if metric == "map_accuracy":
+            return sk_metrics.accuracy_score(adj.ravel(), (pred > 0.5).astype(int).ravel())
+
+        if hasattr(self.model, metric):
+            self.model.set_graph(graph)
+            return getattr(self.model, metric)()
+        metric = getattr(sk_metrics, metric)
         return metric(adj.ravel(), pred.ravel())
 
     def entropy(self) -> float:

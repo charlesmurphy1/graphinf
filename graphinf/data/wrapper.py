@@ -97,7 +97,7 @@ class DataModelWrapper(_Wrapper):
             out[k] = v
         return out
 
-    def set_params(self, **kwargs):
+    def set_params(self, strict: bool = False, **kwargs):
         for k, v in kwargs.items():
             setter = f"set_{k}"
             if hasattr(self.wrap, setter):
@@ -105,7 +105,9 @@ class DataModelWrapper(_Wrapper):
             elif hasattr(self.prior, setter):
                 getattr(self.prior, setter)(v)
             else:
-                raise AttributeError(f"Model `{self.wrap}` has no attribute `{k}`")
+                if strict:
+                    raise AttributeError(f"Model `{self.wrap}` has no attribute `{k}`")
+                continue
 
     def from_model(self, other: DataModelWrapper):
         if issubclass(other.__class__, DataModelWrapper):

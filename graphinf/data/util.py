@@ -1,11 +1,12 @@
 import logging
 import sys
 import time
+import numpy as np
+import multiprocessing as mp
 from functools import partial
 from typing import Callable, List, Literal, Optional
 from warnings import warn
 
-import numpy as np
 from basegraph import core
 from graphinf.data import DataModel
 from graphinf.utility import (
@@ -39,18 +40,20 @@ def mcmc_on_graph(
     start_from_original: bool = False,
     reset_original: bool = False,
     callback: Optional[Callable[[DataModel], None]] = None,
-    verbose: bool = False,
+    # verbose: bool = False,
+    # logger_patience: int = 10,
+    logger: Optional[logging.Logger] = None,
 ) -> None:
-    if verbose:
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-    else:
-        logger = None
+    # if verbose:
+    #     logger = logging.getLogger()
+    #     logger.setLevel(logging.DEBUG)
+    #     handler = logging.StreamHandler(sys.stdout)
+    #     handler.setLevel(logging.INFO)
+    #     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    #     handler.setFormatter(formatter)
+    #     logger.addHandler(handler)
+    # else:
+    #     logger = None
 
     sweep = partial(
         model.gibbs_sweep,
@@ -73,9 +76,10 @@ def mcmc_on_graph(
         success = sweep()
         t1 = time.time()
         if logger is not None:
+
             logger.info(
                 f"Epoch {i}: "
-                f"time={t1 - t0: 0.4f}, "
+                f"time={t1 - t0: 0.4f}s ({(n_sweeps - i + 1) * (t1 - t0): 0.4f}s remaining) "
                 f"accepted={success}, "
                 f"log(likelihood)={model.log_likelihood(): 0.4f}, "
                 f"log(prior)={model.log_prior(): 0.4f}"

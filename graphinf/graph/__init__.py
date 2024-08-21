@@ -22,6 +22,8 @@ __all__ = (
     "NegativeBinomialGraph",
     "ConfigurationModelFamily",
     "StochasticBlockModel",
-    "PlantedPartition",
+    "PlantedPartitionGraph",
     "StochasticBlockModelFamily",
+    "poisson_degreeseq",
+    "nbinom_degreeseq",
 )

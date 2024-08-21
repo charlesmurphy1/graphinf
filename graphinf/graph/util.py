@@ -30,21 +30,9 @@ def mcmc_on_labels(
     start_from_original: bool = False,
     reset_original: bool = False,
     callback: Optional[Callable[[RandomGraph], None]] = None,
-    verbose: bool = False,
+    logger: Optional[logging.Logger] = None,
     **kwargs,
 ) -> None:
-    if verbose:
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)s - %(message)s"
-        )
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-    else:
-        logger = None
 
     if "metropolis_sweep" not in dir(model):
         return
@@ -62,14 +50,14 @@ def mcmc_on_labels(
         sweep()
     for i in range(n_sweeps):
         t0 = time.time()
-        success = sweep()
+        dS, total, success = sweep()
         t1 = time.time()
         if logger is not None:
             logger.info(
                 f"Epoch {i}: "
-                f"time={t1 - t0: 0.4f}, "
-                f"accepted={success}, "
-                f"log(likelihood)={model.log_likelihood(): 0.4f}, "
+                f"time={t1 - t0: 0.4f}s ({(n_sweeps - i + 1) * (t1 - t0)}s remaining) "
+                f"accepted={success} "
+                f"log(likelihood)={model.log_likelihood(): 0.4f} "
                 f"log(prior)={model.log_prior(): 0.4f}"
             )
 
@@ -89,9 +77,7 @@ def reduce_partition(partition):
         reduced.append([])
         mapping.append(dict())
 
-        inverse = (
-            None if i == 0 else {v: k for k, v in mapping[i - 1].items()}
-        )
+        inverse = None if i == 0 else {v: k for k, v in mapping[i - 1].items()}
         idx = 0
         for j, _bb in enumerate(bb):
             if inverse is not None and j not in inverse:
@@ -117,10 +103,7 @@ def log_evidence_exact(
         raise TypeError("`model` must not be nested for exact evaluation.")
 
     if model.size() > 6:
-        warn(
-            f"A model with size {model.size()} is being used"
-            f"for exact evaluation, which might not finish."
-        )
+        warn(f"A model with size {model.size()} is being used" f"for exact evaluation, which might not finish.")
 
     original = model.labels()
     model.set_state(graph)
@@ -152,36 +135,47 @@ def log_evidence_iid_meanfield(
     return collector.log_prob_estimate(graph)
 
 
-def log_evidence_partition_meanfield(
-    model: RandomGraph, graph: core.UndirectedMultigraph, **kwargs
-):
+def log_evidence_partition_meanfield(model: RandomGraph, graph: core.UndirectedMultigraph, **kwargs):
     if importlib.util.find_spec("graph_tool"):
-        from graph_tool.inference import ModeClusterState, mcmc_equilibrate
+        from graph_tool.inference import (
+            BlockState,
+            ModeClusterState,
+            mcmc_equilibrate,
+        )
     else:
         raise ModuleNotFoundError(
             "Module `graph_tool` has not been installed, cannot use `log_evidence_partition_meanfield` method."
         )
 
-    get_labels = (
-        model.labels_copy if not model.nested else model.nested_labels_copy
-    )
-    set_labels = (
-        model.set_labels if not model.nested else model.set_nested_labels
-    )
+    get_labels = model.labels_copy if not model.nested else model.nested_labels_copy
+    set_labels = model.set_labels if not model.nested else model.set_nested_labels
     original = model.labels_copy()
 
     if not kwargs.get("start_from_original", False):
         model.sample_only_labels()
     partitions = [original]
-    callback = lambda model: partitions.append(get_labels())
 
-    mcmc_on_labels(model, callback=callback, **kwargs)
+    class GTCollectPartition:
+        def __init__(self):
+            self.collection = []
 
+        def __call__(self, m: BlockState):
+            self.collection.append(m.b.a.copy())
+
+    blockstate = model.blockstate()
+    mcmc_args = model.gt_mcmc_args()
+    mcmc_args["niter"] = kwargs.get("n_steps_per_vertex", 5)
+    callback = GTCollectPartition()
+    mcmc_equilibrate(
+        blockstate,
+        force_niter=kwargs.get("n_sweeps", 100),
+        mcmc_args=model.gt_mcmc_args(),
+        callback=callback,
+    )
+    partitions = callback.collection
     pmodes = ModeClusterState(partitions, nested=model.nested)
     if kwargs.get("equilibriate_mode_cluster", False):
-        mcmc_equilibrate(
-            pmodes, force_niter=1, verbose=kwargs.get("verbose", False)
-        )
+        mcmc_equilibrate(pmodes, force_niter=1, verbose=kwargs.get("verbose", False))
     samples = []
     for p in partitions:
         set_labels(p)
@@ -191,9 +185,7 @@ def log_evidence_partition_meanfield(
     return np.mean(samples) + pmodes.posterior_entropy()
 
 
-def log_evidence_annealed(
-    model: RandomGraph, graph: core.UndirectedMultigraph, **kwargs
-):
+def log_evidence_annealed(model: RandomGraph, graph: core.UndirectedMultigraph, **kwargs):
     if betas is None:
         betas = np.linspace(0, 1, 11) ** (1.0 / 2)
 

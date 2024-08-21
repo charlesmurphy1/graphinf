@@ -122,6 +122,11 @@ class CowanDynamics(Dynamics):
 
 class VoterDynamics(Dynamics):
     constructor = _dynamics.VoterDynamics
+    _param_list = [
+        "random_flip_prob",
+        "auto_activation_prob",
+        "auto_deactivation_prob",
+    ]
 
     def __init__(
         self,
