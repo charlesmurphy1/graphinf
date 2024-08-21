@@ -27,10 +27,4 @@ jobs:
     
     - name: Unit tests
       working-directory: ${{github.workspace}}/build
-      run: |
-        ./${{github.workspace}}/build/tests/test_generators
-        ./${{github.workspace}}/build/tests/test_utility
-        ./${{github.workspace}}/build/tests/test_proposers
-        ./${{github.workspace}}/build/tests/test_priors
-        ./${{github.workspace}}/build/tests/test_graph
-        ./${{github.workspace}}/build/tests/test_data
+      run: ctest ${{github.workspace}}/build --output-on-failure -j 4
