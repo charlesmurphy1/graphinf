@@ -18,6 +18,7 @@ file(GLOB_RECURSE GENERATORS_TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/test_generator
 file(GLOB_RECURSE UTILITY_TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/test_utility/test_*.cpp)
 file(GLOB_RECURSE PROPOSERS_TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/test_proposers/test_*.cpp)
 file(GLOB_RECURSE PRIORS_TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/test_priors/test_*.cpp)
+file(GLOB_RECURSE MISC_TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/misc.cpp)
 
 add_executable(test_graph ${GRAPH_TEST_SRC})
 add_executable(test_data ${DATA_TEST_SRC})
@@ -25,6 +26,7 @@ add_executable(test_generators ${GENERATORS_TEST_SRC})
 add_executable(test_utility ${UTILITY_TEST_SRC})
 add_executable(test_proposers ${PROPOSERS_TEST_SRC})
 add_executable(test_priors ${PRIORS_TEST_SRC})
+add_executable(test_misc ${MISC_TEST_SRC})
 
 set(allGTests
     test_graph
@@ -33,6 +35,7 @@ set(allGTests
     test_utility    
     test_proposers
     test_priors
+    test_misc
     )
 
 

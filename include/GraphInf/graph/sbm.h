@@ -16,6 +16,8 @@
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"
+#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
+#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -159,12 +161,11 @@ namespace GraphInf
             const LabelGraph &labelGraph,
             bool stubLabeled = true,
             bool withSelfLoops = true,
-            bool withParallelEdges = true,
-            std::string edgeProposerType = "uniform") : StochasticBlockModelBase(blocks.size(), stubLabeled, withSelfLoops, withParallelEdges),
-                                                        m_labelGraphPrior(blocks, labelGraph)
+            bool withParallelEdges = true) : StochasticBlockModelBase(blocks.size(), stubLabeled, withSelfLoops, withParallelEdges),
+                                             m_labelGraphPrior(blocks, labelGraph)
         {
             setLabelGraphPrior(m_labelGraphPrior);
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer(edgeProposerType, false, false, withSelfLoops, withSelfLoops));
+            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer("uniform", false, false, withSelfLoops, withSelfLoops));
             m_edgeProposerPtr = m_edgeProposerUPtr.get();
             m_edgeProposerPtr->isRoot(false);
 
@@ -205,8 +206,7 @@ namespace GraphInf
             bool stubLabeled = true,
             bool withSelfLoops = true,
             bool withParallelEdges = true,
-            std::string edgeProposerType = "uniform",
-            std::string blockProposerType = "uniform",
+            std::string blockProposerType = "mixed",
             double sampleLabelCountProb = 0.1,
             double labelCreationProb = 0.5,
             double shift = 1) : StochasticBlockModelBase(size, stubLabeled, withSelfLoops, withParallelEdges)
@@ -226,8 +226,10 @@ namespace GraphInf
             m_labelGraphPriorUPtr = std::unique_ptr<LabelGraphPrior>(makeLabelGraphPrior(*m_edgeCountPriorUPtr, *m_blockPriorUPtr, usePlantedPrior));
             setLabelGraphPrior(*m_labelGraphPriorUPtr);
 
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(
-                makeEdgeProposer(edgeProposerType, canonical, false, withSelfLoops, withParallelEdges));
+            if (canonical)
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
+            else
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
             setEdgeProposer(*m_edgeProposerUPtr);
             m_labelProposerUPtr = std::unique_ptr<LabelProposer<BlockIndex>>(
                 makeBlockProposer(blockProposerType, useBlockHyperPrior, sampleLabelCountProb, labelCreationProb, shift));
@@ -252,14 +254,12 @@ namespace GraphInf
             double assortativity = 0,
             bool stubLabeled = true,
             bool withSelfLoops = true,
-            bool withParallelEdges = true,
-            std::string edgeProposerType = "uniform") : StochasticBlockModel(getPlantedBlocks(sizes),
-                                                                             getPlantedLabelGraph(sizes.size(), edgeCount, assortativity),
-                                                                             stubLabeled,
-                                                                             withSelfLoops,
-                                                                             withParallelEdges,
-                                                                             edgeProposerType),
-                                                        m_assortativity(assortativity) {}
+            bool withParallelEdges = true) : StochasticBlockModel(getPlantedBlocks(sizes),
+                                                                  getPlantedLabelGraph(sizes.size(), edgeCount, assortativity),
+                                                                  stubLabeled,
+                                                                  withSelfLoops,
+                                                                  withParallelEdges),
+                                             m_assortativity(assortativity) {}
 
         PlantedPartitionModel(
             size_t size,
@@ -268,15 +268,16 @@ namespace GraphInf
             double assortativity = 0,
             bool stubLabeled = true,
             bool withSelfLoops = true,
-            bool withParallelEdges = true,
-            std::string edgeProposerType = "uniform") : StochasticBlockModel(getPlantedBlocks(size, blockCount),
-                                                                             getPlantedLabelGraph(blockCount, edgeCount, assortativity),
-                                                                             stubLabeled,
-                                                                             withSelfLoops,
-                                                                             withParallelEdges,
-                                                                             edgeProposerType),
-                                                        m_assortativity(assortativity) {}
-        const double getAssortativity() const { return m_assortativity; }
+            bool withParallelEdges = true) : StochasticBlockModel(getPlantedBlocks(size, blockCount),
+                                                                  getPlantedLabelGraph(blockCount, edgeCount, assortativity),
+                                                                  stubLabeled,
+                                                                  withSelfLoops,
+                                                                  withParallelEdges),
+                                             m_assortativity(assortativity) {}
+        const double getAssortativity() const
+        {
+            return m_assortativity;
+        }
 
         const bool isCompatible(const MultiGraph &graph) const override
         {

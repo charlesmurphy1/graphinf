@@ -41,6 +41,10 @@ namespace GraphInf
         void onEdgeRemoval(const BaseGraph::Edge &);
         void onEdgeInsertion(const BaseGraph::Edge &, double);
         double onEdgeErasure(const BaseGraph::Edge &);
+        double getLogProposalProb(const BaseGraph::Edge &edge) const
+        {
+            return log(getEdgeWeight(edge)) - log(getTotalWeight());
+        }
         const double getEdgeWeight(const BaseGraph::Edge &edge) const
         {
             // auto orderedEdge = getOrderedEdge(edge);
@@ -61,6 +65,7 @@ namespace GraphInf
 
         const double getTotalWeight() const { return m_edgeSampler.total_weight(); }
         const double getSize() const { return m_edgeSampler.size(); }
+        bool isEmpty() const { return m_edgeSampler.size() == 0; }
         void setUpWithGraph(const MultiGraph &graph);
 
         void clear() { m_edgeSampler.clear(); }

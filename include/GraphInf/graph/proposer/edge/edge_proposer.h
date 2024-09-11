@@ -9,6 +9,7 @@
 #include "GraphInf/types.h"
 #include "GraphInf/exceptions.h"
 #include "GraphInf/utility/maps.hpp"
+#include "GraphInf/graph/proposer/edge/util.h"
 
 namespace GraphInf
 {
@@ -25,6 +26,7 @@ namespace GraphInf
         mutable std::uniform_real_distribution<double> m_uniform01;
         bool isSelfLoop(BaseGraph::Edge edge) const { return edge.first == edge.second; }
         bool isExistingEdge(BaseGraph::Edge edge) const { return m_graphPtr->getEdgeMultiplicity(edge.first, edge.second) >= 1; }
+        GraphMove orderGraphMove(const GraphMove &move) const;
 
     public:
         using Proposer<GraphMove>::Proposer;
@@ -44,7 +46,7 @@ namespace GraphInf
             m_graphPtr = &graph;
         }
         virtual void setUpWithPrior(const RandomGraph &prior);
-        virtual void applyGraphMove(const GraphMove &move){};
+        virtual void applyGraphMove(const GraphMove &move) {};
         // virtual void applyBlockMove(const BlockMove& move) {};
         const bool &allowSelfLoops() const { return m_allowSelfLoops; }
         const bool &allowMultiEdges() const { return m_allowMultiEdges; }

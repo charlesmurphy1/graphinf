@@ -10,6 +10,8 @@
 #include "GraphInf/graph/likelihood/erdosrenyi.h"
 #include "GraphInf/graph/util.h"
 #include "GraphInf/generators.h"
+#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
+#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -88,14 +90,15 @@ namespace GraphInf
             double edgeCount,
             bool canonical = false,
             bool withSelfLoops = true,
-            bool withParallelEdges = true,
-            std::string edgeProposerType = "uniform") : ErdosRenyiModelBase(size, withSelfLoops, withParallelEdges)
+            bool withParallelEdges = true) : ErdosRenyiModelBase(size, withSelfLoops, withParallelEdges)
         {
             m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
             setEdgeCountPrior(*m_edgeCountPriorUPtr);
 
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(
-                makeEdgeProposer(edgeProposerType, canonical, false, withSelfLoops, withParallelEdges));
+            if (canonical)
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new SingleEdgeUniformProposer(m_withSelfLoops, m_withParallelEdges));
+            else
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(m_withSelfLoops, m_withParallelEdges));
             setEdgeProposer(*m_edgeProposerUPtr);
 
             checkSafety();

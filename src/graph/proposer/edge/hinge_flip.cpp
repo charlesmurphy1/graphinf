@@ -45,17 +45,15 @@ namespace GraphInf
     void HingeFlipProposer::applyGraphMove(const GraphMove &move)
     {
 
-        for (auto edge : move.removedEdges)
-        {
-            edge = getOrderedEdge(edge);
-            m_vertexSamplerPtr->onEdgeRemoval(edge);
-            m_edgeSampler.onEdgeRemoval(edge);
-        }
         for (auto edge : move.addedEdges)
         {
-            edge = getOrderedEdge(edge);
             m_vertexSamplerPtr->onEdgeAddition(edge);
             m_edgeSampler.onEdgeAddition(edge);
+        }
+        for (auto edge : move.removedEdges)
+        {
+            m_vertexSamplerPtr->onEdgeRemoval(edge);
+            m_edgeSampler.onEdgeRemoval(edge);
         }
     }
 

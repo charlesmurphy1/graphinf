@@ -10,6 +10,8 @@
 #include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/graph/util.h"
 #include "GraphInf/generators.h"
+#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
+#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -140,14 +142,16 @@ namespace GraphInf
             double edgeCount,
             bool useDegreeHyperPrior = true,
             bool canonical = false,
-            bool degreeConstrained = false,
-            std::string edgeProposerType = "degree") : ConfigurationModelBase(size)
+            bool degreeConstrained = false) : ConfigurationModelBase(size)
         {
             m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
             m_degreePriorUPtr = std::unique_ptr<DegreePrior>(makeDegreePrior(size, *m_edgeCountPriorUPtr, useDegreeHyperPrior));
             setDegreePrior(*m_degreePriorUPtr);
 
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer(edgeProposerType, canonical, degreeConstrained, true, true));
+            if (canonical)
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
+            else
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
             setEdgeProposer(*m_edgeProposerUPtr);
 
             checkSafety();

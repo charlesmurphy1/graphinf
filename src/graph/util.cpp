@@ -111,6 +111,7 @@ namespace GraphInf
         bool withSelfLoops,
         bool withParallelEdges)
     {
+
         if (canonical)
         {
             if (proposerType == "uniform")

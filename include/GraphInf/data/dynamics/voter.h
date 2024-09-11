@@ -39,11 +39,15 @@ namespace GraphInf
 
         const double getActivationProb(const VertexNeighborhoodState &vertexNeighborState) const override
         {
+            if (vertexNeighborState[0] + vertexNeighborState[1] == 0)
+                return 0.5;
             double p = (double)vertexNeighborState[1] / (double)(vertexNeighborState[0] + vertexNeighborState[1]);
             return m_random_flip_prob * 0.5 + (1 - m_random_flip_prob) * p;
         }
         const double getDeactivationProb(const VertexNeighborhoodState &vertexNeighborState) const override
         {
+            if (vertexNeighborState[0] + vertexNeighborState[1] == 0)
+                return 0.5;
             double p = (double)vertexNeighborState[0] / (double)(vertexNeighborState[0] + vertexNeighborState[1]);
             return m_random_flip_prob * 0.5 + (1 - m_random_flip_prob) * p;
         }

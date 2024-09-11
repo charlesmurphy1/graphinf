@@ -2,7 +2,7 @@
 #define GRAPH_INF_EDGE_PROPOSER_UTIL_H
 
 #include <map>
-#include "GraphInf/graph/random_graph.hpp"
+#include <string>
 #include "GraphInf/graph/proposer/sampler/edge_sampler.h"
 #include "GraphInf/graph/proposer/sampler/vertex_sampler.h"
 

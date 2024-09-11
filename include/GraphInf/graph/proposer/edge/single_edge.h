@@ -6,6 +6,7 @@
 #include "GraphInf/graph/proposer/sampler/vertex_sampler.h"
 #include "SamplableSet.hpp"
 #include "hash_specialization.hpp"
+#include "GraphInf/graph/proposer/edge/util.h"
 
 namespace GraphInf
 {
@@ -16,14 +17,28 @@ namespace GraphInf
         mutable std::bernoulli_distribution m_addOrRemoveDistribution = std::bernoulli_distribution(.5);
 
     protected:
+        EdgeSampler m_edgeSampler;
         VertexSampler *m_vertexSamplerPtr = nullptr;
 
     public:
-        using EdgeProposer::EdgeProposer;
+        SingleEdgeProposer(bool allowSelfLoops = true, bool allowMultiEdges = true) : EdgeProposer(allowSelfLoops, allowMultiEdges), m_edgeSampler(EdgeSampler(1, 100)) {}
         const GraphMove proposeRawMove() const override;
         void setUpWithGraph(const MultiGraph &) override;
+        void setEdgeSampler(EdgeSampler &edgeSampler) { m_edgeSampler = edgeSampler; }
         void setVertexSampler(VertexSampler &vertexSampler) { m_vertexSamplerPtr = &vertexSampler; }
-        virtual void applyGraphMove(const GraphMove &move) override{};
+        void applyGraphMove(const GraphMove &move) override
+        {
+            for (auto edge : move.addedEdges)
+            {
+                m_edgeSampler.onEdgeAddition(edge);
+                m_vertexSamplerPtr->onEdgeAddition(edge);
+            }
+            for (auto edge : move.removedEdges)
+            {
+                m_edgeSampler.onEdgeRemoval(edge);
+                m_vertexSamplerPtr->onEdgeRemoval(edge);
+            }
+        };
         // void applyBlockMove(const BlockMove& move) override { };
 
         void checkSelfSafety() const override
@@ -34,7 +49,11 @@ namespace GraphInf
             if (m_vertexSamplerPtr == nullptr)
                 throw SafetyError("SingleEdgeProposer: unsafe proposer since `m_vertexSamplerPtr` is NULL.");
         }
-        void clear() override { m_vertexSamplerPtr->clear(); }
+        void clear() override
+        {
+            m_edgeSampler.clear();
+            m_vertexSamplerPtr->clear();
+        }
     };
 
     class SingleEdgeUniformProposer : public SingleEdgeProposer
@@ -43,7 +62,10 @@ namespace GraphInf
         VertexUniformSampler m_vertexUniformSampler;
 
     public:
-        SingleEdgeUniformProposer(bool allowSelfLoops = true, bool allowMultiEdges = true) : SingleEdgeProposer(allowSelfLoops, allowMultiEdges) { m_vertexSamplerPtr = &m_vertexUniformSampler; }
+        SingleEdgeUniformProposer(bool allowSelfLoops = true, bool allowMultiEdges = true) : SingleEdgeProposer(allowSelfLoops, allowMultiEdges)
+        {
+            m_vertexSamplerPtr = &m_vertexUniformSampler;
+        }
         virtual ~SingleEdgeUniformProposer() {}
 
         const double getLogProposalProbRatio(const GraphMove &move) const override;
@@ -60,10 +82,7 @@ namespace GraphInf
 
         virtual ~SingleEdgeDegreeProposer() {}
 
-        void applyGraphMove(const GraphMove &move) override;
         const double getLogProposalProbRatio(const GraphMove &move) const override;
-
-        const double getGammaRatio(BaseGraph::Edge edge, const double difference = 1) const;
     };
 
 } // namespace GraphInf

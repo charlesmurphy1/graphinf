@@ -6,6 +6,8 @@
 #include "GraphInf/graph/prior/labeled_degree.h"
 #include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/graph/util.h"
+#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
+#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -165,7 +167,6 @@ namespace GraphInf
             double edgeCount,
             bool useDegreeHyperPrior = false,
             bool canonical = false,
-            std::string edgeProposerType = "uniform",
             std::string blockProposerType = "uniform",
             double sampleLabelCountProb = 0.1,
             double labelCreationProb = 0.5,
@@ -176,8 +177,10 @@ namespace GraphInf
             m_degreePriorUPtr = std::unique_ptr<VertexLabeledDegreePrior>(makeVertexLabeledDegreePrior(m_nestedLabelGraphPrior, useDegreeHyperPrior));
             setDegreePrior(*m_degreePriorUPtr);
 
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(
-                makeEdgeProposer(edgeProposerType, canonical, false, true, true));
+            if (canonical)
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
+            else
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
             setEdgeProposer(*m_edgeProposerUPtr);
 
             m_nestedLabelProposerUPtr = std::unique_ptr<NestedLabelProposer<BlockIndex>>(

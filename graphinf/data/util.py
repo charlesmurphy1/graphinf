@@ -3,6 +3,7 @@ import sys
 import time
 import numpy as np
 import multiprocessing as mp
+from collections import deque
 from functools import partial
 from typing import Callable, List, Literal, Optional
 from warnings import warn
@@ -40,51 +41,43 @@ def mcmc_on_graph(
     start_from_original: bool = False,
     reset_original: bool = False,
     callback: Optional[Callable[[DataModel], None]] = None,
-    # verbose: bool = False,
-    # logger_patience: int = 10,
     logger: Optional[logging.Logger] = None,
 ) -> None:
-    # if verbose:
-    #     logger = logging.getLogger()
-    #     logger.setLevel(logging.DEBUG)
-    #     handler = logging.StreamHandler(sys.stdout)
-    #     handler.setLevel(logging.INFO)
-    #     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    #     handler.setFormatter(formatter)
-    #     logger.addHandler(handler)
-    # else:
-    #     logger = None
-
-    sweep = partial(
-        model.gibbs_sweep,
-        n_sweeps=n_gibbs_sweeps,
-        n_steps_per_vertex=n_steps_per_vertex,
-        beta_prior=beta_prior,
-        beta_likelihood=beta_likelihood,
-        sample_prior=sample_prior,
-        sample_params=sample_params,
-    )
 
     original = model.graph()
     if not start_from_original:
         model.sample_prior()
 
-    for _ in range(burn_sweeps):
-        sweep()
-    for i in range(n_sweeps):
+    time_queue = deque(maxlen=100)
+
+    def step(i, prefix=""):
         t0 = time.time()
-        success = sweep()
+        success = model.gibbs_sweep(
+            n_sweeps=n_gibbs_sweeps,
+            n_steps_per_vertex=n_steps_per_vertex,
+            beta_prior=beta_prior,
+            beta_likelihood=beta_likelihood,
+            sample_prior=sample_prior,
+            sample_params=sample_params,
+        )
         t1 = time.time()
+        time_queue.append(t1 - t0)
         if logger is not None:
 
             logger.info(
+                f"[{prefix}]"
                 f"Epoch {i}: "
-                f"time={t1 - t0: 0.4f}s ({(n_sweeps - i + 1) * (t1 - t0): 0.4f}s remaining) "
+                f"time={t1 - t0: 0.4f}s ({(n_sweeps - i + 1) * np.mean(time_queue): 0.4f}s remaining) "
                 f"accepted={success}, "
                 f"log(likelihood)={model.log_likelihood(): 0.4f}, "
                 f"log(prior)={model.log_prior(): 0.4f}"
             )
 
+    for i in range(burn_sweeps):
+        step(i, "burn-in")
+
+    for i in range(n_sweeps):
+        step(i, "sampling")
         if callback is not None:
             callback(model)
 

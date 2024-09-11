@@ -5,6 +5,8 @@
 #include "GraphInf/graph/prior/nested_label_graph.h"
 #include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/graph/util.h"
+#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
+#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -158,7 +160,6 @@ namespace GraphInf
             bool stubLabeled = true,
             bool withSelfLoops = true,
             bool withParallelEdges = true,
-            std::string edgeProposerType = "uniform",
             std::string blockProposerType = "uniform",
             double sampleLabelCountProb = 0.1,
             double labelCreationProb = 0.5,
@@ -167,8 +168,10 @@ namespace GraphInf
             m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
             setEdgeCountPrior(*m_edgeCountPriorUPtr);
 
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(
-                makeEdgeProposer(edgeProposerType, canonical, false, withSelfLoops, withParallelEdges));
+            if (canonical)
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
+            else
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
             setEdgeProposer(*m_edgeProposerUPtr);
 
             m_nestedLabelProposerUPtr = std::unique_ptr<NestedLabelProposer<BlockIndex>>(

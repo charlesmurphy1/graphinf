@@ -27,13 +27,12 @@ namespace GraphInf
 
         py::class_<ConfigurationModelFamily, ConfigurationModelBase>(m, "ConfigurationModelFamily")
             .def(
-                py::init<size_t, double, bool, bool, bool, std::string>(),
+                py::init<size_t, double, bool, bool, bool>(),
                 py::arg("size"),
                 py::arg("edge_count"),
                 py::arg("hyperprior") = true,
                 py::arg("canonical") = false,
-                py::arg("degree_constrained") = false,
-                py::arg("edge_proposer_type") = "degree");
+                py::arg("degree_constrained") = false);
     }
 
 }

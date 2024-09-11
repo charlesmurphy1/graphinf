@@ -13,7 +13,7 @@ namespace GraphInf
     class TestSingleEdgeUniformProposer : public ::testing::Test
     {
     public:
-        ErdosRenyiModel randomGraph = ErdosRenyiModel(10, 10);
+        ErdosRenyiModel randomGraph = ErdosRenyiModel(10, 10, true);
         SingleEdgeUniformProposer proposer;
         MultiGraph graph;
         BaseGraph::Edge inexistentEdge = {0, 1};
@@ -65,7 +65,7 @@ namespace GraphInf
     {
     public:
         EdgeCountDeltaPrior edgeCountPrior = {10};
-        ErdosRenyiModel randomGraph = ErdosRenyiModel(10, 10);
+        ErdosRenyiModel randomGraph = ErdosRenyiModel(10, 10, true);
         SingleEdgeDegreeProposer proposer;
         MultiGraph graph;
         BaseGraph::Edge inexistentEdge = {0, 1};
@@ -98,13 +98,13 @@ namespace GraphInf
     TEST_F(TestSingleEdgeDegreeProposer, getLogProposalProbRatio_removeEdgeWithMultiplicity2_return0)
     {
         GraphInf::GraphMove move = {{doubleEdge}, {}};
-        // proposer.applyGraphMove(move);
+        proposer.applyGraphMove(move);
     }
 
     TEST_F(TestSingleEdgeDegreeProposer, getLogProposalProbRatio_removeEdgeWithMultiplicity1_returnCorrectRatio)
     {
         GraphInf::GraphMove move = {{singleEdge}, {}};
-        // proposer.applyGraphMove(move);
+        proposer.applyGraphMove(move);
     }
 
 }

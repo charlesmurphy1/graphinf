@@ -30,20 +30,20 @@ namespace GraphInf
             double muStddev = 0.1,
             double etaStddev = 0.1,
             double activationStddev = 0.1) : BinaryDynamics(graphPrior,
-                                                              numSteps,
-                                                              autoActivationProb,
-                                                              autoDeactivationProb,
-                                                              activationStddev,
-                                                              0),
-                                               m_a(a),
-                                               m_nu(nu),
-                                               m_mu(mu),
-                                               m_eta(eta) {
-                m_paramProposer.insertGaussianProposer("a", 1.0, 0.0, aStddev);
-                m_paramProposer.insertGaussianProposer("nu", 1.0, 0.0, nuStddev); 
-                m_paramProposer.insertGaussianProposer("mu", 1.0, 0.0, muStddev); 
-                m_paramProposer.insertGaussianProposer("eta", 1.0, 0.0, muStddev); 
-            }
+                                                            numSteps,
+                                                            autoActivationProb,
+                                                            autoDeactivationProb,
+                                                            activationStddev,
+                                                            0.0),
+                                             m_a(a),
+                                             m_nu(nu),
+                                             m_mu(mu),
+                                             m_eta(eta)
+        {
+            m_paramProposer.insertGaussianProposer("nu", 1.0, 0.0, nuStddev);
+            m_paramProposer.insertGaussianProposer("mu", 1.0, 0.0, muStddev);
+            m_paramProposer.insertGaussianProposer("eta", 1.0, 0.0, muStddev);
+        }
 
         const double getActivationProb(const VertexNeighborhoodState &vertexNeighborState) const override
         {

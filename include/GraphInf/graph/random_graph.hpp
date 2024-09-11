@@ -35,7 +35,7 @@ namespace GraphInf
         virtual void _applyGraphMove(const GraphMove &);
         virtual const double _getLogPrior() const { return 0; }
         virtual const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const { return 0; }
-        virtual void sampleOnlyPrior(){};
+        virtual void sampleOnlyPrior() {};
         virtual void setUpLikelihood()
         {
             m_likelihoodModelPtr->m_statePtr = &m_state;
@@ -87,6 +87,7 @@ namespace GraphInf
         {
             proposer.isRoot(false);
             m_edgeProposerPtr = &proposer;
+            m_edgeProposerPtr->setUpWithPrior(*this);
         }
         const EdgeProposer &getEdgeProposer()
         {
@@ -201,7 +202,7 @@ namespace GraphInf
     {
     protected:
         LabelProposer<Label> *m_labelProposerPtr = nullptr;
-        virtual void _applyLabelMove(const LabelMove<Label> &){};
+        virtual void _applyLabelMove(const LabelMove<Label> &) {};
         virtual const double _getLogPriorRatioFromLabelMove(const LabelMove<Label> &move) const { return 0; }
         VertexLabeledGraphLikelihoodModel<Label> *m_vertexLabeledlikelihoodModelPtr = nullptr;
         std::uniform_real_distribution<double> m_uniform;

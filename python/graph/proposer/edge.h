@@ -12,9 +12,8 @@
 #include "GraphInf/graph/proposer/edge/double_edge_swap.h"
 #include "GraphInf/graph/proposer/edge/hinge_flip.h"
 #include "GraphInf/graph/proposer/edge/single_edge.h"
-// #include "GraphInf/graph/proposer/edge/labeled_edge_proposer.h"
-// #include "GraphInf/graph/proposer/edge/labeled_double_edge_swap.h"
-// #include "GraphInf/graph/proposer/edge/labeled_hinge_flip.h"
+#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
+#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace py = pybind11;
 namespace GraphInf
@@ -58,6 +57,12 @@ namespace GraphInf
 
         py::class_<SingleEdgeDegreeProposer, SingleEdgeProposer>(m, "SingleEdgeDegreeProposer")
             .def(py::init<bool, bool, double>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true, py::arg("shift") = 1);
+
+        py::class_<EdgeCountPreservingProposer, EdgeProposer>(m, "EdgeCountPreservingProposer")
+            .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true);
+
+        py::class_<NonPreservingProposer, EdgeProposer>(m, "NonPreservingProposer")
+            .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true);
 
         // /* Labeled edge proposers */
         // py::class_<LabeledEdgeProposer, EdgeProposer, PyLabeledEdgeProposer<>>(m, "LabeledEdgeProposer")

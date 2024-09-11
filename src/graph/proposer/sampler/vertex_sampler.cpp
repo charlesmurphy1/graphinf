@@ -91,4 +91,15 @@ namespace GraphInf
             --m_weights[edge.second];
     }
 
+    void VertexDegreeSampler::setUpWithGraph(const MultiGraph &graph)
+    {
+
+        clear();
+        for (const auto &vertex : graph)
+            onVertexInsertion(vertex);
+        for (const auto &edge : graph.edges())
+            onEdgeInsertion(edge, graph.getEdgeMultiplicity(edge.first, edge.second));
+        m_edgeSampler.setUpWithGraph(graph);
+    }
+
 }

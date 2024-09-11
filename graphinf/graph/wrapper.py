@@ -171,12 +171,10 @@ class ErdosRenyiModel(RandomGraphWrapper):
         canonical: bool = False,
         loopy: bool = True,
         multigraph: bool = True,
-        edge_proposer_type: str = "uniform",
     ):
         self.constructor = partial(
             _graph.ErdosRenyiModel,
             canonical=canonical,
-            edge_proposer_type=edge_proposer_type,
         )
         wrapped = self.constructor(
             size,
@@ -192,7 +190,6 @@ class ErdosRenyiModel(RandomGraphWrapper):
             canonical=canonical,
             loopy=loopy,
             multigraph=multigraph,
-            edge_proposer_type=edge_proposer_type,
         )
 
     def format_graph_into_args(self, graph: bg.UndirectedGraph):
@@ -209,7 +206,6 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         degree_prior_type: str = "uniform",
         canonical: bool = False,
         degree_constrained: bool = False,
-        edge_proposer_type: str = "degree",
     ):
         if degree_prior_type not in self.available_degree_prior_types:
             raise LiteralError(degree_prior_type, self.available_degree_prior_types)
@@ -220,7 +216,6 @@ class ConfigurationModelFamily(RandomGraphWrapper):
             canonical=canonical,
             hyperprior=(degree_prior_type == "hyper"),
             degree_constrained=degree_constrained,
-            edge_proposer_type=edge_proposer_type,
         )
         super().__init__(
             wrapped,
@@ -305,7 +300,6 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
         label_graph_prior_type: str = "uniform",
         degree_prior_type: str = "uniform",
         canonical: bool = False,
-        edge_proposer_type: str = "uniform",
         block_proposer_type: str = "uniform",
         shift: float = 1,
         sample_label_count_prob: float = 0.1,
@@ -326,7 +320,6 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                     _graph.NestedDegreeCorrectedStochasticBlockModelFamily,
                     canonical=canonical,
                     degree_hyperprior=(degree_prior_type == "hyper"),
-                    edge_proposer_type=edge_proposer_type,
                 )
                 nested = True
             else:
@@ -337,7 +330,6 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                     degree_hyperprior=(degree_prior_type == "hyper"),
                     planted=(label_graph_prior_type == "planted"),
                     canonical=canonical,
-                    edge_proposer_type=edge_proposer_type,
                 )
         else:
             if label_graph_prior_type == "nested":
@@ -347,7 +339,6 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                     canonical=canonical,
                     with_self_loops=True,
                     with_parallel_edges=True,
-                    edge_proposer_type=edge_proposer_type,
                 )
                 nested = True
             else:
@@ -360,7 +351,6 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                     canonical=canonical,
                     with_self_loops=True,
                     with_parallel_edges=True,
-                    edge_proposer_type=edge_proposer_type,
                 )
         wrapped = self.constructor(size, edge_count)
         super().__init__(
@@ -372,7 +362,6 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             label_graph_prior_type=label_graph_prior_type,
             degree_prior_type=degree_prior_type,
             canonical=canonical,
-            edge_proposer_type=edge_proposer_type,
             block_proposer_type=block_proposer_type,
             sample_label_count_prob=sample_label_count_prob,
             shift=shift,

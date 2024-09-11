@@ -27,12 +27,16 @@ namespace GraphInf
         virtual void onEdgeErasure(const BaseGraph::Edge &) = 0;
         virtual void onEdgeAddition(const BaseGraph::Edge &) = 0;
         virtual void onEdgeRemoval(const BaseGraph::Edge &) = 0;
+        double getLogProposalProb(const BaseGraph::VertexIndex &vertex) const
+        {
+            return log(getVertexWeight(vertex)) - log(getTotalWeight());
+        };
         virtual const double getVertexWeight(const BaseGraph::VertexIndex &) const = 0;
         virtual const double getTotalWeight() const = 0;
         virtual const size_t getSize() const = 0;
         virtual void checkSafety() const {}
         virtual void clear() {}
-        void setUpWithGraph(const MultiGraph &graph);
+        virtual void setUpWithGraph(const MultiGraph &graph);
     };
 
     class VertexUniformSampler : public VertexSampler
@@ -67,10 +71,10 @@ namespace GraphInf
                 throw std::logic_error("Cannot remove non-exising vertex " + std::to_string(vertex) + ".");
             m_vertexSampler.erase(vertex);
         };
-        void onEdgeInsertion(const BaseGraph::Edge &edge, double edgeWeight) override{};
-        void onEdgeErasure(const BaseGraph::Edge &) override{};
-        void onEdgeAddition(const BaseGraph::Edge &) override{};
-        void onEdgeRemoval(const BaseGraph::Edge &) override{};
+        void onEdgeInsertion(const BaseGraph::Edge &edge, double edgeWeight) override {};
+        void onEdgeErasure(const BaseGraph::Edge &) override {};
+        void onEdgeAddition(const BaseGraph::Edge &) override {};
+        void onEdgeRemoval(const BaseGraph::Edge &) override {};
         const double getVertexWeight(const BaseGraph::VertexIndex &vertex) const override
         {
             return (contains(vertex)) ? m_vertexSampler.get_weight(vertex) : 0.;
@@ -100,7 +104,7 @@ namespace GraphInf
 
     public:
         VertexDegreeSampler(double shift = 1, double minWeight = 1, double maxWeight = 100) : m_shift(shift), m_edgeSampler(minWeight, maxWeight),
-                                                                                              m_vertexSampler(minWeight, maxWeight){};
+                                                                                              m_vertexSampler(minWeight, maxWeight) {};
         VertexDegreeSampler(const VertexDegreeSampler &other) : m_vertexSampler(other.m_vertexSampler), m_edgeSampler(other.m_edgeSampler),
                                                                 m_totalEdgeWeight(other.m_totalEdgeWeight), m_shift(other.m_shift) {}
         ~VertexDegreeSampler() {}
@@ -147,6 +151,8 @@ namespace GraphInf
             if (m_edgeSampler.getTotalWeight() == 0)
                 throw SafetyError("VertexDegreeSampler: unsafe vertex sampler since `m_edgeSampler` is empty.");
         }
+
+        void setUpWithGraph(const MultiGraph &graph) override;
     };
 
 } /* GraphInf */

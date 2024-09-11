@@ -15,6 +15,8 @@
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"
+#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
+#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -181,7 +183,6 @@ namespace GraphInf
             bool useDegreeHyperPrior = false,
             bool usePlantedPrior = false,
             bool canonical = false,
-            std::string edgeProposerType = "degree",
             std::string blockProposerType = "uniform",
             double sampleLabelCountProb = 0.1,
             double labelCreationProb = 0.5,
@@ -200,8 +201,10 @@ namespace GraphInf
             m_degreePriorUPtr = std::unique_ptr<VertexLabeledDegreePrior>(makeVertexLabeledDegreePrior(*m_labelGraphPriorUPtr, useDegreeHyperPrior));
             setDegreePrior(*m_degreePriorUPtr);
 
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(
-                makeEdgeProposer(edgeProposerType, canonical, false, true, true));
+            if (canonical)
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
+            else
+                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
             setEdgeProposer(*m_edgeProposerUPtr);
 
             m_labelProposerUPtr = std::unique_ptr<LabelProposer<BlockIndex>>(

@@ -25,14 +25,13 @@ namespace GraphInf
 
         py::class_<NestedStochasticBlockModelFamily, NestedStochasticBlockModelBase>(m, "NestedStochasticBlockModelFamily")
             .def(
-                py::init<size_t, double, bool, bool, bool, bool, std::string, std::string, double, double, double>(),
+                py::init<size_t, double, bool, bool, bool, bool, std::string, double, double, double>(),
                 py::arg("size"),
                 py::arg("edge_count"),
                 py::arg("canonical") = false,
                 py::arg("stub_labeled") = true,
                 py::arg("with_self_loops") = true,
                 py::arg("with_parallel_edges") = true,
-                py::arg("edge_proposer_type") = "uniform",
                 py::arg("block_proposer_type") = "mixed",
                 py::arg("sample_label_count_prob") = 0.1,
                 py::arg("label_creation_prob") = 0.5,

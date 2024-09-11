@@ -317,6 +317,8 @@ namespace GraphInf
 
         for (const auto &idx : verticesAffected)
         {
+            if (prevNeighborMap.count(idx) == 0 or nextNeighborMap.count(idx) == 0)
+                continue;
             for (size_t t = 0; t < m_length; t++)
             {
                 logLikelihoodRatio += log(

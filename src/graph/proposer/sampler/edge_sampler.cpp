@@ -17,15 +17,21 @@ namespace GraphInf
 
     void EdgeSampler::onEdgeRemoval(const BaseGraph::Edge &edge)
     {
+
         auto orderedEdge = getOrderedEdge(edge);
         if (not contains(orderedEdge))
             throw std::runtime_error("EdgeSampler: Cannot remove non-exising edge (" + std::to_string(orderedEdge.first) + ", " + std::to_string(orderedEdge.second) + ").");
 
         double weight = getEdgeWeight(edge);
+
         if (weight == 1)
+        {
             m_edgeSampler.erase(orderedEdge);
+        }
         else if (m_graphPtr->getEdgeMultiplicity(orderedEdge.first, orderedEdge.second) <= m_maxWeight)
+        {
             m_edgeSampler.set_weight(orderedEdge, weight - 1);
+        }
     }
 
     void EdgeSampler::onEdgeAddition(const BaseGraph::Edge &edge)
