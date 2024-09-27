@@ -141,33 +141,33 @@ class DataModelWrapper(_Wrapper):
         self,
         n_sweeps: int = 4,
         n_graph_move: Optional[int] = None,
-        n_param_move: Optional[int] = None,
-        n_prior_move: Optional[int] = None,
+        n_param_move: int = 0,
         beta_likelihood: float = 1,
         beta_prior: float = 1,
         debug_frequency: int = 0,
         **kwargs,
     ):
         summary = MCMCSummary()
+        if n_graph_move is None:
+            n_graph_move = self.size()
         for _ in range(n_sweeps):
-            s1 = self.wrap.metropolis_graph_sweep(
-                num_steps=n_graph_move or self.size(),
-                beta_likelihood=beta_likelihood,
-                beta_prior=beta_prior,
-                debug_frequency=debug_frequency,
-                **kwargs,
-            )
-            summary.join(s1)
-            if self.prior.labeled and n_prior_move > 0:
-                s2 = self.prior.metropolis_sweep(n_label_move=n_prior_move, **kwargs)
-                summary.join(s2)
-            if n_param_move > 0:
-                s3 = self.wrap.metropolis_param_sweep(
-                    num_steps=n_param_move,
-                    beta_prior=beta_prior,
-                    beta_likelihood=beta_likelihood,
+            if n_graph_move > 0:
+                summary.join(
+                    self.wrap.metropolis_graph_sweep(
+                        n_steps=n_graph_move,
+                        beta_likelihood=beta_likelihood,
+                        beta_prior=beta_prior,
+                        debug_frequency=debug_frequency,
+                    )
                 )
-                summary.join(s3)
+            if n_param_move > 0:
+                summary.join(
+                    self.wrap.metropolis_param_sweep(
+                        n_steps=n_param_move,
+                        beta_prior=beta_prior,
+                        beta_likelihood=beta_likelihood,
+                    )
+                )
         return summary
 
     def posterior_entropy(

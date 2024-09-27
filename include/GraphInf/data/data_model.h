@@ -40,9 +40,9 @@ namespace GraphInf
             computeConsistentState();
         }
         const size_t getSize() const { return m_graphPriorPtr->getSize(); }
-        void samplePrior()
+        void samplePrior(bool canonical = true)
         {
-            m_graphPriorPtr->sample();
+            m_graphPriorPtr->sample(canonical);
             computeConsistentState();
             computationFinished();
 #if DEBUG
@@ -79,13 +79,13 @@ namespace GraphInf
         }
         const double getLogAcceptanceProbFromGraphMove(const GraphMove &move, double betaPrior = 1, double betaLikelihood = 1) const;
         virtual const StepResult<GraphMove> metropolisGraphStep(const double betaPrior = 1, const double betaLikelihood = 1, bool debug = false);
-        const StepResult<GraphMove> greedyGraphStep(int step = 1, double betaPrior = 1, double betaLikelihood = 1)
+        const StepResult<GraphMove> greedyGraphStep(int nCandidates = 1)
         {
             GraphMove bestMove = {};
             double bestLogJointRatio = 0;
             bool accepted = false;
 
-            for (int i = 1; i < step; i++)
+            for (int i = 1; i < nCandidates; i++)
             {
                 auto move = m_graphPriorPtr->proposeGraphMove();
                 auto logJointRatio = getLogJointRatioFromGraphMove(move);
@@ -99,7 +99,7 @@ namespace GraphInf
             applyGraphMove(bestMove);
             return {bestMove, bestLogJointRatio, accepted};
         }
-        virtual const StepResult<ParamMove> metropolisParamStep(const double betaPrior = 1, const double betaLikelihood = 1)
+        virtual const StepResult<ParamMove> metropolisParamStep(double betaPrior = 1, double betaLikelihood = 1)
         {
             if (m_paramProposer.size() == 0)
                 return {};
@@ -125,13 +125,13 @@ namespace GraphInf
             return {
                 move, likelihoodRatio + proposalRatio, accepted};
         }
-        const StepResult<ParamMove> greedyParamStep(int step = 1, double betaPrior = 1, double betaLikelihood = 1)
+        const StepResult<ParamMove> greedyParamStep(size_t nCandidates = 1)
         {
             ParamMove bestMove = {};
             double bestLogJointRatio = 0;
             bool accepted = false;
 
-            for (int i = 1; i < step; i++)
+            for (int i = 1; i < nCandidates; i++)
             {
                 auto move = m_paramProposer.proposeMove();
                 auto logJointRatio = getLogLikelihoodRatioFromParaMove(move);
@@ -146,20 +146,22 @@ namespace GraphInf
             return {bestMove, bestLogJointRatio, accepted};
         }
         const MCMCSummary metropolisGraphSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1, int debugFrequency = 0);
-        const MCMCSummary metropolisPriorSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1) { return m_graphPriorPtr->metropolisSweep(nSteps, betaPrior, betaLikelihood); }
         const MCMCSummary metropolisParamSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1);
-        const MCMCSummary greedyGraphSweep(size_t nSteps, size_t greedySteps = 1, const double betaPrior = 1, const double betaLikelihood = 1)
+        const MCMCSummary greedyGraphSweep(size_t nSteps, size_t nCandidates = 1)
         {
             MCMCSummary summary;
             for (size_t i = 0; i < nSteps; i++)
-                summary.update(greedyGraphStep(greedySteps, betaPrior, betaLikelihood));
+            {
+                summary.update(greedyGraphStep(nCandidates));
+                summary.update(m_graphPriorPtr->greedyStep(nCandidates));
+            }
             return summary;
         }
-        const MCMCSummary greedyParamSweep(size_t nSteps, size_t greedySteps = 1, const double betaPrior = 1, const double betaLikelihood = 1)
+        const MCMCSummary greedyParamSweep(size_t nSteps, size_t nCandidates = 1)
         {
             MCMCSummary summary;
             for (size_t i = 0; i < nSteps; i++)
-                summary.update(greedyParamStep(greedySteps, betaPrior, betaLikelihood));
+                summary.update(greedyParamStep(nCandidates));
             return summary;
         }
 

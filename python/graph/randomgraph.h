@@ -41,7 +41,9 @@ namespace GraphInf
               .def("apply_label_move", &VertexLabeledRandomGraph<Label>::applyLabelMove, py::arg("move"))
               .def("propose_label_move", &VertexLabeledRandomGraph<Label>::proposeLabelMove)
               .def("is_valid_label_move", &VertexLabeledRandomGraph<Label>::isValidLabelMove, py::arg("move"))
-              .def("reduce_labels", &VertexLabeledRandomGraph<Label>::reduceLabels);
+              .def("reduce_labels", &VertexLabeledRandomGraph<Label>::reduceLabels)
+              .def("metropolis_step", &VertexLabeledRandomGraph<Label>::metropolisStep, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+              .def("greedy_step", &VertexLabeledRandomGraph<Label>::greedyStep, py::arg("n_candidates") = 1);
      }
 
      template <typename Label>
@@ -105,7 +107,7 @@ namespace GraphInf
               .def("with_parallel_edges", [](RandomGraph &self, bool condition)
                    { return self.withParallelEdges(condition); })
               .def("edge_count_prior", &RandomGraph::getEdgeCountPrior, py::return_value_policy::reference_internal)
-              .def("sample", &RandomGraph::sample)
+              .def("sample", &RandomGraph::sample, py::arg("canonical") = true)
               .def("sample_state", &RandomGraph::sampleState)
               .def("sample_prior", &RandomGraph::samplePrior)
               .def("log_likelihood", &RandomGraph::getLogLikelihood)
@@ -119,7 +121,10 @@ namespace GraphInf
               .def("propose_graph_move", &RandomGraph::proposeGraphMove)
               .def("is_compatible", &RandomGraph::isCompatible)
               .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"))
-              .def("metropolis_sweep", &RandomGraph::metropolisSweep, py::arg("n_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
+              .def("metropolis_sweep", &RandomGraph::metropolisSweep, py::arg("n_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+              .def("metropolis_step", &RandomGraph::metropolisStep, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+              .def("greedy_step", &RandomGraph::greedyStep, py::arg("n_candidates") = 1)
+              .def("greedy_sweep", &RandomGraph::greedySweep, py::arg("n_steps"), py::arg("n_candidates") = 1);
 
           py::class_<DeltaGraph, RandomGraph>(m, "DeltaGraph")
               .def(py::init<const MultiGraph>(), py::arg("graph"));

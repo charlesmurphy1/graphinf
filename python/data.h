@@ -58,7 +58,7 @@ namespace GraphInf
             .def("set_graph", &DataModel::setGraph, py::arg("graph"))
             .def("graph_prior", &DataModel::getGraphPrior, py::return_value_policy::reference_internal)
             .def("set_graph_prior", &DataModel::setGraphPrior, py::arg("prior"))
-            .def("sample_prior", &DataModel::samplePrior)
+            .def("sample_prior", &DataModel::samplePrior, py::arg("canonical") = true)
             .def("log_likelihood", &DataModel::getLogLikelihood)
             .def("log_prior", &DataModel::getLogPrior)
             .def("log_joint", &DataModel::getLogJoint)
@@ -69,12 +69,12 @@ namespace GraphInf
             .def("apply_param_move", &DataModel::applyParamMove, py::arg("move"))
             .def("is_valid_param_move", &DataModel::isValidParamMove, py::arg("move"))
             .def("log_acceptance_prob_from_graph_move", &DataModel::getLogAcceptanceProbFromGraphMove, py::arg("move"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            .def("metropolis_graph_sweep", &DataModel::metropolisGraphSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1, py::arg("debug_frequency") = 0)
-            .def("metropolis_param_sweep", &DataModel::metropolisParamSweep, py::arg("num_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            .def("greedy_graph_step", &DataModel::greedyGraphStep, py::arg("n") = 1, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            .def("greedy_param_step", &DataModel::greedyParamStep, py::arg("n") = 1, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            .def("greedy_graph_sweep", &DataModel::greedyGraphSweep, py::arg("num_steps"), py::arg("n") = 1, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
-            .def("greedy_param_sweep", &DataModel::greedyParamSweep, py::arg("num_steps"), py::arg("n") = 1, py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
+            .def("metropolis_graph_sweep", &DataModel::metropolisGraphSweep, py::arg("n_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1, py::arg("debug_frequency") = 0)
+            .def("metropolis_param_sweep", &DataModel::metropolisParamSweep, py::arg("n_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1)
+            .def("greedy_graph_step", &DataModel::greedyGraphStep, py::arg("n_candidates") = 1)
+            .def("greedy_param_step", &DataModel::greedyParamStep, py::arg("n_candidates") = 1)
+            .def("greedy_graph_sweep", &DataModel::greedyGraphSweep, py::arg("n_steps"), py::arg("n_candidates") = 1)
+            .def("greedy_param_sweep", &DataModel::greedyParamSweep, py::arg("n_steps"), py::arg("n_candidates") = 1);
 
         py::module dynamics = m.def_submodule("dynamics");
         py::class_<Dynamics, DataModel, PyDynamics<>>(dynamics, "Dynamics")

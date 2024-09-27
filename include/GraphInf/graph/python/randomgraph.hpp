@@ -20,7 +20,7 @@ namespace GraphInf
         void _applyGraphMove(const GraphMove &move) override { PYBIND11_OVERRIDE(void, BaseClass, _applyGraphMove, move); }
         const double _getLogPrior() const override { PYBIND11_OVERRIDE(const double, BaseClass, _getLogPrior); }
         const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const override { PYBIND11_OVERRIDE(const double, BaseClass, _getLogPriorRatioFromGraphMove, move); }
-        void sampleOnlyPrior() override { PYBIND11_OVERRIDE(void, BaseClass, sampleOnlyPrior, ); }
+        void sampleOnlyPrior(bool canonical = true) override { PYBIND11_OVERRIDE(void, BaseClass, sampleOnlyPrior, canonical); }
         void setUpLikelihood() override { PYBIND11_OVERRIDE(void, BaseClass, setUpLikelihood, ); }
         void computeConsistentState() override { PYBIND11_OVERRIDE(void, BaseClass, computeConsistentState, ); }
 
@@ -36,6 +36,8 @@ namespace GraphInf
         void checkSelfSafety() const override { PYBIND11_OVERRIDE(void, BaseClass, checkSelfSafety, ); }
         void checkSelfConsistency() const override { PYBIND11_OVERRIDE(void, BaseClass, checkSelfConsistency, ); }
         bool isValidGraphMove(const GraphMove &move) const override { PYBIND11_OVERRIDE(bool, BaseClass, isValidGraphMove, move); }
+        const StepResult<BlockMove> metropolisStep(const double beta_prior = 1, const double beta_likelihood = 1) override { PYBIND11_OVERRIDE(const StepResult<BlockMove>, BaseClass, metropolisStep, beta_prior, beta_likelihood); }
+        const StepResult<BlockMove> greedyStep(size_t nCandidates = 1) override { PYBIND11_OVERRIDE(const StepResult<BlockMove>, BaseClass, greedyStep, nCandidates); }
     };
 
     template <typename Label, typename BaseClass = VertexLabeledRandomGraph<Label>>

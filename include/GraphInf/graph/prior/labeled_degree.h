@@ -59,6 +59,11 @@ namespace GraphInf
             m_labelGraphPriorPtr->samplePartition();
             recomputeConsistentState();
         }
+        void sampleMicrocanonical()
+        {
+            m_labelGraphPriorPtr->sampleMicrocanonical();
+            sampleState();
+        }
         void setGraph(const MultiGraph &);
         // const MultiGraph& getGraph() const { return *m_graphPtr; }
         virtual void setState(const DegreeSequence &) override;

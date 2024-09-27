@@ -54,7 +54,9 @@ namespace GraphInf
                  py::arg("move"), py::arg("log_joint_ratio"), py::arg("accepted"))
             .def_readonly("move", &StepResult<MoveType>::move)
             .def_readonly("log_joint_ratio", &StepResult<MoveType>::logJointRatio)
-            .def_readonly("accepted", &StepResult<MoveType>::accepted);
+            .def_readonly("accepted", &StepResult<MoveType>::accepted)
+            .def("__repr__", [](const StepResult<MoveType> &self)
+                 { return self.display(); });
     }
 
     void initStepResult(py::module &m)

@@ -23,7 +23,11 @@ namespace GraphInf
         {
             return m_edgeCountPriorPtr->getLogJointRatioFromGraphMove(move);
         }
-        void sampleOnlyPrior() override { m_edgeCountPriorPtr->sample(); }
+        void sampleOnlyPrior(bool canonical = true) override
+        {
+            if (canonical)
+                m_edgeCountPriorPtr->sample();
+        }
         void setUpLikelihood() override
         {
             m_likelihoodModel.m_statePtr = &m_state;

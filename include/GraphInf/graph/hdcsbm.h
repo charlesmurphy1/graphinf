@@ -33,7 +33,13 @@ namespace GraphInf
         {
             return m_degreePriorPtr->getLogJointRatioFromLabelMove(move);
         }
-        void sampleOnlyPrior() override { m_degreePriorPtr->sample(); }
+        void sampleOnlyPrior(bool canonical = true) override
+        {
+            if (canonical)
+                m_degreePriorPtr->sample();
+            else
+                m_degreePriorPtr->sampleMicrocanonical();
+        }
         void setUpLikelihood() override
         {
             m_likelihoodModel.m_statePtr = &m_state;

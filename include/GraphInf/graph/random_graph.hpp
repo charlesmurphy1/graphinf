@@ -51,7 +51,7 @@ namespace GraphInf
         }
         virtual const double _getLogPrior() const { return 0; }
         virtual const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const { return 0; }
-        virtual void sampleOnlyPrior() {};
+        virtual void sampleOnlyPrior(bool canonical = true) {};
         virtual void setUpLikelihood()
         {
             m_likelihoodModelPtr->m_statePtr = &m_state;
@@ -181,14 +181,12 @@ namespace GraphInf
             }
             m_edgeCountPriorPtr->isRoot(false);
         }
-
-        void sample()
+        void sample(bool canonical = true)
         {
-
             try
             {
                 processRecursiveFunction([&]()
-                                         { sampleOnlyPrior(); });
+                                         { sampleOnlyPrior(canonical); });
                 sampleState();
                 setUp();
             }
@@ -218,10 +216,26 @@ namespace GraphInf
             sampleOnlyPrior();
             computeConsistentState(); });
         }
-
-        virtual const MCMCSummary metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1)
+        virtual const StepResult<LabelMove<BlockIndex>> metropolisStep(double betaPrior = 1, double betaLikelihood = 1)
+        {
+            return {};
+        }
+        virtual const StepResult<LabelMove<BlockIndex>> greedyStep(size_t nCandidates = 1)
+        {
+            return {};
+        }
+        const MCMCSummary metropolisSweep(size_t numSteps, double betaPrior = 1, double betaLikelihood = 1)
         {
             MCMCSummary summary;
+            for (size_t i = 0; i < numSteps; i++)
+                summary.update(metropolisStep(betaPrior, betaLikelihood));
+            return summary;
+        }
+        const MCMCSummary greedySweep(size_t numSteps, size_t nCandidates = 1)
+        {
+            MCMCSummary summary;
+            for (size_t i = 0; i < numSteps; i++)
+                summary.update(greedyStep(nCandidates));
             return summary;
         }
 
@@ -342,7 +356,7 @@ namespace GraphInf
         }
         const double getLogProposalRatioFromLabelMove(const LabelMove<Label> &move) const;
 
-        const StepResult<LabelMove<Label>> metropolisStep(double m_betaPrior = 1, double m_betaLikelihood = 1)
+        const StepResult<LabelMove<Label>> metropolisStep(double m_betaPrior = 1, double m_betaLikelihood = 1) override
         {
             const auto move = proposeLabelMove();
             if (m_labelProposerPtr->isTrivialMove(move))
@@ -374,12 +388,25 @@ namespace GraphInf
             return {move, logLikelihoodRatio + logPriorRatio + logProposalRatio, accepted};
         }
 
-        const MCMCSummary metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1) override
+        const StepResult<LabelMove<Label>> greedyStep(size_t nCandidates) override
         {
-            MCMCSummary summary;
-            for (size_t i = 0; i < numSteps; i++)
-                summary.update(metropolisStep(betaPrior, betaLikelihood));
-            return summary;
+            LabelMove<Label> bestMove;
+            double bestLogJointRatio = 0;
+            bool accepted = false;
+
+            for (size_t i = 1; i < nCandidates; i++)
+            {
+                auto move = proposeLabelMove();
+                auto logJointRatio = getLogJointRatioFromLabelMove(move);
+                if (logJointRatio > bestLogJointRatio && isValidLabelMove(move))
+                {
+                    bestMove = move;
+                    bestLogJointRatio = logJointRatio;
+                    accepted = true;
+                }
+            }
+            applyLabelMove(bestMove);
+            return {bestMove, bestLogJointRatio, accepted};
         }
 
         void applyLabelMove(const LabelMove<Label> &move);

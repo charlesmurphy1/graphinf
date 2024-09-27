@@ -133,6 +133,13 @@ namespace GraphInf
         MoveType move;
         double logJointRatio;
         bool accepted;
+
+        std::string display() const
+        {
+            std::stringstream ss;
+            ss << "StepResult(move=" << move.display() << ", log_joint_ratio=" << logJointRatio << ", accepted=" << accepted << ")";
+            return ss.str();
+        }
     };
 
     struct MCMCSummary

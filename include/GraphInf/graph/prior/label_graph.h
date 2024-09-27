@@ -114,6 +114,11 @@ namespace GraphInf
             m_blockPriorPtr->sample();
             recomputeStateFromGraph();
         }
+        void sampleMicrocanonical()
+        {
+            m_blockPriorPtr->sample();
+            sampleState();
+        }
 
         const size_t &getEdgeCount() const { return m_edgeCountPriorPtr->getState(); }
         const CounterMap<BlockIndex> &getEdgeCounts() const { return m_edgeCounts; }

@@ -42,7 +42,13 @@ namespace GraphInf
         {
             return m_labelGraphPriorPtr->getLogJointRatioFromLabelMove(move);
         }
-        void sampleOnlyPrior() override { m_labelGraphPriorPtr->sample(); }
+        void sampleOnlyPrior(bool canonical = true) override
+        {
+            if (canonical)
+                m_labelGraphPriorPtr->sample();
+            else
+                m_labelGraphPriorPtr->sampleMicrocanonical();
+        }
         void setUpLikelihood() override
         {
 

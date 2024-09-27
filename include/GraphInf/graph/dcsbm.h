@@ -36,9 +36,12 @@ namespace GraphInf
         const double _getLogPrior() const override { return m_degreePriorPtr->getLogJoint(); }
         const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const override { return m_degreePriorPtr->getLogJointRatioFromGraphMove(move); }
         const double _getLogPriorRatioFromLabelMove(const BlockMove &move) const override { return m_degreePriorPtr->getLogJointRatioFromLabelMove(move); }
-        void sampleOnlyPrior() override
+        void sampleOnlyPrior(bool canonical = true) override
         {
-            m_degreePriorPtr->sample();
+            if (canonical)
+                m_degreePriorPtr->sample();
+            else
+                m_degreePriorPtr->sampleMicrocanonical();
             computationFinished();
         }
         void sampleWithLabels() override

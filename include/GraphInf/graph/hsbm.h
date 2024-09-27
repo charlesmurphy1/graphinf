@@ -34,9 +34,12 @@ namespace GraphInf
         {
             return m_nestedLabelGraphPrior.getLogJointRatioFromLabelMove(move);
         }
-        void sampleOnlyPrior() override
+        void sampleOnlyPrior(bool canonical = true) override
         {
-            m_nestedLabelGraphPrior.sample();
+            if (canonical)
+                m_nestedLabelGraphPrior.sample();
+            else
+                m_nestedLabelGraphPrior.sampleMicrocanonical();
         }
         void setUpLikelihood() override
         {
