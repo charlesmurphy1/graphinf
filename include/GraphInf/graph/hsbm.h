@@ -5,8 +5,6 @@
 #include "GraphInf/graph/prior/nested_label_graph.h"
 #include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/graph/util.h"
-#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
-#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -21,8 +19,8 @@ namespace GraphInf
 
         void _applyGraphMove(const GraphMove &move) override
         {
-            m_nestedLabelGraphPrior.applyGraphMove(move);
             RandomGraph::_applyGraphMove(move);
+            m_nestedLabelGraphPrior.applyGraphMove(move);
         }
         void _applyLabelMove(const BlockMove &move) override
         {
@@ -36,7 +34,10 @@ namespace GraphInf
         {
             return m_nestedLabelGraphPrior.getLogJointRatioFromLabelMove(move);
         }
-        void sampleOnlyPrior() override { m_nestedLabelGraphPrior.sample(); }
+        void sampleOnlyPrior() override
+        {
+            m_nestedLabelGraphPrior.sample();
+        }
         void setUpLikelihood() override
         {
             m_sbmLikelihoodModelUPtr->m_statePtr = &m_state;
@@ -44,17 +45,9 @@ namespace GraphInf
             m_sbmLikelihoodModelUPtr->m_withParallelEdgesPtr = &m_withParallelEdges;
             m_sbmLikelihoodModelUPtr->m_labelGraphPriorPtrPtr = &m_labelGraphPriorPtr;
         }
-        NestedStochasticBlockModelBase(size_t graphSize, bool stubLabeled = true, bool withSelfLoops = true, bool withParallelEdges = true) : NestedBlockLabeledRandomGraph(graphSize, withSelfLoops, withParallelEdges),
-                                                                                                                                              m_nestedLabelGraphPrior(graphSize),
-                                                                                                                                              m_stubLabeled(stubLabeled)
-        {
-            m_sbmLikelihoodModelUPtr = std::unique_ptr<StochasticBlockModelLikelihood>(makeSBMLikelihood(stubLabeled));
-            m_likelihoodModelPtr = m_vertexLabeledlikelihoodModelPtr = m_sbmLikelihoodModelUPtr.get();
-            setUpLikelihood();
-        }
-        NestedStochasticBlockModelBase(size_t graphSize, EdgeCountPrior &edgeCountPrior, bool stubLabeled = true, bool withSelfLoops = true, bool withParallelEdges = true) : NestedBlockLabeledRandomGraph(graphSize, withSelfLoops, withParallelEdges),
-                                                                                                                                                                              m_nestedLabelGraphPrior(graphSize, edgeCountPrior),
-                                                                                                                                                                              m_stubLabeled(stubLabeled)
+        NestedStochasticBlockModelBase(size_t size, double edgeCount, bool stubLabeled = true, bool canonical = false, bool withSelfLoops = true, bool withParallelEdges = true) : NestedBlockLabeledRandomGraph(size, edgeCount, canonical, withSelfLoops, withParallelEdges),
+                                                                                                                                                                                   m_nestedLabelGraphPrior(size, *m_edgeCountPriorPtr),
+                                                                                                                                                                                   m_stubLabeled(stubLabeled)
         {
             m_sbmLikelihoodModelUPtr = std::unique_ptr<StochasticBlockModelLikelihood>(makeSBMLikelihood(stubLabeled));
             m_likelihoodModelPtr = m_vertexLabeledlikelihoodModelPtr = m_sbmLikelihoodModelUPtr.get();
@@ -66,7 +59,6 @@ namespace GraphInf
         }
 
     public:
-        const size_t getEdgeCount() const override { return m_nestedLabelGraphPrior.getEdgeCount(); }
         const size_t getDepth() const override { return m_nestedLabelGraphPrior.getDepth(); }
         using NestedBlockLabeledRandomGraph::getLabel;
         const BlockIndex getLabel(BaseGraph::VertexIndex vertex, Level level) const override { return m_nestedLabelGraphPrior.getBlock(vertex, level); }
@@ -122,8 +114,6 @@ namespace GraphInf
             setUp();
         }
 
-        void setEdgeCountPrior(EdgeCountPrior &prior) { m_nestedLabelGraphPrior.setEdgeCountPrior(prior); }
-
         void checkSelfConsistency() const override
         {
             NestedVertexLabeledRandomGraph<BlockIndex>::checkSelfConsistency();
@@ -148,8 +138,6 @@ namespace GraphInf
 
     class NestedStochasticBlockModelFamily : public NestedStochasticBlockModelBase
     {
-        std::unique_ptr<EdgeCountPrior> m_edgeCountPriorUPtr = nullptr;
-        std::unique_ptr<EdgeProposer> m_edgeProposerUPtr = nullptr;
         std::unique_ptr<NestedLabelProposer<BlockIndex>> m_nestedLabelProposerUPtr = nullptr;
 
     public:
@@ -163,21 +151,12 @@ namespace GraphInf
             std::string blockProposerType = "uniform",
             double sampleLabelCountProb = 0.1,
             double labelCreationProb = 0.5,
-            double shift = 1) : NestedStochasticBlockModelBase(size, stubLabeled, withSelfLoops, withParallelEdges)
+            double shift = 1) : NestedStochasticBlockModelBase(size, edgeCount, stubLabeled, canonical, withSelfLoops, withParallelEdges)
         {
-            m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
-            setEdgeCountPrior(*m_edgeCountPriorUPtr);
 
-            if (canonical)
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
-            else
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
-            setEdgeProposer(*m_edgeProposerUPtr);
+            m_nestedLabelProposerUPtr = std::unique_ptr<NestedLabelProposer<BlockIndex>>(makeNestedBlockProposer(blockProposerType, true, sampleLabelCountProb, labelCreationProb, shift));
 
-            m_nestedLabelProposerUPtr = std::unique_ptr<NestedLabelProposer<BlockIndex>>(
-                makeNestedBlockProposer(blockProposerType, true, sampleLabelCountProb, labelCreationProb, shift));
             setNestedLabelProposer(*m_nestedLabelProposerUPtr);
-
             checkSafety();
             sample();
         }

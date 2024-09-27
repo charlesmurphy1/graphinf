@@ -7,7 +7,7 @@
 #include "GraphInf/graph/proposer/python/label.hpp"
 #include "GraphInf/graph/proposer/python/nested_label.hpp"
 
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/graph/proposer/label/base.hpp"
 #include "GraphInf/graph/proposer/label/uniform.hpp"
 #include "GraphInf/graph/proposer/label/mixed.hpp"

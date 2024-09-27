@@ -5,7 +5,7 @@
 #include <unordered_set>
 
 #include "GraphInf/graph/proposer/proposer.hpp"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/types.h"
 #include "GraphInf/exceptions.h"
 #include "GraphInf/utility/maps.hpp"
@@ -45,7 +45,6 @@ namespace GraphInf
             clear();
             m_graphPtr = &graph;
         }
-        virtual void setUpWithPrior(const RandomGraph &prior);
         virtual void applyGraphMove(const GraphMove &move) {};
         // virtual void applyBlockMove(const BlockMove& move) {};
         const bool &allowSelfLoops() const { return m_allowSelfLoops; }

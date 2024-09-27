@@ -9,6 +9,7 @@
 #include <memory>
 #include "GraphInf/utility/polylog2_integral.h"
 #include "GraphInf/rng.h"
+#include "GraphInf/mcmc.h"
 #include "SamplableSet.hpp"
 
 namespace GraphInf
@@ -68,24 +69,24 @@ namespace GraphInf
         }
     };
 
-    struct ParamMove
-    {
-        ParamMove(std::string key, double value) : key(key), value(value) {}
+    // struct ParamMove
+    // {
+    //     ParamMove(std::string key, double value) : key(key), value(value) {}
 
-        std::string key;
-        double value;
+    //     std::string key;
+    //     double value;
 
-        friend std::ostream &operator<<(std::ostream &os, const ParamMove &move)
-        {
-            os << move.display();
-            return os;
-        }
+    //     friend std::ostream &operator<<(std::ostream &os, const ParamMove &move)
+    //     {
+    //         os << move.display();
+    //         return os;
+    //     }
 
-        std::string display() const
-        {
-            return "ParamMove(" + key + "=" + std::to_string(value) + ")";
-        }
-    };
+    //     std::string display() const
+    //     {
+    //         return "ParamMove(" + key + "=" + std::to_string(value) + ")";
+    //     }
+    // };
 
     class MultiParamProposer
     {

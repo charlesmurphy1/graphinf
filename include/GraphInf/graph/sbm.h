@@ -16,8 +16,6 @@
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"
-#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
-#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -47,27 +45,18 @@ namespace GraphInf
         void sampleOnlyPrior() override { m_labelGraphPriorPtr->sample(); }
         void setUpLikelihood() override
         {
+
             m_sbmLikelihoodModelUPtr->m_statePtr = &m_state;
             m_sbmLikelihoodModelUPtr->m_withSelfLoopsPtr = &m_withSelfLoops;
             m_sbmLikelihoodModelUPtr->m_withParallelEdgesPtr = &m_withParallelEdges;
             m_sbmLikelihoodModelUPtr->m_labelGraphPriorPtrPtr = &m_labelGraphPriorPtr;
         }
 
-        using BlockLabeledRandomGraph::BlockLabeledRandomGraph;
-
-        StochasticBlockModelBase(size_t graphSize, bool stubLabeled = true, bool withSelfLoops = true, bool withParallelEdges = true) : VertexLabeledRandomGraph<BlockIndex>(graphSize, withSelfLoops, withParallelEdges),
-                                                                                                                                        m_stubLabeled(stubLabeled)
+        StochasticBlockModelBase(size_t size, double edgeCount, bool stubLabeled = true, bool canonical = false, bool withSelfLoops = true, bool withParallelEdges = true) : VertexLabeledRandomGraph<BlockIndex>(size, edgeCount, canonical, withSelfLoops, withParallelEdges),
+                                                                                                                                                                             m_stubLabeled(stubLabeled)
         {
             m_sbmLikelihoodModelUPtr = std::unique_ptr<StochasticBlockModelLikelihood>(makeSBMLikelihood(stubLabeled));
             m_likelihoodModelPtr = m_vertexLabeledlikelihoodModelPtr = m_sbmLikelihoodModelUPtr.get();
-        }
-
-        StochasticBlockModelBase(size_t graphSize, LabelGraphPrior &prior, bool stubLabeled = true, bool withSelfLoops = true, bool withParallelEdges = true) : VertexLabeledRandomGraph<BlockIndex>(graphSize, withSelfLoops, withParallelEdges),
-                                                                                                                                                                m_stubLabeled(stubLabeled)
-        {
-            m_sbmLikelihoodModelUPtr = std::unique_ptr<StochasticBlockModelLikelihood>(makeSBMLikelihood(stubLabeled));
-            m_likelihoodModelPtr = m_vertexLabeledlikelihoodModelPtr = m_sbmLikelihoodModelUPtr.get();
-            setLabelGraphPrior(prior);
         }
         void computeConsistentState() override
         {
@@ -114,10 +103,7 @@ namespace GraphInf
         const CounterMap<BlockIndex> &getVertexCounts() const override { return m_labelGraphPriorPtr->getBlockPrior().getVertexCounts(); }
         const CounterMap<BlockIndex> &getEdgeLabelCounts() const override { return m_labelGraphPriorPtr->getEdgeCounts(); }
         const LabelGraph &getLabelGraph() const override { return m_labelGraphPriorPtr->getState(); }
-        const size_t getEdgeCount() const override { return m_labelGraphPriorPtr->getEdgeCount(); }
         const bool isStubLabeled() const { return m_stubLabeled; }
-        const bool withSelfLoops() const { return m_withSelfLoops; }
-        const bool withParallelEdges() const { return m_withParallelEdges; }
         const double getLabelLogJoint() const override
         {
             double logP = m_labelGraphPriorPtr->getBlockPrior().getLogJoint();
@@ -149,48 +135,10 @@ namespace GraphInf
         }
     };
 
-    class StochasticBlockModel : public StochasticBlockModelBase
-    {
-        LabelGraphDeltaPrior m_labelGraphPrior;
-        std::unique_ptr<EdgeProposer> m_edgeProposerUPtr = nullptr;
-        std::unique_ptr<LabelProposer<BlockIndex>> m_labelProposerUPtr;
-
-    public:
-        StochasticBlockModel(
-            const BlockSequence &blocks,
-            const LabelGraph &labelGraph,
-            bool stubLabeled = true,
-            bool withSelfLoops = true,
-            bool withParallelEdges = true) : StochasticBlockModelBase(blocks.size(), stubLabeled, withSelfLoops, withParallelEdges),
-                                             m_labelGraphPrior(blocks, labelGraph)
-        {
-            setLabelGraphPrior(m_labelGraphPrior);
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer("uniform", false, false, withSelfLoops, withSelfLoops));
-            m_edgeProposerPtr = m_edgeProposerUPtr.get();
-            m_edgeProposerPtr->isRoot(false);
-
-            m_labelProposerUPtr = std::unique_ptr<LabelProposer<BlockIndex>>(makeBlockProposer("uniform"));
-            m_labelProposerPtr = m_labelProposerUPtr.get();
-            m_labelProposerPtr->isRoot(false);
-
-            checkSafety();
-            sample();
-        }
-
-        const bool isCompatible(const MultiGraph &graph) const override
-        {
-            if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph))
-                return false;
-            auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
-            return labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix();
-        }
-    };
-
     class StochasticBlockModelFamily : public StochasticBlockModelBase
     {
         std::unique_ptr<BlockCountPrior> m_blockCountPriorUPtr = nullptr;
         std::unique_ptr<BlockPrior> m_blockPriorUPtr = nullptr;
-        std::unique_ptr<EdgeCountPrior> m_edgeCountPriorUPtr = nullptr;
         std::unique_ptr<LabelGraphPrior> m_labelGraphPriorUPtr = nullptr;
         std::unique_ptr<EdgeProposer> m_edgeProposerUPtr = nullptr;
         std::unique_ptr<LabelProposer<BlockIndex>> m_labelProposerUPtr = nullptr;
@@ -209,8 +157,9 @@ namespace GraphInf
             std::string blockProposerType = "mixed",
             double sampleLabelCountProb = 0.1,
             double labelCreationProb = 0.5,
-            double shift = 1) : StochasticBlockModelBase(size, stubLabeled, withSelfLoops, withParallelEdges)
+            double shift = 1) : StochasticBlockModelBase(size, edgeCount, stubLabeled, canonical, withSelfLoops, withParallelEdges)
         {
+
             if (blockCount < 1 or blockCount > size - 1)
                 m_blockCountPriorUPtr = std::unique_ptr<BlockCountPrior>(new BlockCountUniformPrior(1, size));
             else
@@ -221,16 +170,10 @@ namespace GraphInf
             if (stubLabeled)
                 withSelfLoops = withParallelEdges = true;
 
-            m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
             m_blockPriorUPtr = std::unique_ptr<BlockPrior>(makeBlockPrior(size, *m_blockCountPriorUPtr, useBlockHyperPrior));
-            m_labelGraphPriorUPtr = std::unique_ptr<LabelGraphPrior>(makeLabelGraphPrior(*m_edgeCountPriorUPtr, *m_blockPriorUPtr, usePlantedPrior));
+            m_labelGraphPriorUPtr = std::unique_ptr<LabelGraphPrior>(makeLabelGraphPrior(*m_edgeCountPriorPtr, *m_blockPriorUPtr, usePlantedPrior));
             setLabelGraphPrior(*m_labelGraphPriorUPtr);
 
-            if (canonical)
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
-            else
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
-            setEdgeProposer(*m_edgeProposerUPtr);
             m_labelProposerUPtr = std::unique_ptr<LabelProposer<BlockIndex>>(
                 makeBlockProposer(blockProposerType, useBlockHyperPrior, sampleLabelCountProb, labelCreationProb, shift));
             setLabelProposer(*m_labelProposerUPtr);
@@ -243,50 +186,50 @@ namespace GraphInf
     std::vector<BlockIndex> getPlantedBlocks(size_t, size_t);
     LabelGraph getPlantedLabelGraph(size_t blockCount, size_t edgeCount, double assortativity = 0);
 
-    class PlantedPartitionModel : public StochasticBlockModel
-    {
-        double m_assortativity;
+    // class PlantedPartitionModel : public StochasticBlockModel
+    // {
+    //     double m_assortativity;
 
-    public:
-        PlantedPartitionModel(
-            std::vector<size_t> sizes,
-            size_t edgeCount,
-            double assortativity = 0,
-            bool stubLabeled = true,
-            bool withSelfLoops = true,
-            bool withParallelEdges = true) : StochasticBlockModel(getPlantedBlocks(sizes),
-                                                                  getPlantedLabelGraph(sizes.size(), edgeCount, assortativity),
-                                                                  stubLabeled,
-                                                                  withSelfLoops,
-                                                                  withParallelEdges),
-                                             m_assortativity(assortativity) {}
+    // public:
+    //     PlantedPartitionModel(
+    //         std::vector<size_t> sizes,
+    //         size_t edgeCount,
+    //         double assortativity = 0,
+    //         bool stubLabeled = true,
+    //         bool withSelfLoops = true,
+    //         bool withParallelEdges = true) : StochasticBlockModel(getPlantedBlocks(sizes),
+    //                                                               getPlantedLabelGraph(sizes.size(), edgeCount, assortativity),
+    //                                                               stubLabeled,
+    //                                                               withSelfLoops,
+    //                                                               withParallelEdges),
+    //                                          m_assortativity(assortativity) {}
 
-        PlantedPartitionModel(
-            size_t size,
-            size_t edgeCount,
-            size_t blockCount,
-            double assortativity = 0,
-            bool stubLabeled = true,
-            bool withSelfLoops = true,
-            bool withParallelEdges = true) : StochasticBlockModel(getPlantedBlocks(size, blockCount),
-                                                                  getPlantedLabelGraph(blockCount, edgeCount, assortativity),
-                                                                  stubLabeled,
-                                                                  withSelfLoops,
-                                                                  withParallelEdges),
-                                             m_assortativity(assortativity) {}
-        const double getAssortativity() const
-        {
-            return m_assortativity;
-        }
+    //     PlantedPartitionModel(
+    //         size_t size,
+    //         size_t edgeCount,
+    //         size_t blockCount,
+    //         double assortativity = 0,
+    //         bool stubLabeled = true,
+    //         bool withSelfLoops = true,
+    //         bool withParallelEdges = true) : StochasticBlockModel(getPlantedBlocks(size, blockCount),
+    //                                                               getPlantedLabelGraph(blockCount, edgeCount, assortativity),
+    //                                                               stubLabeled,
+    //                                                               withSelfLoops,
+    //                                                               withParallelEdges),
+    //                                          m_assortativity(assortativity) {}
+    //     const double getAssortativity() const
+    //     {
+    //         return m_assortativity;
+    //     }
 
-        const bool isCompatible(const MultiGraph &graph) const override
-        {
-            if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph))
-                return false;
-            auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
-            return labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix();
-        }
-    };
+    //     const bool isCompatible(const MultiGraph &graph) const override
+    //     {
+    //         if (not VertexLabeledRandomGraph<BlockIndex>::isCompatible(graph))
+    //             return false;
+    //         auto labelGraph = getLabelGraphFromGraph(graph, getLabels());
+    //         return labelGraph.getAdjacencyMatrix() == getLabelGraph().getAdjacencyMatrix();
+    //     }
+    // };
 
 } // end GraphInf
 #endif

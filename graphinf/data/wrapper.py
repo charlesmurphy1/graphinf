@@ -12,6 +12,7 @@ from graphinf.graph import ErdosRenyiModel as _ErdosRenyiModel
 from graphinf.graph import RandomGraphWrapper as _RandomGraphWrapper
 from graphinf.wrapper import Wrapper as _Wrapper
 from graphinf.utility import EdgeCollector
+from graphinf._graphinf.utility import MCMCSummary
 
 from .util import (
     mcmc_on_graph,
@@ -139,31 +140,35 @@ class DataModelWrapper(_Wrapper):
     def gibbs_sweep(
         self,
         n_sweeps: int = 4,
-        n_steps_per_vertex: int = 1,
+        n_graph_move: Optional[int] = None,
+        n_param_move: Optional[int] = None,
+        n_prior_move: Optional[int] = None,
         beta_likelihood: float = 1,
         beta_prior: float = 1,
-        sample_prior: bool = False,
-        sample_params: bool = False,
+        debug_frequency: int = 0,
         **kwargs,
     ):
-        n_success = 0
+        summary = MCMCSummary()
         for _ in range(n_sweeps):
-            n_success += self.wrap.metropolis_graph_sweep(
-                num_steps=n_steps_per_vertex * self.size(),
+            s1 = self.wrap.metropolis_graph_sweep(
+                num_steps=n_graph_move or self.size(),
                 beta_likelihood=beta_likelihood,
                 beta_prior=beta_prior,
+                debug_frequency=debug_frequency,
                 **kwargs,
             )
-            if self.prior.labeled and sample_prior:
-                _, _, m = self.prior.metropolis_sweep(**kwargs)
-                n_success += m
-            if sample_params:
-                n_success += self.wrap.metropolis_param_sweep(
-                    n_steps_per_vertex,
+            summary.join(s1)
+            if self.prior.labeled and n_prior_move > 0:
+                s2 = self.prior.metropolis_sweep(n_label_move=n_prior_move, **kwargs)
+                summary.join(s2)
+            if n_param_move > 0:
+                s3 = self.wrap.metropolis_param_sweep(
+                    num_steps=n_param_move,
                     beta_prior=beta_prior,
                     beta_likelihood=beta_likelihood,
                 )
-        return n_success
+                summary.join(s3)
+        return summary
 
     def posterior_entropy(
         self,

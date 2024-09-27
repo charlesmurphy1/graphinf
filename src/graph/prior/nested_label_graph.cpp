@@ -134,6 +134,7 @@ namespace GraphInf
 
     void NestedLabelGraphPrior::sampleState()
     {
+
         m_nestedState = std::vector<LabelGraph>(getDepth());
         for (Level l = getDepth() - 1; l >= 0; --l)
             m_nestedState[l] = sampleState(l);

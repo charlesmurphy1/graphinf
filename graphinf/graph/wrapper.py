@@ -26,7 +26,6 @@ __all__ = (
     "PoissonGraph",
     "NegativeBinomialGraph",
     "StochasticBlockModelFamily",
-    "PlantedPartitionGraph",
 )
 
 
@@ -249,36 +248,36 @@ class NegativeBinomialGraph(ConfigurationModel):
         super().__init__(nbinom_degreeseq(size, avgk, heterogeneity))
 
 
-class PlantedPartitionGraph(RandomGraphWrapper):
-    def __init__(
-        self,
-        size: int = 100,
-        edge_count: int = 250,
-        block_count: int = 3,
-        assortativity: float = 0.5,
-        stub_labeled: bool = False,
-        loopy: bool = True,
-        multigraph: bool = True,
-    ):
-        wrapped = _graph.PlantedPartitionModel(
-            size,
-            edge_count,
-            block_count=block_count,
-            assortativity=assortativity,
-            stub_labeled=stub_labeled,
-            with_self_loops=loopy,
-            with_parallel_edges=multigraph,
-        )
-        super().__init__(
-            wrapped,
-            size=size,
-            edge_count=edge_count,
-            block_count=block_count,
-            assortativity=assortativity,
-            stub_labeled=stub_labeled,
-            loopy=loopy,
-            multigraph=multigraph,
-        )
+# class PlantedPartitionGraph(RandomGraphWrapper):
+#     def __init__(
+#         self,
+#         size: int = 100,
+#         edge_count: int = 250,
+#         block_count: int = 3,
+#         assortativity: float = 0.5,
+#         stub_labeled: bool = False,
+#         loopy: bool = True,
+#         multigraph: bool = True,
+#     ):
+#         wrapped = _graph.PlantedPartitionModel(
+#             size,
+#             edge_count,
+#             block_count=block_count,
+#             assortativity=assortativity,
+#             stub_labeled=stub_labeled,
+#             with_self_loops=loopy,
+#             with_parallel_edges=multigraph,
+#         )
+#         super().__init__(
+#             wrapped,
+#             size=size,
+#             edge_count=edge_count,
+#             block_count=block_count,
+#             assortativity=assortativity,
+#             stub_labeled=stub_labeled,
+#             loopy=loopy,
+#             multigraph=multigraph,
+#         )
 
 
 class StochasticBlockModelFamily(RandomGraphWrapper):
@@ -379,11 +378,11 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
 
     def metropolis_sweep(
         self,
-        n_steps_per_vertex: int = 5,
+        n_label_move: Optional[int] = None,
         n_gibbs: int = 10,
     ):
         if self.params["block_proposer_type"] == "uniform":
-            n_steps = n_steps_per_vertex * self.size()
+            n_steps = n_label_move or self.size()
             begin_log_joint = self.log_joint()
             n_success = self.wrap.metropolis_sweep(n_steps)
             end_log_joint = self.log_joint()
@@ -394,7 +393,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
                 psingle=self.size(),
                 psplit=1,
                 pmergesplit=1,
-                niter=n_steps_per_vertex,
+                niter=n_label_move // self.size(),
                 d=self.params["sample_label_count_prob"],
                 c=self.params["shift"],
                 entropy_args=self.gt_entropy_args(),

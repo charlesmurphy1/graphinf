@@ -6,10 +6,9 @@
 
 #include "GraphInf/graph/proposer/python/proposer.hpp"
 
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/graph/proposer/proposer.hpp"
 
-#include "movetypes.h"
 #include "proposer.h"
 #include "sampler.h"
 #include "edge.h"
@@ -36,7 +35,6 @@ namespace GraphInf
 
     void initProposers(py::module &m)
     {
-        initMoveTypes(m);
         initProposerBaseClass(m);
 
         auto sampler = m.def_submodule("sampler");

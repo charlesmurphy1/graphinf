@@ -6,14 +6,18 @@
 #include "GraphInf/types.h"
 #include "GraphInf/rv.hpp"
 #include "GraphInf/exceptions.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/utility/maps.hpp"
-#include "GraphInf/utility/mcmc.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/graph/likelihood/likelihood.hpp"
+#include "GraphInf/graph/prior/edge_count.h"
 
-#include "GraphInf/graph/proposer/edge/edge_proposer.h"
+#include "GraphInf/graph/proposer/edge/hinge_flip.h"
+#include "GraphInf/graph/proposer/edge/double_edge_swap.h"
+#include "GraphInf/graph/proposer/edge/single_edge.h"
 #include "GraphInf/graph/proposer/label/base.hpp"
 #include "GraphInf/graph/proposer/nested_label/base.hpp"
+#include "GraphInf/graph/util.h"
 
 // #include "GraphInf/graph/util.h"
 
@@ -28,11 +32,23 @@ namespace GraphInf
 
     protected:
         GraphLikelihoodModel *m_likelihoodModelPtr = nullptr;
-        EdgeProposer *m_edgeProposerPtr = nullptr;
+        SingleEdgeProposer m_singleEdgeProposer;
+        HingeFlipUniformProposer m_hingeFlipProposer;
+        DoubleEdgeSwapProposer m_doubleEdgeSwapProposer;
+        EdgeCountPrior *m_edgeCountPriorPtr = nullptr;
+        std::string m_graphMoveType = "canonical";
+        mutable std::discrete_distribution<int> m_canonicalProposer = std::discrete_distribution<int>({1, 1, 1});
+        mutable std::discrete_distribution<int> m_microcanonicalProposer = std::discrete_distribution<int>({1, 1});
         bool m_withSelfLoops, m_withParallelEdges;
         size_t m_size;
         MultiGraph m_state;
         virtual void _applyGraphMove(const GraphMove &);
+        void _applyGraphMoveToProposers(const GraphMove &move)
+        {
+            m_singleEdgeProposer.applyGraphMove(move);
+            m_hingeFlipProposer.applyGraphMove(move);
+            m_doubleEdgeSwapProposer.applyGraphMove(move);
+        }
         virtual const double _getLogPrior() const { return 0; }
         virtual const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const { return 0; }
         virtual void sampleOnlyPrior() {};
@@ -41,22 +57,64 @@ namespace GraphInf
             m_likelihoodModelPtr->m_statePtr = &m_state;
         }
         virtual void setUp();
-        virtual void computeConsistentState() {}
+        virtual void computeConsistentState()
+        {
+            m_edgeCountPriorPtr->setState(m_state.getTotalEdgeNumber());
+        }
+
+        GraphMove proposeCanonicalMove() const
+        {
+            auto s = m_canonicalProposer(rng);
+            if (s == 2 && getEdgeCount() > 2)
+                return m_doubleEdgeSwapProposer.proposeMove();
+            if (s == 1 && getEdgeCount() > 1)
+                return m_hingeFlipProposer.proposeMove();
+            return m_singleEdgeProposer.proposeMove();
+        }
+
+        GraphMove proposeMicrocanonicalMove() const
+        {
+            auto s = m_microcanonicalProposer(rng);
+            if (s == 1 && getEdgeCount() > 2)
+                return m_doubleEdgeSwapProposer.proposeMove();
+            if (getEdgeCount() > 1)
+                return m_hingeFlipProposer.proposeMove();
+            throw std::runtime_error("RandomGraph: cannot propose microcanonical move with less than 1 edges.");
+        }
 
     public:
-        RandomGraph(size_t size, bool withSelfLoops = true, bool withParallelEdges = true) : m_size(size), m_state(size),
-                                                                                             m_withSelfLoops(withSelfLoops),
-                                                                                             m_withParallelEdges(withParallelEdges) {}
+        RandomGraph(size_t size, double edgeCount, bool canonical = false, bool withSelfLoops = true, bool withParallelEdges = true) : m_size(size), m_state(size),
+                                                                                                                                       m_withSelfLoops(withSelfLoops),
+                                                                                                                                       m_withParallelEdges(withParallelEdges),
+                                                                                                                                       m_singleEdgeProposer(size, 0.5, withSelfLoops, withParallelEdges),
+                                                                                                                                       m_hingeFlipProposer(withSelfLoops, withParallelEdges),
+                                                                                                                                       m_doubleEdgeSwapProposer(withSelfLoops, withParallelEdges)
+        {
+
+            setUpEdgeCountPrior(edgeCount, canonical);
+        }
 
         RandomGraph(
             size_t size,
+            double edgeCount,
             GraphLikelihoodModel &likelihoodModel,
+            bool canonical = false,
             bool withSelfLoops = true,
             bool withParallelEdges = true) : m_size(size), m_state(size),
                                              m_likelihoodModelPtr(&likelihoodModel),
                                              m_withSelfLoops(withSelfLoops),
-                                             m_withParallelEdges(withParallelEdges) {}
-        virtual ~RandomGraph() {}
+                                             m_withParallelEdges(withParallelEdges),
+                                             m_singleEdgeProposer(size, 0.5, withSelfLoops, withParallelEdges),
+                                             m_hingeFlipProposer(withSelfLoops, withParallelEdges),
+                                             m_doubleEdgeSwapProposer(withSelfLoops, withParallelEdges)
+        {
+
+            setUpEdgeCountPrior(edgeCount, canonical);
+        }
+
+        virtual ~RandomGraph()
+        {
+        }
 
         const MultiGraph &getState() const { return m_state; }
 
@@ -71,7 +129,7 @@ namespace GraphInf
         }
         const size_t getSize() const { return m_size; }
         void setSize(const size_t size) { m_size = size; }
-        virtual const size_t getEdgeCount() const = 0;
+        const size_t getEdgeCount() const { return m_edgeCountPriorPtr->getState(); };
         const double getAverageDegree() const
         {
             double avgDegree = 2 * (double)getEdgeCount();
@@ -82,24 +140,51 @@ namespace GraphInf
         const bool withSelfLoops(bool condition) { return m_withSelfLoops = condition; }
         const bool withParallelEdges() const { return m_withParallelEdges; }
         const bool withParallelEdges(bool condition) { return m_withParallelEdges = condition; }
+        void setGraphMoveType(std::string moveType)
+        {
+            std::vector<std::string> validMoveTypes = {"canonical", "microcanonical", "single_edge", "hinge_flip", "double_edge_swap"};
+            if (std::find(validMoveTypes.begin(), validMoveTypes.end(), moveType) == validMoveTypes.end())
+                throw std::invalid_argument("RandomGraph: invalid move type " + moveType + ".");
+            m_graphMoveType = moveType;
+        }
+        std::string getGraphMoveType() const { return m_graphMoveType; }
 
-        void setEdgeProposer(EdgeProposer &proposer)
+        SingleEdgeProposer &getSingleEdgeProposer()
         {
-            proposer.isRoot(false);
-            m_edgeProposerPtr = &proposer;
-            m_edgeProposerPtr->setUpWithPrior(*this);
+            return m_singleEdgeProposer;
         }
-        const EdgeProposer &getEdgeProposer()
+
+        HingeFlipUniformProposer &getHingeFlipProposer()
         {
-            return *m_edgeProposerPtr;
+            return m_hingeFlipProposer;
         }
-        EdgeProposer &getEdgeProposerRef()
+
+        DoubleEdgeSwapProposer &getDoubleEdgeSwapProposer()
         {
-            return *m_edgeProposerPtr;
+            return m_doubleEdgeSwapProposer;
+        }
+        const EdgeCountPrior &getEdgeCountPrior() const
+        {
+            return *m_edgeCountPriorPtr;
+        }
+        void setUpEdgeCountPrior(double edgeCount, bool canonical)
+        {
+            if (canonical)
+            {
+                m_edgeCountPriorPtr = new EdgeCountPoissonPrior(edgeCount);
+                setGraphMoveType("canonical");
+            }
+            else
+            {
+                m_edgeCountPriorPtr = new EdgeCountDeltaPrior(edgeCount);
+                setGraphMoveType("microcanonical");
+            }
+            m_edgeCountPriorPtr->isRoot(false);
         }
 
         void sample()
         {
+
             try
             {
                 processRecursiveFunction([&]()
@@ -121,6 +206,8 @@ namespace GraphInf
         }
         void sampleState()
         {
+
+            auto g = m_likelihoodModelPtr->sample();
             setState(m_likelihoodModelPtr->sample());
             computationFinished();
         }
@@ -132,20 +219,10 @@ namespace GraphInf
             computeConsistentState(); });
         }
 
-        virtual const MCMCSummary metropolisStep(double betaPrior = 1, double betaLikelihood = 1)
+        virtual const MCMCSummary metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1)
         {
-            return {"none", 1, true};
-        }
-        const int metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1)
-        {
-            int numSuccesses = 0;
-            for (size_t i = 0; i < numSteps; i++)
-            {
-                auto summary = metropolisStep(betaPrior, betaLikelihood);
-                if (summary.isAccepted)
-                    numSuccesses += 1;
-            }
-            return numSuccesses;
+            MCMCSummary summary;
+            return summary;
         }
 
         const double getLogLikelihood() const
@@ -179,6 +256,7 @@ namespace GraphInf
 
         void applyGraphMove(const GraphMove &move);
         const GraphMove proposeGraphMove() const;
+        bool isTrivialGraphMove(const GraphMove &move) const { return m_singleEdgeProposer.isTrivialMove(move); }
 
         virtual const bool isCompatible(const MultiGraph &graph) const { return graph.getSize() == m_size; }
         virtual bool isSafe() const override { return m_likelihoodModelPtr and m_likelihoodModelPtr->isSafe(); }
@@ -186,12 +264,13 @@ namespace GraphInf
         {
             if (m_likelihoodModelPtr == nullptr)
                 throw SafetyError("RandomGraph", "m_likelihoodModelPtr");
-            if (m_edgeProposerPtr == nullptr)
-                throw SafetyError("RandomGraph", "m_edgeProposerPtr");
         }
         virtual void checkSelfConsistency() const override
         {
             m_likelihoodModelPtr->checkConsistency();
+            m_singleEdgeProposer.checkConsistency();
+            m_hingeFlipProposer.checkConsistency();
+            m_doubleEdgeSwapProposer.checkConsistency();
         }
 
         virtual bool isValidGraphMove(const GraphMove &move) const { return true; }
@@ -207,15 +286,18 @@ namespace GraphInf
         VertexLabeledGraphLikelihoodModel<Label> *m_vertexLabeledlikelihoodModelPtr = nullptr;
         std::uniform_real_distribution<double> m_uniform;
 
-        using RandomGraph::m_edgeProposerPtr;
         virtual void setUp() override;
 
     public:
-        VertexLabeledRandomGraph(size_t size, bool withSelfLoops = true, bool withParallelEdges = true) : RandomGraph(size, withSelfLoops, withParallelEdges), m_uniform(0, 1) {}
+        VertexLabeledRandomGraph(size_t size, double edgeCount, bool canonical = false, bool withSelfLoops = true, bool withParallelEdges = true) : RandomGraph(size, edgeCount, canonical, withSelfLoops, withParallelEdges), m_uniform(0, 1)
+        {
+        }
         VertexLabeledRandomGraph(
-            size_t size, VertexLabeledGraphLikelihoodModel<Label> &likelihoodModel,
-            bool withSelfLoops = true, bool withParallelEdges = true) : RandomGraph(size, likelihoodModel, withSelfLoops, withParallelEdges), m_uniform(0, 1),
-                                                                        m_vertexLabeledlikelihoodModelPtr(&likelihoodModel) {}
+            size_t size, double edgeCount, VertexLabeledGraphLikelihoodModel<Label> &likelihoodModel, bool canonical = false,
+            bool withSelfLoops = true, bool withParallelEdges = true) : RandomGraph(size, edgeCount, likelihoodModel, canonical, withSelfLoops, withParallelEdges), m_uniform(0, 1),
+                                                                        m_vertexLabeledlikelihoodModelPtr(&likelihoodModel)
+        {
+        }
         virtual ~VertexLabeledRandomGraph() {}
         virtual const std::vector<Label> &getLabels() const = 0;
         virtual const size_t getLabelCount() const = 0;
@@ -259,29 +341,45 @@ namespace GraphInf
             return getLogPriorRatioFromLabelMove(move) + getLogLikelihoodRatioFromLabelMove(move);
         }
         const double getLogProposalRatioFromLabelMove(const LabelMove<Label> &move) const;
-        const double getLogAcceptanceProbFromLabelMove(const LabelMove<Label> move, double betaPrior = 1, double betaLikelihood = 1) const
-        {
-            double logLikelihoodRatio = (betaLikelihood == 0) ? 0 : betaLikelihood * getLogLikelihoodRatioFromLabelMove(move);
-            double logPriorRatio = (betaPrior == 0) ? 0 : betaPrior * getLogPriorRatioFromLabelMove(move);
-            double logProposalRatio = getLogProposalRatioFromLabelMove(move);
-            if (logLikelihoodRatio == -INFINITY or logPriorRatio == -INFINITY)
-                return -INFINITY;
-            double logJointRatio = logLikelihoodRatio + logPriorRatio;
-            return logProposalRatio + logJointRatio;
-        }
-        const MCMCSummary metropolisStep(double m_betaPrior = 1, double m_betaLikelihood = 1) override
+
+        const StepResult<LabelMove<Label>> metropolisStep(double m_betaPrior = 1, double m_betaLikelihood = 1)
         {
             const auto move = proposeLabelMove();
             if (m_labelProposerPtr->isTrivialMove(move))
-                return {"LabelMove(trivial)", 1., true};
-            double acceptProb = exp(getLogAcceptanceProbFromLabelMove(move));
-            bool isAccepted = false;
+                return {move, 0, true};
+
+            // Log likelihood ratio
+            double logLikelihoodRatio = 0;
+            if (m_betaLikelihood > 0)
+                logLikelihoodRatio = m_betaLikelihood * getLogLikelihoodRatioFromLabelMove(move);
+
+            // Log prior ratio
+            double logPriorRatio = 0;
+            if (m_betaPrior > 0)
+                logPriorRatio = m_betaPrior * getLogPriorRatioFromLabelMove(move);
+
+            // Log proposal ratio
+            double logProposalRatio = getLogProposalRatioFromLabelMove(move);
+
+            // Acceptance probability
+            double acceptProb = exp(logLikelihoodRatio + logPriorRatio + logProposalRatio);
+
+            // Metropolis-Hastings step
+            bool accepted = false;
             if (m_uniform(rng) < acceptProb)
             {
-                isAccepted = true;
                 applyLabelMove(move);
+                accepted = true;
             }
-            return {move.display(), acceptProb, isAccepted};
+            return {move, logLikelihoodRatio + logPriorRatio + logProposalRatio, accepted};
+        }
+
+        const MCMCSummary metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1) override
+        {
+            MCMCSummary summary;
+            for (size_t i = 0; i < numSteps; i++)
+                summary.update(metropolisStep(betaPrior, betaLikelihood));
+            return summary;
         }
 
         void applyLabelMove(const LabelMove<Label> &move);
@@ -295,7 +393,8 @@ namespace GraphInf
         }
         virtual void checkSelfConsistency() const override
         {
-            m_edgeProposerPtr->checkConsistency();
+            RandomGraph::checkSelfConsistency();
+            m_labelProposerPtr->checkConsistency();
         }
         virtual void reduceLabels() {}
     };
@@ -308,7 +407,6 @@ namespace GraphInf
     protected:
         NestedLabelProposer<Label> *m_nestedLabelProposerPtr = nullptr;
         using VertexLabeledRandomGraph<Label>::m_state;
-        using VertexLabeledRandomGraph<Label>::m_edgeProposerPtr;
         using VertexLabeledRandomGraph<Label>::m_labelProposerPtr;
         virtual void setUp() override;
 
@@ -368,7 +466,7 @@ namespace GraphInf
     template <typename Label>
     void VertexLabeledRandomGraph<Label>::setUp()
     {
-        m_edgeProposerPtr->setUpWithPrior(*this);
+        RandomGraph::setUp();
         m_labelProposerPtr->setUpWithPrior(*this);
     }
 
@@ -398,7 +496,7 @@ namespace GraphInf
     template <typename Label>
     void NestedVertexLabeledRandomGraph<Label>::setUp()
     {
-        m_edgeProposerPtr->setUpWithPrior(*this);
+        VertexLabeledRandomGraph<Label>::setUp();
         m_nestedLabelProposerPtr->setUpWithNestedPrior(*this);
     }
 

@@ -7,7 +7,7 @@
 #include "GraphInf/graph/proposer/python/sampler.hpp"
 
 #include "BaseGraph/types.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/graph/proposer/sampler/vertex_sampler.h"
 #include "GraphInf/graph/proposer/sampler/edge_sampler.h"
 #include "GraphInf/graph/proposer/sampler/label_sampler.h"

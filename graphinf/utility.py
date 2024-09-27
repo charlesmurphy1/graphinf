@@ -237,6 +237,10 @@ class EdgeCollector:
         return graph
 
 
+def load_edgelist(edge_list: list[tuple[int, int, int]]) -> core.UndirectedMultigraph:
+    pass
+
+
 def load_graph(path: str):
     data = pd.read_pickle(path)
     edgelist = data["edgelist"]

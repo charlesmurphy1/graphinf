@@ -19,6 +19,7 @@ namespace GraphInf
     {
     public:
         const int NUM_VERTICES = 7;
+        const int NUM_EDGES = 10;
         const int LENGTH = 20;
         const int PAST_LENGTH = GetParam();
         const int NUM_STATES = 3;
@@ -28,7 +29,7 @@ namespace GraphInf
             {3, 1, 0}, {1, 2, 0}, {4, 1, 0}, {3, 1, 1}, {1, 1, 0}, {0, 1, 0}, {0, 0, 0}};
         const GraphMove GRAPH_MOVE = {{{0, 2}}, {{0, 5}}};
         MultiGraph GRAPH = getUndirectedHouseMultiGraph();
-        DummyRandomGraph randomGraph = DummyRandomGraph(NUM_VERTICES);
+        DummyRandomGraph randomGraph = DummyRandomGraph(NUM_VERTICES, NUM_EDGES);
         DummyDynamics dynamics = DummyDynamics(randomGraph, NUM_STATES, LENGTH);
         MultiGraph graph = GRAPH;
         State state = STATE;

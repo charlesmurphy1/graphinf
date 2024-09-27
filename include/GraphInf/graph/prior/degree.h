@@ -5,7 +5,7 @@
 #include "GraphInf/types.h"
 #include "prior.hpp"
 #include "edge_count.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/utility/maps.hpp"
 
 namespace GraphInf
@@ -130,12 +130,12 @@ namespace GraphInf
             m_degreeSeq = degrees;
             DegreePrior::setState(degrees);
         }
-        void sampleState() override{};
+        void sampleState() override {};
 
         const double getLogLikelihood() const override { return 0.; }
 
         const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override;
-        void checkSelfConsistency() const override{};
+        void checkSelfConsistency() const override {};
         void checkSelfSafety() const override
         {
             if (m_degreeSeq.size() == 0)

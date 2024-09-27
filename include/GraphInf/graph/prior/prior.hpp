@@ -4,7 +4,7 @@
 #include <functional>
 #include "GraphInf/types.h"
 #include "GraphInf/rv.hpp"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 
 namespace GraphInf
 {

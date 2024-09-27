@@ -5,7 +5,7 @@
 #include "../fixtures.hpp"
 #include "GraphInf/graph/prior/block_count.h"
 #include "GraphInf/graph/prior/nested_block.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"

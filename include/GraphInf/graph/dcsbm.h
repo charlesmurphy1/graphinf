@@ -15,8 +15,6 @@
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"
-#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
-#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -56,12 +54,7 @@ namespace GraphInf
             m_likelihoodModel.m_degreePriorPtrPtr = &m_degreePriorPtr;
         }
 
-        DegreeCorrectedStochasticBlockModelBase(size_t graphSize) : VertexLabeledRandomGraph<BlockIndex>(graphSize, m_likelihoodModel, true, true) {}
-        DegreeCorrectedStochasticBlockModelBase(size_t graphSize, VertexLabeledDegreePrior &degreePrior) : VertexLabeledRandomGraph<BlockIndex>(graphSize, m_likelihoodModel, true, true)
-        {
-            setDegreePrior(degreePrior);
-            m_degreePriorPtr->isRoot(false);
-        }
+        DegreeCorrectedStochasticBlockModelBase(size_t size, double edgeCount, bool canonical = false) : VertexLabeledRandomGraph<BlockIndex>(size, edgeCount, m_likelihoodModel, canonical, true, true) {}
 
         void computeConsistentState() override
         {
@@ -116,10 +109,6 @@ namespace GraphInf
         {
             return m_degreePriorPtr->getLabelGraphPrior().getState();
         }
-        const size_t getEdgeCount() const override
-        {
-            return m_degreePriorPtr->getLabelGraphPrior().getEdgeCount();
-        }
         const size_t getDegree(const BaseGraph::VertexIndex vertex) const { return getDegreePrior().getDegree(vertex); }
         const std::vector<size_t> getDegrees() const { return getDegreePrior().getState(); }
         const double getLabelLogJoint() const override
@@ -169,9 +158,7 @@ namespace GraphInf
         std::unique_ptr<LabelGraphPrior> m_labelGraphPriorUPtr;
 
         std::unique_ptr<BlockPrior> m_blockPriorUPtr;
-        std::unique_ptr<EdgeCountPrior> m_edgeCountPriorUPtr;
         std::unique_ptr<VertexLabeledDegreePrior> m_degreePriorUPtr;
-        std::unique_ptr<EdgeProposer> m_edgeProposerUPtr;
         std::unique_ptr<LabelProposer<BlockIndex>> m_labelProposerUPtr;
 
     public:
@@ -186,7 +173,7 @@ namespace GraphInf
             std::string blockProposerType = "uniform",
             double sampleLabelCountProb = 0.1,
             double labelCreationProb = 0.5,
-            double shift = 1) : DegreeCorrectedStochasticBlockModelBase(size)
+            double shift = 1) : DegreeCorrectedStochasticBlockModelBase(size, edgeCount, canonical)
         {
             if (blockCount == 0)
                 m_blockCountPriorUPtr = std::unique_ptr<BlockCountPrior>(new BlockCountUniformPrior(1, size - 1));
@@ -195,17 +182,10 @@ namespace GraphInf
                 m_blockCountPriorUPtr = std::unique_ptr<BlockCountPrior>(new BlockCountDeltaPrior(blockCount));
                 sampleLabelCountProb = 0;
             }
-            m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
             m_blockPriorUPtr = std::unique_ptr<BlockPrior>(makeBlockPrior(size, *m_blockCountPriorUPtr, useBlockHyperPrior));
-            m_labelGraphPriorUPtr = std::unique_ptr<LabelGraphPrior>(makeLabelGraphPrior(*m_edgeCountPriorUPtr, *m_blockPriorUPtr, usePlantedPrior));
+            m_labelGraphPriorUPtr = std::unique_ptr<LabelGraphPrior>(makeLabelGraphPrior(*m_edgeCountPriorPtr, *m_blockPriorUPtr, usePlantedPrior));
             m_degreePriorUPtr = std::unique_ptr<VertexLabeledDegreePrior>(makeVertexLabeledDegreePrior(*m_labelGraphPriorUPtr, useDegreeHyperPrior));
             setDegreePrior(*m_degreePriorUPtr);
-
-            if (canonical)
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
-            else
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
-            setEdgeProposer(*m_edgeProposerUPtr);
 
             m_labelProposerUPtr = std::unique_ptr<LabelProposer<BlockIndex>>(
                 makeBlockProposer(blockProposerType, useBlockHyperPrior, sampleLabelCountProb, labelCreationProb, shift));

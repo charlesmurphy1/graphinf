@@ -24,33 +24,33 @@ namespace GraphInf
             .def("label_graph_prior", &StochasticBlockModelBase::getLabelGraphPrior, py::return_value_policy::reference_internal)
             .def("set_label_graph_prior", &StochasticBlockModelBase::setLabelGraphPrior, py::arg("prior"));
 
-        py::class_<StochasticBlockModel, StochasticBlockModelBase>(m, "StochasticBlockModel")
-            .def(
-                py::init<const std::vector<BlockIndex>, const LabelGraph &, bool, bool, bool>(),
-                py::arg("blocks"),
-                py::arg("label_graph"),
-                py::arg("stub_labeled") = true,
-                py::arg("with_self_loops") = true,
-                py::arg("with_parallel_edges") = true);
+        // py::class_<StochasticBlockModel, StochasticBlockModelBase>(m, "StochasticBlockModel")
+        //     .def(
+        //         py::init<const std::vector<BlockIndex>, const LabelGraph &, bool, bool, bool>(),
+        //         py::arg("blocks"),
+        //         py::arg("label_graph"),
+        //         py::arg("stub_labeled") = true,
+        //         py::arg("with_self_loops") = true,
+        //         py::arg("with_parallel_edges") = true);
 
-        py::class_<PlantedPartitionModel, StochasticBlockModel>(m, "PlantedPartitionModel")
-            .def(
-                py::init<const std::vector<size_t>, size_t, double, bool, bool, bool>(),
-                py::arg("sizes"),
-                py::arg("edge_count"),
-                py::arg("assortativity") = 0,
-                py::arg("stub_labeled") = true,
-                py::arg("with_self_loops") = true,
-                py::arg("with_parallel_edges") = true)
-            .def(
-                py::init<size_t, size_t, size_t, double, bool, bool, bool>(),
-                py::arg("size"),
-                py::arg("edge_count"),
-                py::arg("block_count"),
-                py::arg("assortativity") = 0,
-                py::arg("stub_labeled") = true,
-                py::arg("with_self_loops") = true,
-                py::arg("with_parallel_edges") = true);
+        // py::class_<PlantedPartitionModel, StochasticBlockModel>(m, "PlantedPartitionModel")
+        //     .def(
+        //         py::init<const std::vector<size_t>, size_t, double, bool, bool, bool>(),
+        //         py::arg("sizes"),
+        //         py::arg("edge_count"),
+        //         py::arg("assortativity") = 0,
+        //         py::arg("stub_labeled") = true,
+        //         py::arg("with_self_loops") = true,
+        //         py::arg("with_parallel_edges") = true)
+        //     .def(
+        //         py::init<size_t, size_t, size_t, double, bool, bool, bool>(),
+        //         py::arg("size"),
+        //         py::arg("edge_count"),
+        //         py::arg("block_count"),
+        //         py::arg("assortativity") = 0,
+        //         py::arg("stub_labeled") = true,
+        //         py::arg("with_self_loops") = true,
+        //         py::arg("with_parallel_edges") = true);
 
         py::class_<StochasticBlockModelFamily, StochasticBlockModelBase>(m, "StochasticBlockModelFamily")
             .def(

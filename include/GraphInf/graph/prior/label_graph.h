@@ -4,7 +4,7 @@
 #include "prior.hpp"
 #include "edge_count.h"
 #include "block.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/types.h"
 #include "GraphInf/exceptions.h"
 #include "GraphInf/utility/functions.h"
@@ -198,14 +198,14 @@ namespace GraphInf
             this->setState(other.getState());
             return *this;
         }
-        void sampleState() override{};
+        void sampleState() override {};
 
         const double getLogLikelihood() const override { return 0.; }
 
         const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const override;
         const double getLogLikelihoodRatioFromLabelMove(const BlockMove &move) const override;
 
-        void checkSelfConsistency() const override{};
+        void checkSelfConsistency() const override {};
         void checkSelfSafety() const override
         {
             if (m_labelGraph.getSize() == 0)

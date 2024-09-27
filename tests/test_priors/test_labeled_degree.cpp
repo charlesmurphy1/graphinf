@@ -7,7 +7,7 @@
 #include "GraphInf/graph/prior/block.h"
 #include "GraphInf/graph/prior/label_graph.h"
 #include "GraphInf/graph/prior/labeled_degree.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"
@@ -28,7 +28,7 @@ namespace GraphInf
     class DummyVertexLabeledDegreePrior : public VertexLabeledDegreePrior
     {
     public:
-        DummyVertexLabeledDegreePrior(LabelGraphPrior &labelGraphPrior) : VertexLabeledDegreePrior(labelGraphPrior){};
+        DummyVertexLabeledDegreePrior(LabelGraphPrior &labelGraphPrior) : VertexLabeledDegreePrior(labelGraphPrior) {};
 
         void sampleState() override
         {

@@ -36,10 +36,4 @@ namespace GraphInf
         throw std::runtime_error("EdgeProposer: Could not find edge to propose.");
     }
 
-    void EdgeProposer::setUpWithPrior(const RandomGraph &prior)
-    {
-        clear();
-        setUpWithGraph(prior.getState());
-    }
-
 }

@@ -6,14 +6,12 @@
 
 #include "GraphInf/graph/proposer/python/edge_proposer.hpp"
 
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/graph/proposer/proposer.hpp"
 #include "GraphInf/graph/proposer/edge/edge_proposer.h"
 #include "GraphInf/graph/proposer/edge/double_edge_swap.h"
 #include "GraphInf/graph/proposer/edge/hinge_flip.h"
 #include "GraphInf/graph/proposer/edge/single_edge.h"
-#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
-#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace py = pybind11;
 namespace GraphInf
@@ -24,7 +22,6 @@ namespace GraphInf
         py::class_<EdgeProposer, Proposer<GraphMove>, PyEdgeProposer<>>(m, "EdgeProposer")
             .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true)
             .def("set_up_with_graph", &EdgeProposer::setUpWithGraph, py::arg("graph"))
-            .def("set_up_with_prior", &EdgeProposer::setUpWithPrior, py::arg("graph"))
             .def("allow_self_loops", &EdgeProposer::allowSelfLoops)
             .def("allow_multiedges", &EdgeProposer::allowMultiEdges)
             .def("get_log_proposal_ratio", &EdgeProposer::getLogProposalProbRatio, py::arg("move"))
@@ -44,25 +41,39 @@ namespace GraphInf
         py::class_<HingeFlipUniformProposer, HingeFlipProposer>(m, "HingeFlipUniformProposer")
             .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true);
 
-        py::class_<HingeFlipDegreeProposer, HingeFlipProposer>(m, "HingeFlipDegreeProposer")
-            .def(py::init<bool, bool, double>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true, py::arg("shift") = 1);
+        // py::class_<HingeFlipDegreeProposer, HingeFlipProposer>(m, "HingeFlipDegreeProposer")
+        //     .def(py::init<bool, bool, double>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true, py::arg("shift") = 1);
 
         /* Single edge proposers */
-        py::class_<SingleEdgeProposer, EdgeProposer, PySingleEdgeProposer<>>(m, "SingleEdgeProposer")
-            .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true)
-            .def("set_vertex_sampler", &SingleEdgeProposer::setVertexSampler, py::arg("vertex_sampler"));
+        py::class_<SingleEdgeProposer, EdgeProposer>(m, "SingleEdgeProposer")
+            .def(py::init<std::map<BaseGraph::Edge, double>, double, bool, bool>(), py::arg("weights"), py::arg("sample_new_edge_prob") = 0.5, py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true)
+            .def(py::init<std::vector<std::vector<double>>, double, bool, bool>(), py::arg("weights"), py::arg("sample_new_edge_prob") = 0.5, py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true)
+            .def(py::init<size_t, double, bool, bool>(), py::arg("size"), py::arg("sample_new_edge_prob") = 0.5, py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true)
+            .def("get_edge_sampler", &SingleEdgeProposer::getEdgeSampler)
+            .def("set_default_weights", &SingleEdgeProposer::setDefaultWeights, py::arg("size"))
+            .def("set_weights", py::overload_cast<std::map<BaseGraph::Edge, double>>(&SingleEdgeProposer::setWeights), py::arg("weights"))
+            .def("set_weights", py::overload_cast<std::vector<std::vector<double>>>(&SingleEdgeProposer::setWeights), py::arg("weights"))
+            .def("update_weight", &SingleEdgeProposer::updateWeight, py::arg("edge"), py::arg("weight"));
+        // py::class_<SingleEdgeProposer, EdgeProposer, PySingleEdgeProposer<>>(m, "SingleEdgeProposer")
+        //     .def(py::init<bool, bool, double, double, double>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true, py::arg("bias") = 1.0, py::arg("min_add_edge_prob") = 0.1, py::arg("add_edge_prob") = -1)
+        //     .def("set_vertex_sampler", &SingleEdgeProposer::setVertexSampler, py::arg("vertex_sampler"))
+        //     .def("bias", &SingleEdgeProposer::getBias)
+        //     .def("set_bias", &SingleEdgeProposer::setBias, py::arg("bias"))
+        //     .def("add_edge_prob", &SingleEdgeProposer::getAddEdgeProb)
+        //     .def("set_add_edge_prob", &SingleEdgeProposer::setAddEdgeProb, py::arg("add_edge_prob"));
 
-        py::class_<SingleEdgeUniformProposer, SingleEdgeProposer>(m, "SingleEdgeUniformProposer")
-            .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true);
+        // py::class_<SingleEdgeUniformProposer, SingleEdgeProposer>(m, "SingleEdgeUniformProposer")
+        //     .def(py::init<bool, bool, double>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true, py::arg("bias") = 1.0);
 
-        py::class_<SingleEdgeDegreeProposer, SingleEdgeProposer>(m, "SingleEdgeDegreeProposer")
-            .def(py::init<bool, bool, double>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true, py::arg("shift") = 1);
+        // py::class_<SingleEdgeDegreeProposer, SingleEdgeProposer>(m, "SingleEdgeDegreeProposer")
+        //     .def(py::init<bool, bool, double, double>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true, py::arg("bias") = 1.0, py::arg("shift") = 1);
 
-        py::class_<EdgeCountPreservingProposer, EdgeProposer>(m, "EdgeCountPreservingProposer")
-            .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true);
+        // py::class_<EdgeCountPreservingProposer, EdgeProposer>(m, "EdgeCountPreservingProposer")
+        //     .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true);
 
-        py::class_<NonPreservingProposer, EdgeProposer>(m, "NonPreservingProposer")
-            .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true);
+        // py::class_<NonPreservingProposer, EdgeProposer>(m, "NonPreservingProposer")
+        //     .def(py::init<bool, bool>(), py::arg("allow_self_loops") = true, py::arg("allow_multiedges") = true)
+        //     .def("set_single_edge_bias", &NonPreservingProposer::setSingleEdgeBias, py::arg("bias"));
 
         // /* Labeled edge proposers */
         // py::class_<LabeledEdgeProposer, EdgeProposer, PyLabeledEdgeProposer<>>(m, "LabeledEdgeProposer")

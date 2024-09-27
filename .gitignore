@@ -4,6 +4,7 @@ _skbuild/
 tmp/
 .ccls-cache/
 build/
+cpp_build/
 .cache/
 cmake-build-debug
 .idea

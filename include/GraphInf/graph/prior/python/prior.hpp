@@ -7,7 +7,7 @@
 #include "GraphInf/types.h"
 #include "GraphInf/python/rv.hpp"
 #include "GraphInf/graph/prior/prior.hpp"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 
 namespace GraphInf
 {

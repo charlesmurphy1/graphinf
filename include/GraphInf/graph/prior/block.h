@@ -7,7 +7,7 @@
 
 #include "prior.hpp"
 #include "block_count.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/types.h"
 #include "GraphInf/utility/maps.hpp"
 #include "GraphInf/utility/functions.h"
@@ -25,7 +25,7 @@ namespace GraphInf
         const double _getLogPrior() const override { return m_blockCountPriorPtr->getLogJoint(); };
         void _samplePriors() override { m_blockCountPriorPtr->sample(); }
 
-        void _applyGraphMove(const GraphMove &) override{};
+        void _applyGraphMove(const GraphMove &) override {};
         virtual void _applyLabelMove(const BlockMove &move) override
         {
             m_blockCountPriorPtr->setState(m_blockCountPriorPtr->getState() + move.addedLabels);

@@ -114,6 +114,7 @@ TEST_P(HSBMParametrizedTest, applyGraphMove_forAddedEdge)
     BaseGraph::Edge addedEdge = {0, 2};
     size_t addedEdgeMultBefore = randomGraph.getState().getEdgeMultiplicity(addedEdge.first, addedEdge.second);
     GraphInf::GraphMove move = {{}, {addedEdge}};
+
     randomGraph.applyGraphMove(move);
     size_t addedEdgeMultAfter = randomGraph.getState().getEdgeMultiplicity(addedEdge.first, addedEdge.second);
     EXPECT_EQ(addedEdgeMultAfter - 1, addedEdgeMultBefore);

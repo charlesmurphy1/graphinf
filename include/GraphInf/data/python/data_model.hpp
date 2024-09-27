@@ -5,6 +5,7 @@
 #include <pybind11/stl.h>
 
 #include "GraphInf/python/rv.hpp"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/data/data_model.h"
 #include "GraphInf/data/dynamics/dynamics.h"
 #include "GraphInf/data/dynamics/binary_dynamics.h"
@@ -36,9 +37,8 @@ namespace GraphInf
         }
         /* Abstract methods */
         void computeConsistentState() override { PYBIND11_OVERRIDE(void, BaseClass, computeConsistentState, ); }
-        const MCMCSummary metropolisGraphStep(const double b = 1, const double c = 1) override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisGraphStep, b, c); }
-        const MCMCSummary metropolisPriorStep() override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisPriorStep, ); }
-        const MCMCSummary metropolisParamStep(const double b = 1, const double c = 1) override { PYBIND11_OVERRIDE(const MCMCSummary, BaseClass, metropolisParamStep, b, c); }
+        const StepResult<GraphMove> metropolisGraphStep(const double b = 1, const double c = 1, bool d = false) override { PYBIND11_OVERRIDE(const StepResult<GraphMove>, BaseClass, metropolisGraphStep, b, c, d); }
+        const StepResult<ParamMove> metropolisParamStep(const double b = 1, const double c = 1) override { PYBIND11_OVERRIDE(const StepResult<ParamMove>, BaseClass, metropolisParamStep, b, c); }
         void applyParamMove(const ParamMove &move) override { PYBIND11_OVERRIDE(void, BaseClass, applyParamMove, move); }
         bool isValidParamMove(const ParamMove &move) const override { PYBIND11_OVERRIDE(bool, BaseClass, isValidParamMove, move); }
 

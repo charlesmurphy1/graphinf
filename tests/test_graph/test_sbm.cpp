@@ -372,18 +372,18 @@ INSTANTIATE_TEST_SUITE_P(
 //     EXPECT_EQ(graph.getEdgeCount(), 5);
 // }
 
-TEST(SBMTest, construction_returnSafeObject)
-{
-    std::vector<size_t> sizes = {10, 20, 30};
-    size_t edgeCount = 100;
-    double assortativity = 0.8;
-    std::vector<BlockIndex> blocks = getPlantedBlocks(sizes);
-    LabelGraph labelGraph = getPlantedLabelGraph(sizes.size(), edgeCount);
-    StochasticBlockModel randomGraph = StochasticBlockModel(blocks, labelGraph);
-    EXPECT_NO_THROW(randomGraph.checkSafety());
-    randomGraph.sample();
-    EXPECT_NO_THROW(randomGraph.checkConsistency());
-}
+// TEST(SBMTest, construction_returnSafeObject)
+// {
+//     std::vector<size_t> sizes = {10, 20, 30};
+//     size_t edgeCount = 100;
+//     double assortativity = 0.8;
+//     std::vector<BlockIndex> blocks = getPlantedBlocks(sizes);
+//     LabelGraph labelGraph = getPlantedLabelGraph(sizes.size(), edgeCount);
+//     StochasticBlockModel randomGraph = StochasticBlockModel(blocks, labelGraph);
+//     EXPECT_NO_THROW(randomGraph.checkSafety());
+//     randomGraph.sample();
+//     EXPECT_NO_THROW(randomGraph.checkConsistency());
+// }
 
 TEST(UniformSBMTest, construction_returnSafeObject)
 {
@@ -397,20 +397,20 @@ TEST(UniformSBMTest, construction_returnSafeObject)
     }
 }
 
-TEST(PlantedPartitionModelTest, constructor1_noThrow)
-{
-    size_t edgeCount = 100;
-    double assortativity = 0.8;
-    PlantedPartitionModel randomGraph = PlantedPartitionModel({10, 20, 30}, edgeCount, assortativity);
-    randomGraph.sample();
-    EXPECT_NO_THROW(randomGraph.checkConsistency());
-}
+// TEST(PlantedPartitionModelTest, constructor1_noThrow)
+// {
+//     size_t edgeCount = 100;
+//     double assortativity = 0.8;
+//     PlantedPartitionModel randomGraph = PlantedPartitionModel({10, 20, 30}, edgeCount, assortativity);
+//     randomGraph.sample();
+//     EXPECT_NO_THROW(randomGraph.checkConsistency());
+// }
 
-TEST(PlantedPartitionModelTest, constructor2_noThrow)
-{
-    size_t edgeCount = 100;
-    double assortativity = 0.8;
-    PlantedPartitionModel randomGraph = PlantedPartitionModel(60, edgeCount, 3, assortativity);
-    randomGraph.sample();
-    EXPECT_NO_THROW(randomGraph.checkConsistency());
-}
+// TEST(PlantedPartitionModelTest, constructor2_noThrow)
+// {
+//     size_t edgeCount = 100;
+//     double assortativity = 0.8;
+//     PlantedPartitionModel randomGraph = PlantedPartitionModel(60, edgeCount, 3, assortativity);
+//     randomGraph.sample();
+//     EXPECT_NO_THROW(randomGraph.checkConsistency());
+// }

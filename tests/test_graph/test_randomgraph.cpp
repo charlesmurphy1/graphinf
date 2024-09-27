@@ -15,14 +15,15 @@
 using namespace std;
 using namespace GraphInf;
 
-static const int NUM_VERTICES = 7;
+static const int NUM_VERTICES = 7, NUM_EDGES = 10;
+
 static const GraphMove GRAPH_MOVE = {{{0, 3}}, {{0, 5}}};
 static MultiGraph GRAPH = getUndirectedHouseMultiGraph();
 
 class TestRandomGraphBaseClass : public ::testing::Test
 {
 public:
-    DummyRandomGraph randomGraph = {NUM_VERTICES};
+    DummyRandomGraph randomGraph = {NUM_VERTICES, NUM_EDGES};
     MultiGraph graph = GRAPH;
 
     void SetUp()

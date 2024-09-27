@@ -3,7 +3,6 @@
 
 #include "GraphInf/exceptions.h"
 #include "util.h"
-#include "GraphInf/graph/random_graph.hpp"
 #include "edge_proposer.h"
 #include "GraphInf/graph/proposer/sampler/vertex_sampler.h"
 #include "GraphInf/graph/proposer/sampler/edge_sampler.h"
@@ -34,6 +33,8 @@ namespace GraphInf
         const GraphMove proposeRawMove() const override;
         void setUpWithGraph(const MultiGraph &) override;
         void setVertexSampler(VertexSampler &vertexSampler) { m_vertexSamplerPtr = &vertexSampler; }
+        EdgeSampler &getEdgeSampler() { return m_edgeSampler; }
+        VertexSampler &getVertexSampler() { return *m_vertexSamplerPtr; }
         void applyGraphMove(const GraphMove &move) override;
         // void applyBlockMove(const BlockMove& move) override { };
         const double getLogProposalProbRatio(const GraphMove &move) const override;

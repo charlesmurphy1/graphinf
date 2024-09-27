@@ -17,7 +17,7 @@ namespace GraphInf
      py::class_<VertexLabeledRandomGraph<Label>, RandomGraph, PyVertexLabeledRandomGraph<Label>> declareVertexLabeledRandomGraph(py::module &m, std::string pyName)
      {
           return py::class_<VertexLabeledRandomGraph<Label>, RandomGraph, PyVertexLabeledRandomGraph<Label>>(m, pyName.c_str())
-              .def(py::init<size_t, bool, bool>(), py::arg("size"), py::arg("with_self_loops") = true, py::arg("with_parallel_edges") = true)
+              .def(py::init<size_t, double, bool, bool, bool>(), py::arg("size"), py::arg("edge_count"), py::arg("canonical") = false, py::arg("with_self_loops") = true, py::arg("with_parallel_edges") = true)
               .def("label_proposer", &VertexLabeledRandomGraph<Label>::getLabelProposer, py::return_value_policy::reference_internal)
               .def("set_label_proposer", &VertexLabeledRandomGraph<Label>::setLabelProposer, py::arg("proposer"))
               .def("labels", &VertexLabeledRandomGraph<Label>::getLabels, py::return_value_policy::reference_internal)
@@ -42,14 +42,13 @@ namespace GraphInf
               .def("propose_label_move", &VertexLabeledRandomGraph<Label>::proposeLabelMove)
               .def("is_valid_label_move", &VertexLabeledRandomGraph<Label>::isValidLabelMove, py::arg("move"))
               .def("reduce_labels", &VertexLabeledRandomGraph<Label>::reduceLabels);
-
      }
 
      template <typename Label>
      py::class_<NestedVertexLabeledRandomGraph<Label>, VertexLabeledRandomGraph<Label>, PyNestedVertexLabeledRandomGraph<Label>> declareNestedVertexLabeledRandomGraph(py::module &m, std::string pyName)
      {
           return py::class_<NestedVertexLabeledRandomGraph<Label>, VertexLabeledRandomGraph<Label>, PyNestedVertexLabeledRandomGraph<Label>>(m, pyName.c_str())
-              .def(py::init<size_t, bool, bool>(), py::arg("size"), py::arg("with_self_loops") = true, py::arg("with_parallel_edges") = true)
+              .def(py::init<size_t, double, bool, bool, bool>(), py::arg("size"), py::arg("edge_count"), py::arg("canonical") = false, py::arg("with_self_loops") = true, py::arg("with_parallel_edges") = true)
               .def("get_nested_label_proposer", &NestedVertexLabeledRandomGraph<Label>::getNestedLabelProposer, py::return_value_policy::reference_internal)
               .def("set_nested_label_proposer", &NestedVertexLabeledRandomGraph<Label>::setNestedLabelProposer, py::arg("proposer"))
               .def("set_nested_labels", &NestedVertexLabeledRandomGraph<Label>::setNestedLabels, py::arg("nested_labels"), py::arg("reduce") = false)
@@ -84,7 +83,7 @@ namespace GraphInf
      void initRandomGraphBaseClass(py::module &m)
      {
           py::class_<RandomGraph, NestedRandomVariable, PyRandomGraph<>>(m, "RandomGraph")
-              .def(py::init<size_t, bool, bool>(), py::arg("size"), py::arg("with_self_loops") = true, py::arg("with_parallel_edges") = true)
+              .def(py::init<size_t, double, bool, bool, bool>(), py::arg("size"), py::arg("edge_count"), py::arg("canonical") = false, py::arg("with_self_loops") = true, py::arg("with_parallel_edges") = true)
               .def("state", &RandomGraph::getState, py::return_value_policy::reference_internal)
               .def("state_copy", &RandomGraph::getState, py::return_value_policy::copy)
               .def("set_state", &RandomGraph::setState, py::arg("state"))
@@ -92,8 +91,11 @@ namespace GraphInf
               .def("set_size", &RandomGraph::setSize)
               .def("edge_count", &RandomGraph::getEdgeCount)
               .def("average_degree", &RandomGraph::getAverageDegree)
-              .def("edge_proposer", &RandomGraph::getEdgeProposer, py::return_value_policy::reference_internal)
-              .def("set_edge_proposer", &RandomGraph::setEdgeProposer, py::arg("proposer"))
+              .def("set_graph_move_type", &RandomGraph::setGraphMoveType, py::arg("move_type"))
+              .def("graph_move_type", &RandomGraph::getGraphMoveType)
+              .def("single_edge_proposer", &RandomGraph::getSingleEdgeProposer, py::return_value_policy::reference_internal)
+              .def("hinge_flip_proposer", &RandomGraph::getHingeFlipProposer, py::return_value_policy::reference_internal)
+              .def("double_edge_swap_proposer", &RandomGraph::getDoubleEdgeSwapProposer, py::return_value_policy::reference_internal)
               .def("with_self_loops", [](const RandomGraph &self)
                    { return self.withSelfLoops(); })
               .def("with_self_loops", [](RandomGraph &self, bool condition)
@@ -102,6 +104,7 @@ namespace GraphInf
                    { return self.withParallelEdges(); })
               .def("with_parallel_edges", [](RandomGraph &self, bool condition)
                    { return self.withParallelEdges(condition); })
+              .def("edge_count_prior", &RandomGraph::getEdgeCountPrior, py::return_value_policy::reference_internal)
               .def("sample", &RandomGraph::sample)
               .def("sample_state", &RandomGraph::sampleState)
               .def("sample_prior", &RandomGraph::samplePrior)
@@ -116,7 +119,7 @@ namespace GraphInf
               .def("propose_graph_move", &RandomGraph::proposeGraphMove)
               .def("is_compatible", &RandomGraph::isCompatible)
               .def("is_valid_graph_move", &RandomGraph::isValidGraphMove, py::arg("move"))
-              .def("metropolis_sweep", &RandomGraph::metropolisSweep, py::arg("n_steps"), py::arg("beta_prior")=1, py::arg("beta_likelihood")=1);
+              .def("metropolis_sweep", &RandomGraph::metropolisSweep, py::arg("n_steps"), py::arg("beta_prior") = 1, py::arg("beta_likelihood") = 1);
 
           py::class_<DeltaGraph, RandomGraph>(m, "DeltaGraph")
               .def(py::init<const MultiGraph>(), py::arg("graph"));

@@ -10,8 +10,6 @@
 #include "GraphInf/graph/likelihood/erdosrenyi.h"
 #include "GraphInf/graph/util.h"
 #include "GraphInf/generators.h"
-#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
-#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -19,13 +17,7 @@ namespace GraphInf
     class ErdosRenyiModelBase : public RandomGraph
     {
     protected:
-        EdgeCountPrior *m_edgeCountPriorPtr = nullptr;
         ErdosRenyiLikelihood m_likelihoodModel;
-        void _applyGraphMove(const GraphMove &move) override
-        {
-            m_edgeCountPriorPtr->applyGraphMove(move);
-            RandomGraph::_applyGraphMove(move);
-        }
         const double _getLogPrior() const override { return m_edgeCountPriorPtr->getLogJoint(); }
         const double _getLogPriorRatioFromGraphMove(const GraphMove &move) const override
         {
@@ -40,22 +32,19 @@ namespace GraphInf
             m_likelihoodModel.m_withSelfLoopsPtr = &m_withSelfLoops;
             m_likelihoodModel.m_withParallelEdgesPtr = &m_withParallelEdges;
         }
-        ErdosRenyiModelBase(size_t graphSize, bool withSelfLoops = true, bool withParallelEdges = true) : RandomGraph(graphSize, m_likelihoodModel, withSelfLoops, withParallelEdges)
+        ErdosRenyiModelBase(size_t size, double edgeCount, bool canonical = false, bool withSelfLoops = true, bool withParallelEdges = true) : RandomGraph(size, edgeCount, m_likelihoodModel, canonical, withSelfLoops, withParallelEdges)
         {
             setUpLikelihood();
         }
-        ErdosRenyiModelBase(size_t graphSize, EdgeCountPrior &edgeCountPrior, bool withSelfLoops = true, bool withParallelEdges = true) : RandomGraph(graphSize, m_likelihoodModel, withSelfLoops, withParallelEdges),
-                                                                                                                                          m_edgeCountPriorPtr(&edgeCountPrior) { setUpLikelihood(); }
+
         void computeConsistentState() override
         {
             m_edgeCountPriorPtr->setState(m_state.getTotalEdgeNumber());
         }
 
     public:
-        const size_t getEdgeCount() const override { return m_edgeCountPriorPtr->getState(); }
-
-        const EdgeCountPrior &getEdgeCountPrior() { return *m_edgeCountPriorPtr; }
-        void setEdgeCountPrior(EdgeCountPrior &edgeCountPrior) { m_edgeCountPriorPtr = &edgeCountPrior; }
+        // const EdgeCountPrior &getEdgeCountPrior() { return *m_edgeCountPriorPtr; }
+        // void setEdgeCountPrior(EdgeCountPrior &edgeCountPrior) { m_edgeCountPriorPtr = &edgeCountPrior; }
         // void fromGraph(const MultiGraph &graph) override
         // {
         //     RandomGraph::fromGraph(graph);
@@ -74,15 +63,14 @@ namespace GraphInf
         {
             RandomGraph::checkSelfSafety();
             if (not m_edgeCountPriorPtr)
-                throw SafetyError("ErdosRenyiFamily", "m_edgeCountPriorPtr");
+                throw SafetyError("ErdosRenyiModel", "m_edgeCountPriorPtr");
             m_edgeCountPriorPtr->checkSafety();
         }
     };
 
     class ErdosRenyiModel : public ErdosRenyiModelBase
     {
-        std::unique_ptr<EdgeCountPrior> m_edgeCountPriorUPtr = nullptr;
-        std::unique_ptr<EdgeProposer> m_edgeProposerUPtr = nullptr;
+        // std::unique_ptr<EdgeCountPrior> m_edgeCountPriorUPtr = nullptr;
 
     public:
         ErdosRenyiModel(
@@ -90,17 +78,14 @@ namespace GraphInf
             double edgeCount,
             bool canonical = false,
             bool withSelfLoops = true,
-            bool withParallelEdges = true) : ErdosRenyiModelBase(size, withSelfLoops, withParallelEdges)
+            bool withParallelEdges = true) : ErdosRenyiModelBase(size, edgeCount, canonical, withSelfLoops, withParallelEdges)
         {
-            m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
-            setEdgeCountPrior(*m_edgeCountPriorUPtr);
-
-            if (canonical)
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new SingleEdgeUniformProposer(m_withSelfLoops, m_withParallelEdges));
-            else
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(m_withSelfLoops, m_withParallelEdges));
-            setEdgeProposer(*m_edgeProposerUPtr);
-
+            // m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
+            // setEdgeCountPrior(*m_edgeCountPriorUPtr);
+            // if (canonical)
+            //     setGraphMoveType("canonical");
+            // else
+            //     setGraphMoveType("microcanonical");
             checkSafety();
             sample();
         }

@@ -8,7 +8,7 @@
 #include "GraphInf/types.h"
 #include "GraphInf/python/rv.hpp"
 #include "GraphInf/graph/random_graph.hpp"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 
 namespace GraphInf
 {
@@ -28,10 +28,6 @@ namespace GraphInf
         using PyNestedRandomVariable<BaseClass>::PyNestedRandomVariable;
 
         /* Pure abstract methods */
-        const size_t getEdgeCount() const override
-        {
-            PYBIND11_OVERRIDE_PURE(const size_t &, BaseClass, getEdgeCount, );
-        }
 
         /* Abstract methods */
         void setUp() override { PYBIND11_OVERRIDE(void, BaseClass, setUp, ); }
@@ -39,7 +35,6 @@ namespace GraphInf
         bool isSafe() const override { PYBIND11_OVERRIDE(bool, BaseClass, isSafe, ); }
         void checkSelfSafety() const override { PYBIND11_OVERRIDE(void, BaseClass, checkSelfSafety, ); }
         void checkSelfConsistency() const override { PYBIND11_OVERRIDE(void, BaseClass, checkSelfConsistency, ); }
-        // void fromGraph(const MultiGraph &graph) override { PYBIND11_OVERRIDE(void, BaseClass, fromGraph, graph); }
         bool isValidGraphMove(const GraphMove &move) const override { PYBIND11_OVERRIDE(bool, BaseClass, isValidGraphMove, move); }
     };
 

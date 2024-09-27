@@ -10,8 +10,6 @@
 #include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/graph/util.h"
 #include "GraphInf/generators.h"
-#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
-#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -39,8 +37,8 @@ namespace GraphInf
             m_likelihoodModel.m_degreePriorPtrPtr = &m_degreePriorPtr;
         }
 
-        ConfigurationModelBase(size_t graphSize) : RandomGraph(graphSize, m_likelihoodModel, true, true) { setUpLikelihood(); }
-        ConfigurationModelBase(size_t graphSize, DegreePrior &degreePrior) : RandomGraph(graphSize, m_likelihoodModel, true, true), m_degreePriorPtr(&degreePrior)
+        ConfigurationModelBase(size_t size, double edgeCount, bool canonical = false) : RandomGraph(size, edgeCount, m_likelihoodModel, canonical, true, true) { setUpLikelihood(); }
+        ConfigurationModelBase(size_t size, double edgeCount, DegreePrior &degreePrior, bool canonical = false) : RandomGraph(size, edgeCount, m_likelihoodModel, canonical, true, true), m_degreePriorPtr(&degreePrior)
         {
             setUpLikelihood();
             m_degreePriorPtr->isRoot(false);
@@ -58,6 +56,7 @@ namespace GraphInf
         {
             m_degreePriorPtr = &prior;
             m_degreePriorPtr->isRoot(false);
+            m_degreePriorPtr->setEdgeCountPrior(*m_edgeCountPriorPtr);
         }
         // void fromGraph(const MultiGraph &graph) override
         // {
@@ -65,7 +64,6 @@ namespace GraphInf
         //     m_degreePriorPtr->setGraph(graph);
         // }
 
-        const size_t getEdgeCount() const override { return m_degreePriorPtr->getEdgeCount(); }
         const size_t getDegree(BaseGraph::VertexIndex vertex) const { return m_degreePriorPtr->getDegree(vertex); }
         const std::vector<size_t> &getDegrees() const { return m_degreePriorPtr->getState(); }
 
@@ -91,69 +89,19 @@ namespace GraphInf
         }
     };
 
-    class ConfigurationModel : public ConfigurationModelBase
-    {
-        std::unique_ptr<DegreePrior> m_degreePriorUPtr = nullptr;
-        std::unique_ptr<EdgeProposer> m_edgeProposerUPtr = nullptr;
-
-    public:
-        ConfigurationModel(const DegreeSequence &degrees) : ConfigurationModelBase(degrees.size())
-        {
-            m_degreePriorUPtr = std::unique_ptr<DegreePrior>(new DegreeDeltaPrior(degrees));
-            setDegreePrior(*m_degreePriorUPtr.get());
-
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer("degree", false, true, true, true));
-            m_edgeProposerPtr = m_edgeProposerUPtr.get();
-            m_edgeProposerPtr->isRoot(false);
-
-            checkSafety();
-            sample();
-        }
-        ConfigurationModel(const MultiGraph &graph) : ConfigurationModelBase(graph.getSize())
-        {
-            auto degrees = graph.getDegrees();
-            m_degreePriorUPtr = std::unique_ptr<DegreePrior>(new DegreeDeltaPrior(degrees));
-            setDegreePrior(*m_degreePriorUPtr.get());
-
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer("degree", false, true, true, true));
-            m_edgeProposerPtr = m_edgeProposerUPtr.get();
-            m_edgeProposerPtr->isRoot(false);
-
-            checkSafety();
-            sample();
-        }
-
-        const bool isCompatible(const MultiGraph &graph) const override
-        {
-            return RandomGraph::isCompatible(graph) and graph.getDegrees() == m_degreePriorPtr->getState();
-            ;
-        }
-    };
-
     class ConfigurationModelFamily : public ConfigurationModelBase
     {
-        std::unique_ptr<EdgeCountPrior> m_edgeCountPriorUPtr = nullptr;
         std::unique_ptr<DegreePrior> m_degreePriorUPtr = nullptr;
-        std::unique_ptr<EdgeProposer> m_edgeProposerUPtr = nullptr;
 
     public:
         ConfigurationModelFamily(
             size_t size,
             double edgeCount,
-            bool useDegreeHyperPrior = true,
             bool canonical = false,
-            bool degreeConstrained = false) : ConfigurationModelBase(size)
+            bool useDegreeHyperPrior = true) : ConfigurationModelBase(size, edgeCount, canonical)
         {
-            m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
-            m_degreePriorUPtr = std::unique_ptr<DegreePrior>(makeDegreePrior(size, *m_edgeCountPriorUPtr, useDegreeHyperPrior));
+            m_degreePriorUPtr = std::unique_ptr<DegreePrior>(makeDegreePrior(size, *m_edgeCountPriorPtr, useDegreeHyperPrior));
             setDegreePrior(*m_degreePriorUPtr);
-
-            if (canonical)
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
-            else
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
-            setEdgeProposer(*m_edgeProposerUPtr);
-
             checkSafety();
             sample();
         }

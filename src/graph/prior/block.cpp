@@ -6,7 +6,7 @@
 #include "GraphInf/graph/prior/block.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/utility/maps.hpp"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/rng.h"
 #include "GraphInf/generators.h"
 #include "GraphInf/exceptions.h"

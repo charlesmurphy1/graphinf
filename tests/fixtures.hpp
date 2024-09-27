@@ -118,7 +118,6 @@ namespace GraphInf
     class DummyRandomGraph : public RandomGraph
     {
         size_t m_edgeCount;
-        HingeFlipUniformProposer m_edgeProposer;
         DummyGraphLikelihood likelihood;
         void setUpLikelihood() override
         {
@@ -127,10 +126,8 @@ namespace GraphInf
         }
 
     public:
-        using RandomGraph::RandomGraph;
-        DummyRandomGraph(size_t size) : RandomGraph(size, likelihood)
+        DummyRandomGraph(size_t size, double edgeCount) : RandomGraph(size, edgeCount, likelihood)
         {
-            setEdgeProposer(m_edgeProposer);
         }
 
         void setState(const MultiGraph &state) override
@@ -138,8 +135,6 @@ namespace GraphInf
             RandomGraph::setState(state);
             m_edgeCount = state.getTotalEdgeNumber();
         }
-
-        const size_t getEdgeCount() const override { return m_edgeCount; }
     };
 
     class DummyDynamics : public Dynamics

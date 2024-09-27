@@ -1,7 +1,7 @@
 #ifndef GRAPH_INF_NESTED_LABELPROPOSER_H
 #define GRAPH_INF_NESTED_LABELPROPOSER_H
 
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/graph/proposer/label/base.hpp"
 #include "GraphInf/rng.h"
 #include "GraphInf/exceptions.h"

@@ -5,7 +5,7 @@
 #include "GraphInf/types.h"
 #include "prior.hpp"
 #include "label_graph.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/utility/maps.hpp"
 
 namespace GraphInf
@@ -134,7 +134,7 @@ namespace GraphInf
             m_degreeSeq = degrees;
             m_state = degrees;
         }
-        void sampleState() override{};
+        void sampleState() override {};
 
         const double getLogLikelihood() const override { return 0.; }
 
@@ -143,7 +143,7 @@ namespace GraphInf
         {
             return (move.prevLabel != move.nextLabel) ? -INFINITY : 0.;
         }
-        void checkSelfConsistency() const override{};
+        void checkSelfConsistency() const override {};
         void checkSelfSafety() const override
         {
             if (m_degreeSeq.size() == 0)

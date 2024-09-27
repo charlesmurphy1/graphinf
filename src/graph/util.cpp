@@ -103,36 +103,36 @@ namespace GraphInf
             return new UniformStochasticBlockModelLikelihood();
     }
 
-    EdgeProposer *makeEdgeProposer(
-        std::string proposerType,
-        bool canonical,
-        bool degreeConstrained,
-        // bool labelConstrained=false,
-        bool withSelfLoops,
-        bool withParallelEdges)
-    {
+    // EdgeProposer *makeEdgeProposer(
+    //     std::string proposerType,
+    //     bool canonical,
+    //     bool degreeConstrained,
+    //     // bool labelConstrained=false,
+    //     bool withSelfLoops,
+    //     bool withParallelEdges)
+    // {
 
-        if (canonical)
-        {
-            if (proposerType == "uniform")
-                return new SingleEdgeUniformProposer(withSelfLoops, withParallelEdges);
-            else if (proposerType == "degree")
-                return new SingleEdgeUniformProposer(withSelfLoops, withParallelEdges);
-            else
-                throw std::runtime_error("makeEdgeProposer: invalid proposer type `" + proposerType + "`.");
-        }
-        else if (not degreeConstrained)
-        {
-            if (proposerType == "uniform")
-                return new HingeFlipUniformProposer(withSelfLoops, withParallelEdges);
-            else if (proposerType == "degree")
-                return new HingeFlipUniformProposer(withSelfLoops, withParallelEdges);
-            else
-                throw std::runtime_error("makeEdgeProposer: invalid proposer type `" + proposerType + "`.");
-        }
-        else
-            return new DoubleEdgeSwapProposer(withSelfLoops, withParallelEdges);
-    }
+    //     if (canonical)
+    //     {
+    //         if (proposerType == "uniform")
+    //             return new SingleEdgeUniformProposer(withSelfLoops, withParallelEdges);
+    //         else if (proposerType == "degree")
+    //             return new SingleEdgeUniformProposer(withSelfLoops, withParallelEdges);
+    //         else
+    //             throw std::runtime_error("makeEdgeProposer: invalid proposer type `" + proposerType + "`.");
+    //     }
+    //     else if (not degreeConstrained)
+    //     {
+    //         if (proposerType == "uniform")
+    //             return new HingeFlipUniformProposer(withSelfLoops, withParallelEdges);
+    //         else if (proposerType == "degree")
+    //             return new HingeFlipUniformProposer(withSelfLoops, withParallelEdges);
+    //         else
+    //             throw std::runtime_error("makeEdgeProposer: invalid proposer type `" + proposerType + "`.");
+    //     }
+    //     else
+    //         return new DoubleEdgeSwapProposer(withSelfLoops, withParallelEdges);
+    // }
 
     LabelProposer<BlockIndex> *makeBlockProposer(
         std::string proposerType, bool restricted, double sampleLabelCountProb, double labelCreationProb, double shift)

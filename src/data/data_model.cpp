@@ -14,96 +14,85 @@ namespace GraphInf
             logPriorRatio = 0;
         else
             logPriorRatio = betaPrior * getLogPriorRatioFromGraphMove(move);
-        double logProposalRatio = m_graphPriorPtr->getEdgeProposer().getLogProposalProbRatio(move);
+        double logProposalRatio = m_graphPriorPtr->getLogProposalRatioFromGraphMove(move);
         if (logLikelihoodRatio == -INFINITY or logPriorRatio == -INFINITY)
             return -INFINITY;
         double logJointRatio = logLikelihoodRatio + logPriorRatio;
         return logProposalRatio + logJointRatio;
     }
 
-    const MCMCSummary DataModel::metropolisGraphStep(const double betaPrior, const double betaLikelihood)
+    const StepResult<GraphMove> DataModel::metropolisGraphStep(const double betaPrior, const double betaLikelihood, bool debug)
     {
         const auto move = m_graphPriorPtr->proposeGraphMove();
-        if (m_graphPriorPtr->getEdgeProposer().isTrivialMove(move))
-            return {"GraphMove(trivial)", 1.0, true};
-        double acceptProb = exp(getLogAcceptanceProbFromGraphMove(move, betaPrior, betaLikelihood));
-        bool isAccepted = false;
+        if (m_graphPriorPtr->isTrivialGraphMove(move))
+            return {};
+        auto logLikelihoodBefore = 0.0, logPriorBefore = 0.0;
+        if (debug)
+        {
+            logLikelihoodBefore = getLogLikelihood();
+            logPriorBefore = getLogPrior();
+        }
+
+        // Log likelihood ratio
+        double logLikelihoodRatio = 0;
+        if (betaLikelihood > 0)
+            logLikelihoodRatio = betaLikelihood * getLogLikelihoodRatioFromGraphMove(move);
+
+        // Log prior ratio
+        double logPriorRatio = 0;
+        if (betaPrior > 0)
+            logPriorRatio = betaPrior * getLogPriorRatioFromGraphMove(move);
+
+        // Log proposal ratio
+        double logProposalRatio = m_graphPriorPtr->getLogProposalRatioFromGraphMove(move);
+
+        // Acceptance probability
+        double acceptProb = exp(logLikelihoodRatio + logPriorRatio + logProposalRatio);
+
+        // Metropolis-Hastings step
+        bool accepted = false;
         if (m_uniform(rng) < acceptProb)
         {
-            isAccepted = true;
+            accepted = true;
             applyGraphMove(move);
         }
-        return {move.display(), acceptProb, isAccepted};
-    }
-    const int DataModel::gibbsSweep(size_t numSteps, const double betaPrior, const double betaLikelihood)
-    {
-        int numSuccesses = 0;
-        for (size_t i = 0; i < numSteps; i++)
+        if (debug)
         {
-            MCMCSummary summary;
-            if (m_uniform(rng) < m_paramRate)
-                summary = metropolisParamStep();
-            if (m_uniform(rng) < m_graphPriorRate)
-                summary = metropolisPriorStep();
-            if (m_uniform(rng) < m_graphRate)
-                summary = metropolisGraphStep(betaPrior, betaLikelihood);
-
-            if (summary.isAccepted)
-                numSuccesses += 1;
-        }
-        return numSuccesses;
-    }
-    const int DataModel::metropolisSweep(size_t numSteps, const double betaPrior, const double betaLikelihood)
-    {
-        int numSuccesses = 0;
-        double z = m_graphRate + m_graphPriorRate + m_paramRate;
-        auto dist = std::discrete_distribution<int>({m_graphRate / z, m_graphPriorRate / z, m_paramRate / z});
-        for (size_t i = 0; i < numSteps; i++)
-        {
-            MCMCSummary summary;
-
-            switch (dist(rng))
+            checkConsistency();
+            auto logLikelihoodAfter = getLogLikelihood();
+            auto logPriorAfter = getLogPrior();
+            if (abs(logLikelihoodAfter - logLikelihoodBefore - logLikelihoodRatio) > 1e-6 && accepted == 1)
             {
-            case 0:
-                summary = metropolisGraphStep(betaPrior, betaLikelihood);
-                break;
-            case 1:
-                summary = metropolisPriorStep();
-                break;
-            case 2:
-                summary = metropolisParamStep();
-                break;
-            default:
-                break;
+                std::stringstream ss;
+                ss << "DataModel: log likelihood mismatch with move " << move.display() << ": expected_ratio=" << logLikelihoodAfter - logLikelihoodBefore << ", actual_ratio=" << logLikelihoodRatio;
+                throw std::runtime_error(ss.str());
             }
+            if (abs(logPriorAfter - logPriorBefore - logPriorRatio) > 1e-6 && accepted == 1)
+            {
+                std::stringstream ss;
+                ss << "DataModel: log prior mismatch with move " << move.display() << ": expected_ratio=" << logPriorAfter - logPriorBefore << ", actual_ratio=" << logPriorRatio;
+                throw std::runtime_error(ss.str());
+            }
+        }
+        return {move, logLikelihoodRatio + logPriorRatio, accepted};
+    }
 
-            if (summary.isAccepted)
-                numSuccesses += 1;
-        }
-        return numSuccesses;
-    }
-    const int DataModel::metropolisGraphSweep(size_t numSteps, const double betaPrior, const double betaLikelihood)
+    const MCMCSummary DataModel::metropolisGraphSweep(size_t numSteps, const double betaPrior, const double betaLikelihood, int debugFrequency)
     {
-        int numSuccesses = 0;
+        MCMCSummary summary = {};
         for (size_t i = 0; i < numSteps; i++)
         {
-            MCMCSummary summary;
-            summary = metropolisGraphStep(betaPrior, betaLikelihood);
-            if (summary.isAccepted)
-                numSuccesses += 1;
+            summary.update(metropolisGraphStep(betaPrior, betaLikelihood, (debugFrequency > 0 && (i + 1) % debugFrequency == 0)));
         }
-        return numSuccesses;
+        return summary;
     }
-    const int DataModel::metropolisParamSweep(size_t numSteps, double betaPrior, double betaLikelihood)
+    const MCMCSummary DataModel::metropolisParamSweep(size_t numSteps, double betaPrior, double betaLikelihood)
     {
-        int numSuccesses = 0;
+        MCMCSummary summary = {};
         for (size_t i = 0; i < numSteps; i++)
         {
-            MCMCSummary summary;
-            summary = metropolisParamStep(betaLikelihood, betaPrior);
-            if (summary.isAccepted)
-                numSuccesses += 1;
+            summary.update(metropolisParamStep(betaLikelihood, betaPrior));
         }
-        return numSuccesses;
+        return summary;
     }
 }

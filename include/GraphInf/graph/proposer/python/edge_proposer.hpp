@@ -30,7 +30,6 @@ namespace GraphInf
 
         /* Abstract & overloaded methods */
         void setUpWithGraph(const MultiGraph &graph) override { PYBIND11_OVERRIDE_PURE(void, BaseClass, setUp, graph); }
-        void setUpWithPrior(const RandomGraph &prior) override { PYBIND11_OVERRIDE_PURE(void, BaseClass, setUp, prior); }
         void applyGraphMove(const GraphMove &move) override { PYBIND11_OVERRIDE(void, BaseClass, applyGraphMove, move); }
         void clear() override { PYBIND11_OVERRIDE(void, BaseClass, clear, ); }
     };
@@ -48,18 +47,18 @@ namespace GraphInf
         /* Abstract & overloaded methods */
     };
 
-    template <typename BaseClass = SingleEdgeProposer>
-    class PySingleEdgeProposer : public PyEdgeProposer<BaseClass>
-    {
-    public:
-        using PyEdgeProposer<BaseClass>::PyEdgeProposer;
-        ~PySingleEdgeProposer() override = default;
+    // template <typename BaseClass = SingleEdgeProposer>
+    // class PySingleEdgeProposer : public PyEdgeProposer<BaseClass>
+    // {
+    // public:
+    //     using PyEdgeProposer<BaseClass>::PyEdgeProposer;
+    //     ~PySingleEdgeProposer() override = default;
 
-        /* Pure abstract methods */
+    //     /* Pure abstract methods */
 
-        /* Abstract & overloaded methods */
-        void applyGraphMove(const GraphMove &move) override { PYBIND11_OVERRIDE(void, BaseClass, applyGraphMove, move); }
-    };
+    //     /* Abstract & overloaded methods */
+    //     void applyGraphMove(const GraphMove &move) override { PYBIND11_OVERRIDE(void, BaseClass, applyGraphMove, move); }
+    // };
 
     // template<typename BaseClass = LabeledEdgeProposer>
     // class PyLabeledEdgeProposer: public PyEdgeProposer<BaseClass>{

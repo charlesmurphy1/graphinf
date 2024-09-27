@@ -3,7 +3,7 @@
 
 #include "GraphInf/rng.h"
 #include "GraphInf/exceptions.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/graph/proposer/nested_label/base.hpp"
 #include "GraphInf/graph/random_graph.hpp"
 

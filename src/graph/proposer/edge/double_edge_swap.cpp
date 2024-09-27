@@ -30,8 +30,8 @@ namespace GraphInf
 
     void DoubleEdgeSwapProposer::setUpWithGraph(const MultiGraph &graph)
     {
+        EdgeProposer::setUpWithGraph(graph);
         m_edgeSampler.setUpWithGraph(graph);
-        m_graphPtr = &graph;
     }
 
     void DoubleEdgeSwapProposer::applyGraphMove(const GraphMove &move)

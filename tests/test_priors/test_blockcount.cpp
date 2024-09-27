@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "GraphInf/graph/prior/block_count.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/exceptions.h"
 

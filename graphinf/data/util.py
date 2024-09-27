@@ -31,17 +31,13 @@ def adj_matrix_to_graph(adj_matrix: np.ndarray) -> core.UndirectedMultigraph:
 def mcmc_on_graph(
     model: DataModel,
     n_sweeps: int = 1000,
-    n_gibbs_sweeps: int = 4,
-    n_steps_per_vertex: int = 1,
+    n_gibbs_sweeps: int = 1,
     burn_sweeps: int = 0,
-    beta_prior: float = 1,
-    beta_likelihood: float = 1,
-    sample_prior: bool = True,
-    sample_params: bool = False,
     start_from_original: bool = False,
     reset_original: bool = False,
     callback: Optional[Callable[[DataModel], None]] = None,
     logger: Optional[logging.Logger] = None,
+    **kwargs,
 ) -> None:
 
     original = model.graph()
@@ -52,26 +48,24 @@ def mcmc_on_graph(
 
     def step(i, prefix=""):
         t0 = time.time()
-        success = model.gibbs_sweep(
-            n_sweeps=n_gibbs_sweeps,
-            n_steps_per_vertex=n_steps_per_vertex,
-            beta_prior=beta_prior,
-            beta_likelihood=beta_likelihood,
-            sample_prior=sample_prior,
-            sample_params=sample_params,
-        )
+        summary = model.gibbs_sweep(n_sweeps=n_gibbs_sweeps, **kwargs)
         t1 = time.time()
         time_queue.append(t1 - t0)
-        if logger is not None:
 
-            logger.info(
-                f"[{prefix}]"
-                f"Epoch {i}: "
-                f"time={t1 - t0: 0.4f}s ({(n_sweeps - i + 1) * np.mean(time_queue): 0.4f}s remaining) "
-                f"accepted={success}, "
-                f"log(likelihood)={model.log_likelihood(): 0.4f}, "
-                f"log(prior)={model.log_prior(): 0.4f}"
-            )
+        if logger is not None:
+            msg = f"[{prefix}]"
+            msg += f"Epoch {i}: "
+            msg += f"time={t1 - t0: 0.4f}s ({(n_sweeps - i + 1) * np.mean(time_queue): 0.4f}s remaining)\n\t"
+            msg += f"accepted={ {k : v / float(summary.total[k]) for k, v in summary.accepted.items()} }, \n\t"
+            msg += f"total={ {k : v for k, v in summary.total.items()} }, \n\t"
+            msg += f"avg[posterior ratio]={summary.log_joint_ratio: 0.4f}, "
+            msg += f"log(likelihood)={model.log_likelihood(): 0.4f}, "
+            msg += f"log(prior)={model.log_prior(): 0.4f}, "
+            msg += f"log(joint)={model.log_joint(): 0.4f}, \n\t"
+
+            for k, v in model.params.items():
+                msg += f"{k}={v: 0.4f}, "
+            logger.info(msg)
 
     for i in range(burn_sweeps):
         step(i, "burn-in")

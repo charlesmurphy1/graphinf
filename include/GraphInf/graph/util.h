@@ -46,12 +46,12 @@ namespace GraphInf
     DegreePrior *makeDegreePrior(size_t size, EdgeCountPrior &prior, bool hyperPrior = false);
     VertexLabeledDegreePrior *makeVertexLabeledDegreePrior(LabelGraphPrior &prior, bool hyperPrior = false);
     StochasticBlockModelLikelihood *makeSBMLikelihood(bool stubLabeled = true);
-    EdgeProposer *makeEdgeProposer(
-        std::string proposerType = "uniform",
-        bool canonical = false,
-        bool degreeConstrained = false,
-        bool withSelfLoops = true,
-        bool withParallelEdges = true);
+    // EdgeProposer *makeEdgeProposer(
+    //     std::string proposerType = "uniform",
+    //     bool canonical = false,
+    //     bool degreeConstrained = false,
+    //     bool withSelfLoops = true,
+    //     bool withParallelEdges = true);
     LabelProposer<BlockIndex> *makeBlockProposer(
         std::string proposerType = "uniform",
         bool restricted = true,

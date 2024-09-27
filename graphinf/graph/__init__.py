@@ -1,4 +1,4 @@
-from graphinf._graphinf.graph import RandomGraph, StochasticBlockModel
+from graphinf._graphinf.graph import RandomGraph
 from .wrapper import (
     RandomGraphWrapper,
     DeltaGraph,
@@ -8,7 +8,6 @@ from .wrapper import (
     PoissonGraph,
     NegativeBinomialGraph,
     StochasticBlockModelFamily,
-    PlantedPartitionGraph,
 )
 from .degree_sequences import poisson_degreeseq, nbinom_degreeseq
 
@@ -21,8 +20,6 @@ __all__ = (
     "PoissonGraph",
     "NegativeBinomialGraph",
     "ConfigurationModelFamily",
-    "StochasticBlockModel",
-    "PlantedPartitionGraph",
     "StochasticBlockModelFamily",
     "poisson_degreeseq",
     "nbinom_degreeseq",

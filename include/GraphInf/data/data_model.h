@@ -1,10 +1,11 @@
 #ifndef GRAPH_INF_DATAMODEL_H
 #define GRAPH_INF_DATAMODEL_H
 
+#include <cmath>
 #include "GraphInf/rv.hpp"
 #include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/data/proposer.h"
-#include "GraphInf/utility/mcmc.h"
+#include "GraphInf/mcmc.h"
 
 namespace GraphInf
 {
@@ -13,7 +14,7 @@ namespace GraphInf
     {
     protected:
         RandomGraph *m_graphPriorPtr = nullptr;
-        virtual void computeConsistentState(){};
+        virtual void computeConsistentState() {};
         virtual void applyGraphMoveToSelf(const GraphMove &move) = 0;
         std::uniform_real_distribution<double> m_uniform;
         MultiParamProposer m_paramProposer;
@@ -77,38 +78,90 @@ namespace GraphInf
             return getLogPriorRatioFromGraphMove(move) + getLogLikelihoodRatioFromGraphMove(move);
         }
         const double getLogAcceptanceProbFromGraphMove(const GraphMove &move, double betaPrior = 1, double betaLikelihood = 1) const;
-        virtual const MCMCSummary metropolisGraphStep(const double betaPrior = 1, const double betaLikelihood = 1);
-        virtual const MCMCSummary metropolisParamStep(const double betaPrior = 1, const double betaLikelihood = 1)
+        virtual const StepResult<GraphMove> metropolisGraphStep(const double betaPrior = 1, const double betaLikelihood = 1, bool debug = false);
+        const StepResult<GraphMove> greedyGraphStep(int step = 1, double betaPrior = 1, double betaLikelihood = 1)
+        {
+            GraphMove bestMove = {};
+            double bestLogJointRatio = 0;
+            bool accepted = false;
+
+            for (int i = 1; i < step; i++)
+            {
+                auto move = m_graphPriorPtr->proposeGraphMove();
+                auto logJointRatio = getLogJointRatioFromGraphMove(move);
+                if (logJointRatio > bestLogJointRatio)
+                {
+                    bestMove = move;
+                    bestLogJointRatio = logJointRatio;
+                    accepted = true;
+                }
+            }
+            applyGraphMove(bestMove);
+            return {bestMove, bestLogJointRatio, accepted};
+        }
+        virtual const StepResult<ParamMove> metropolisParamStep(const double betaPrior = 1, const double betaLikelihood = 1)
         {
             if (m_paramProposer.size() == 0)
-                return {"ParamMove()", 0, true};
+                return {};
 
             auto move = m_paramProposer.proposeMove();
 
             if (not isValidParamMove(move))
-                return {move.display(), -INFINITY, false};
+                return {move, -INFINITY, false};
 
             double likelihoodRatio = 0;
             if (betaLikelihood > 0)
                 likelihoodRatio = betaLikelihood * getLogLikelihoodRatioFromParaMove(move);
             double proposalRatio = m_paramProposer.logProposalRatio(move);
             double acceptProb = exp(likelihoodRatio + proposalRatio);
+            if (acceptProb > 1.0)
+                acceptProb = 1.0;
+            bool accepted = false;
             if (m_uniform(rng) < acceptProb)
             {
                 applyParamMove(move);
-                return {move.display(), acceptProb, true};
+                accepted = true;
             }
-            return {move.display(), acceptProb, false};
+            return {
+                move, likelihoodRatio + proposalRatio, accepted};
         }
-        virtual const MCMCSummary metropolisPriorStep()
+        const StepResult<ParamMove> greedyParamStep(int step = 1, double betaPrior = 1, double betaLikelihood = 1)
         {
-            return m_graphPriorPtr->metropolisStep();
-        }
+            ParamMove bestMove = {};
+            double bestLogJointRatio = 0;
+            bool accepted = false;
 
-        const int gibbsSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1);
-        const int metropolisSweep(size_t numSteps, const double betaPrior = 1, const double betaLikelihood = 1);
-        const int metropolisGraphSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1);
-        const int metropolisParamSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1);
+            for (int i = 1; i < step; i++)
+            {
+                auto move = m_paramProposer.proposeMove();
+                auto logJointRatio = getLogLikelihoodRatioFromParaMove(move);
+                if (logJointRatio > bestLogJointRatio && isValidParamMove(move))
+                {
+                    bestMove = move;
+                    bestLogJointRatio = logJointRatio;
+                    accepted = true;
+                }
+            }
+            applyParamMove(bestMove);
+            return {bestMove, bestLogJointRatio, accepted};
+        }
+        const MCMCSummary metropolisGraphSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1, int debugFrequency = 0);
+        const MCMCSummary metropolisPriorSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1) { return m_graphPriorPtr->metropolisSweep(nSteps, betaPrior, betaLikelihood); }
+        const MCMCSummary metropolisParamSweep(size_t nSteps, const double betaPrior = 1, const double betaLikelihood = 1);
+        const MCMCSummary greedyGraphSweep(size_t nSteps, size_t greedySteps = 1, const double betaPrior = 1, const double betaLikelihood = 1)
+        {
+            MCMCSummary summary;
+            for (size_t i = 0; i < nSteps; i++)
+                summary.update(greedyGraphStep(greedySteps, betaPrior, betaLikelihood));
+            return summary;
+        }
+        const MCMCSummary greedyParamSweep(size_t nSteps, size_t greedySteps = 1, const double betaPrior = 1, const double betaLikelihood = 1)
+        {
+            MCMCSummary summary;
+            for (size_t i = 0; i < nSteps; i++)
+                summary.update(greedyParamStep(greedySteps, betaPrior, betaLikelihood));
+            return summary;
+        }
 
         void applyGraphMove(const GraphMove &move)
         {
@@ -120,21 +173,48 @@ namespace GraphInf
             checkConsistency();
 #endif
         }
-        void freezeGraph() { m_graphRate = 0; }
-        void unfreezeGraph(double rate = 1) { m_graphRate = rate; }
+        void freezeGraph()
+        {
+            m_graphRate = 0;
+        }
+        void unfreezeGraph(double rate = 1)
+        {
+            m_graphRate = rate;
+        }
 
-        void freezeGraphPrior() { m_graphPriorRate = 0; }
-        void unfreezeGraphPrior(double rate = 1) { m_graphPriorRate = rate; }
+        void freezeGraphPrior()
+        {
+            m_graphPriorRate = 0;
+        }
+        void unfreezeGraphPrior(double rate = 1)
+        {
+            m_graphPriorRate = rate;
+        }
 
-        void freezeParam() { m_paramRate = 0; }
-        void unfreezeParam(double rate = 1) { m_paramRate = rate; }
+        void freezeParam()
+        {
+            m_paramRate = 0;
+        }
+        void unfreezeParam(double rate = 1)
+        {
+            m_paramRate = rate;
+        }
 
-        void freezeParam(std::string key) { m_paramProposer.freeze(key); }
-        void unfreezeParam(std::string key, double rate = 1) { m_paramProposer.unfreeze(key, rate); }
+        void freezeParam(std::string key)
+        {
+            m_paramProposer.freeze(key);
+        }
+        void unfreezeParam(std::string key, double rate = 1)
+        {
+            m_paramProposer.unfreeze(key, rate);
+        }
 
         virtual void applyParamMove(const ParamMove &move) {}
 
-        virtual bool isValidParamMove(const ParamMove &move) const { return true; }
+        virtual bool isValidParamMove(const ParamMove &move) const
+        {
+            return true;
+        }
 
         void computationFinished() const override
         {

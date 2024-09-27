@@ -42,8 +42,8 @@ namespace GraphInf
         const size_t NUM_VERTICES = 100, NUM_EDGES = 250;
         const bool useHyperPrior = false, canonical = false, stubLabeled = false;
 
-        StochasticBlockModelFamily graphPrior = StochasticBlockModelFamily(100, 250, 3, useHyperPrior, canonical, stubLabeled);
-        GibbsMixedBlockProposer proposer = GibbsMixedBlockProposer(SAMPLE_LABEL_PROB, LABEL_CREATION_PROB, SHIFT);
+        StochasticBlockModelFamily graphPrior{100, 250, 3, useHyperPrior, canonical, stubLabeled};
+        GibbsMixedBlockProposer proposer{SAMPLE_LABEL_PROB, LABEL_CREATION_PROB, SHIFT};
         bool expectConsistencyError = false;
         void SetUp()
         {

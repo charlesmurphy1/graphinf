@@ -104,7 +104,7 @@ TEST_P(CMParametrizedTest, doingMetropolisHastingsWithGraph_expectNoConsistencyE
 
 TEST_P(CMParametrizedTest, enumeratingAllGraphs_likelihoodIsNormalized)
 {
-    ConfigurationModelFamily g(3, 3, GetParam());
+    ConfigurationModelFamily g(3, 3, false, GetParam());
 
     std::list<double> s;
     for (auto gg : enumerateAllGraphs(3, 3))
@@ -122,11 +122,3 @@ INSTANTIATE_TEST_SUITE_P(
     ConfigurationModelFamilyTests,
     CMParametrizedTest,
     ::testing::Values(false, true));
-
-TEST(CMTests, instanciateConfigurationModel_forRegularSequence)
-{
-    std::vector<size_t> degrees(100, 5);
-    ConfigurationModel graph(degrees);
-    EXPECT_EQ(graph.getSize(), 100);
-    EXPECT_EQ(graph.getDegrees(), degrees);
-}

@@ -12,21 +12,17 @@ namespace GraphInf
     {
     private:
         DeltaGraphLikelihood m_likelihoodModel;
-        std::unique_ptr<EdgeProposer> m_edgeProposerUPtr = nullptr;
         void setUpLikelihood() override
         {
             m_likelihoodModel.m_statePtr = &m_state;
         }
 
     public:
-        DeltaGraph(const MultiGraph graph) : RandomGraph(graph.getSize(), m_likelihoodModel)
+        DeltaGraph(const MultiGraph graph) : RandomGraph(graph.getSize(), graph.getTotalEdgeNumber(), m_likelihoodModel)
         {
             m_state = graph;
-            m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(makeEdgeProposer());
-            setEdgeProposer(*m_edgeProposerUPtr);
             setUpLikelihood();
         }
-        const size_t getEdgeCount() const override { return m_state.getTotalEdgeNumber(); }
     };
 
 }

@@ -12,9 +12,7 @@ namespace GraphInf
 
     void initErdosRenyi(py::module &m)
     {
-        py::class_<ErdosRenyiModelBase, RandomGraph>(m, "ErdosRenyiModelBase")
-            .def("edge_count_prior", &ErdosRenyiModelBase::getEdgeCountPrior, py::return_value_policy::reference_internal)
-            .def("set_edge_count_prior", &ErdosRenyiModelBase::setEdgeCountPrior, py::arg("prior"));
+        py::class_<ErdosRenyiModelBase, RandomGraph>(m, "ErdosRenyiModelBase");
         py::class_<ErdosRenyiModel, ErdosRenyiModelBase>(m, "ErdosRenyiModel")
             .def(
                 py::init<size_t, double, bool, bool, bool>(),

@@ -6,8 +6,6 @@
 #include "GraphInf/graph/prior/labeled_degree.h"
 #include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/graph/util.h"
-#include "GraphInf/graph/proposer/edge/edge_count_preserving.h"
-#include "GraphInf/graph/proposer/edge/non_preserving.h"
 
 namespace GraphInf
 {
@@ -41,22 +39,15 @@ namespace GraphInf
             m_likelihoodModel.m_statePtr = &m_state;
             m_likelihoodModel.m_degreePriorPtrPtr = &m_degreePriorPtr;
         }
-        NestedDegreeCorrectedStochasticBlockModelBase(size_t graphSize) : NestedBlockLabeledRandomGraph(graphSize, m_likelihoodModel, true, true),
-                                                                          m_nestedLabelGraphPrior(graphSize),
-                                                                          m_likelihoodModel() {}
-        NestedDegreeCorrectedStochasticBlockModelBase(size_t graphSize, EdgeCountPrior &EdgeCountPrior, VertexLabeledDegreePrior &degreePrior) : NestedBlockLabeledRandomGraph(graphSize, m_likelihoodModel, true, true),
-                                                                                                                                                 m_likelihoodModel(),
-                                                                                                                                                 m_nestedLabelGraphPrior(graphSize, EdgeCountPrior)
-        {
-            setDegreePrior(degreePrior);
-        }
+        NestedDegreeCorrectedStochasticBlockModelBase(size_t size, double edgeCount, bool canonical = false) : NestedBlockLabeledRandomGraph(size, edgeCount, m_likelihoodModel, canonical, true, true),
+                                                                                                               m_nestedLabelGraphPrior(size),
+                                                                                                               m_likelihoodModel() {}
         void computeConsistentState() override
         {
             m_degreePriorPtr->setGraph(m_state);
         }
 
     public:
-        const size_t getEdgeCount() const override { return m_nestedLabelGraphPrior.getEdgeCount(); }
         const size_t getDepth() const override { return m_nestedLabelGraphPrior.getDepth(); }
         using NestedBlockLabeledRandomGraph::getLabel;
         const BlockIndex getLabel(BaseGraph::VertexIndex vertex, Level level) const override { return m_nestedLabelGraphPrior.getBlock(vertex, level); }
@@ -156,9 +147,7 @@ namespace GraphInf
 
     class NestedDegreeCorrectedStochasticBlockModelFamily : public NestedDegreeCorrectedStochasticBlockModelBase
     {
-        std::unique_ptr<EdgeCountPrior> m_edgeCountPriorUPtr;
         std::unique_ptr<VertexLabeledDegreePrior> m_degreePriorUPtr;
-        std::unique_ptr<EdgeProposer> m_edgeProposerUPtr;
         std::unique_ptr<NestedLabelProposer<BlockIndex>> m_nestedLabelProposerUPtr;
 
     public:
@@ -170,18 +159,11 @@ namespace GraphInf
             std::string blockProposerType = "uniform",
             double sampleLabelCountProb = 0.1,
             double labelCreationProb = 0.5,
-            double shift = 1) : NestedDegreeCorrectedStochasticBlockModelBase(size)
+            double shift = 1) : NestedDegreeCorrectedStochasticBlockModelBase(size, edgeCount, canonical)
         {
-            m_edgeCountPriorUPtr = std::unique_ptr<EdgeCountPrior>(makeEdgeCountPrior(edgeCount, canonical));
-            m_nestedLabelGraphPrior.setEdgeCountPrior(*m_edgeCountPriorUPtr);
+            m_nestedLabelGraphPrior.setEdgeCountPrior(*m_edgeCountPriorPtr);
             m_degreePriorUPtr = std::unique_ptr<VertexLabeledDegreePrior>(makeVertexLabeledDegreePrior(m_nestedLabelGraphPrior, useDegreeHyperPrior));
             setDegreePrior(*m_degreePriorUPtr);
-
-            if (canonical)
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new NonPreservingProposer(true, true));
-            else
-                m_edgeProposerUPtr = std::unique_ptr<EdgeProposer>(new EdgeCountPreservingProposer(true, true));
-            setEdgeProposer(*m_edgeProposerUPtr);
 
             m_nestedLabelProposerUPtr = std::unique_ptr<NestedLabelProposer<BlockIndex>>(
                 makeNestedBlockProposer(blockProposerType, true, sampleLabelCountProb, labelCreationProb, shift));

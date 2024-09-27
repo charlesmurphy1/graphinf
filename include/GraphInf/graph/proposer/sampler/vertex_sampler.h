@@ -6,7 +6,7 @@
 #include "SamplableSet.hpp"
 #include "hash_specialization.hpp"
 #include "BaseGraph/types.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/types.h"
 #include "GraphInf/exceptions.h"
 #include "GraphInf/rng.h"

@@ -37,9 +37,9 @@ namespace GraphInf
 
     void HingeFlipProposer::setUpWithGraph(const MultiGraph &graph)
     {
+        EdgeProposer::setUpWithGraph(graph);
         m_edgeSampler.setUpWithGraph(graph);
         m_vertexSamplerPtr->setUpWithGraph(graph);
-        m_graphPtr = &graph;
     }
 
     void HingeFlipProposer::applyGraphMove(const GraphMove &move)
@@ -47,13 +47,13 @@ namespace GraphInf
 
         for (auto edge : move.addedEdges)
         {
-            m_vertexSamplerPtr->onEdgeAddition(edge);
             m_edgeSampler.onEdgeAddition(edge);
+            m_vertexSamplerPtr->onEdgeAddition(edge);
         }
         for (auto edge : move.removedEdges)
         {
-            m_vertexSamplerPtr->onEdgeRemoval(edge);
             m_edgeSampler.onEdgeRemoval(edge);
+            m_vertexSamplerPtr->onEdgeRemoval(edge);
         }
     }
 
@@ -96,8 +96,8 @@ namespace GraphInf
     {
         auto addedEdge = getOrderedEdge(move.addedEdges[0]);
         auto removedEdge = getOrderedEdge(move.removedEdges[0]);
-        double addedEdgeWeight = m_edgeSampler.getEdgeWeight(addedEdge);
-        double removedEdgeWeight = m_edgeSampler.getEdgeWeight(removedEdge);
+        auto addedEdgeWeight = (double)m_edgeSampler.getEdgeWeight(addedEdge);
+        auto removedEdgeWeight = (double)m_edgeSampler.getEdgeWeight(removedEdge);
         return log(addedEdgeWeight + 1) - log(removedEdgeWeight) + getLogVertexWeightRatio(move);
     }
 

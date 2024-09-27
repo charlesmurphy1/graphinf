@@ -1,7 +1,7 @@
 #ifndef GRAPH_INF_LABELPROPOSER_H
 #define GRAPH_INF_LABELPROPOSER_H
 
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/graph/proposer/proposer.hpp"
 // #include "GraphInf/graph/random_graph.hpp"
 #include "GraphInf/rng.h"
@@ -54,7 +54,7 @@ namespace GraphInf
         }
 
         const double getSampleLabelCountProb() const { return m_sampleLabelCountProb; }
-        virtual void applyLabelMove(const LabelMove<Label> &move){};
+        virtual void applyLabelMove(const LabelMove<Label> &move) {};
 
         const VertexLabeledRandomGraph<Label> &getGraphPrior()
         {

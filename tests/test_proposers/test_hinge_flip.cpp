@@ -5,7 +5,7 @@
 #include "GraphInf/graph/prior/edge_count.h"
 #include "GraphInf/graph/erdosrenyi.h"
 #include "GraphInf/graph/proposer/edge/hinge_flip.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/rng.h"
 #include "../fixtures.hpp"
 
@@ -113,6 +113,7 @@ namespace GraphInf
     {
         BaseGraph::Edge edge;
         size_t weight;
+        std::cout << randomGraph.getEdgeCount() << std::endl;
         while (true)
         {
             edge = proposer.getEdgeSampler().sample();

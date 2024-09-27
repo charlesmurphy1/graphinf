@@ -4,7 +4,7 @@
 
 #include "GraphInf/graph/prior/edge_count.h"
 #include "GraphInf/graph/prior/degree.h"
-#include "GraphInf/graph/proposer/movetypes.h"
+#include "GraphInf/mcmc.h"
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/generators.h"
 #include "GraphInf/types.h"
@@ -19,7 +19,7 @@ namespace GraphInf
     class DummyDegreePrior : public DegreePrior
     {
     public:
-        DummyDegreePrior(size_t size, EdgeCountPrior &prior) : DegreePrior(size, prior){};
+        DummyDegreePrior(size_t size, EdgeCountPrior &prior) : DegreePrior(size, prior) {};
 
         void sampleState() override
         {

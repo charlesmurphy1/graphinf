@@ -42,8 +42,8 @@ namespace GraphInf
         }
         const double getLogLikelihoodRatioFromGraphMove(const GraphMove &move) const
         {
-            int dE = move.addedEdges.size() - move.removedEdges.size();
             size_t E = (*m_edgeCountPriorPtrPtr)->getState();
+            int dE = move.addedEdges.size() - move.removedEdges.size();
             return getLogLikelihoodFromEdgeCount(E + dE) - getLogLikelihoodFromEdgeCount(E);
         }
         EdgeCountPrior **m_edgeCountPriorPtrPtr = nullptr;
