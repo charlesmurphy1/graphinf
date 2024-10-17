@@ -56,7 +56,7 @@ namespace GraphInf
             m_edgeCount = state;
         }
 
-        void sampleState() override{};
+        void sampleState() override {};
         const double getLogLikelihoodFromState(const size_t &state) const override
         {
             if (state == m_state)
@@ -87,7 +87,7 @@ namespace GraphInf
             setMean(other.m_mean);
             setState(other.m_state);
         }
-        virtual ~EdgeCountPoissonPrior(){};
+        virtual ~EdgeCountPoissonPrior() {};
         const EdgeCountPoissonPrior &operator=(const EdgeCountPoissonPrior &other)
         {
             setMean(other.m_mean);
@@ -112,22 +112,22 @@ namespace GraphInf
         }
     };
 
-    class EdgeCountExponentialPrior : public EdgeCountPrior
+    class EdgeCountGeometricPrior : public EdgeCountPrior
     {
     private:
         double m_mean;
         std::geometric_distribution<size_t> m_geometricDistribution;
 
     public:
-        EdgeCountExponentialPrior() {}
-        EdgeCountExponentialPrior(double mean) { setMean(mean); }
-        EdgeCountExponentialPrior(const EdgeCountExponentialPrior &other)
+        EdgeCountGeometricPrior() {}
+        EdgeCountGeometricPrior(double mean) { setMean(mean); }
+        EdgeCountGeometricPrior(const EdgeCountGeometricPrior &other)
         {
             setMean(other.m_mean);
             setState(other.m_state);
         }
-        virtual ~EdgeCountExponentialPrior(){};
-        const EdgeCountExponentialPrior &operator=(const EdgeCountExponentialPrior &other)
+        virtual ~EdgeCountGeometricPrior() {};
+        const EdgeCountGeometricPrior &operator=(const EdgeCountGeometricPrior &other)
         {
             setMean(other.m_mean);
             setState(other.m_state);
@@ -156,29 +156,45 @@ namespace GraphInf
         }
     };
 
-    // class EdgeCountUniformPrior: public EdgeCountPrior{
-    // private:
-    //     size_t m_min, m_max;
-    // public:
-    //     EdgeCountUniformPrior() {}
-    //     EdgeCountUniformPrior(double mean) { setMean(mean); }
-    //     EdgeCountUniformPrior(const EdgeCountPoissonPrior& other) { setMean(other.m_mean); setState(other.m_state); }
-    //     virtual ~EdgeCountPoissonPrior() {};
-    //     const EdgeCountPoissonPrior& operator=(const EdgeCountPoissonPrior& other) {
-    //         setMean(other.m_mean);
-    //         setState(other.m_state);
-    //         return *this;
-    //     }
-    //
-    //     double getMean() const { return m_mean; }
-    //     void setMean(double mean){
-    //         m_mean = mean;
-    //         m_poissonDistribution = std::poisson_distribution<size_t>(mean);
-    //     }
-    //     void sampleState() override;
-    //     const double getLogLikelihoodFromState(const size_t& state) const override { }
-    //     void checkSelfSafety() const override;
-    // };
+    class EdgeCountUniformPrior : public EdgeCountPrior
+    {
+    private:
+        size_t m_min, m_max;
+        std::uniform_int_distribution<size_t> m_uniformDistribution;
+
+    public:
+        EdgeCountUniformPrior() {}
+        EdgeCountUniformPrior(double min, double max) : m_min(min), m_max(max), m_uniformDistribution(min, max) { setState(m_uniformDistribution(rng)); }
+        EdgeCountUniformPrior(const EdgeCountUniformPrior &other)
+        {
+            setMinMax(other.getMin(), other.getMax());
+            setState(other.getState());
+        }
+        virtual ~EdgeCountUniformPrior() {};
+        const EdgeCountUniformPrior &operator=(const EdgeCountUniformPrior &other)
+        {
+            setMinMax(other.m_min, other.m_max);
+            setState(other.m_state);
+            return *this;
+        }
+
+        double getMin() const { return m_min; }
+        double getMax() const { return m_max; }
+        void setMinMax(double min, double max)
+        {
+            m_min = min;
+            m_max = max;
+            m_uniformDistribution = std::uniform_int_distribution<size_t>(min, max);
+        }
+        void sampleState() override { setState(m_uniformDistribution(rng)); }
+        const double getLogLikelihoodFromState(const size_t &state) const override
+        {
+            if (state >= m_min && state <= m_max)
+                return 0;
+            return -INFINITY;
+        }
+        void checkSelfSafety() const override {}
+    };
 }
 
 #endif

@@ -137,11 +137,7 @@ def log_evidence_iid_meanfield(
 
 def log_evidence_partition_meanfield(model: RandomGraph, graph: core.UndirectedMultigraph, **kwargs):
     if importlib.util.find_spec("graph_tool"):
-        from graph_tool.inference import (
-            BlockState,
-            ModeClusterState,
-            mcmc_equilibrate,
-        )
+        import graph_tool.all as gt
     else:
         raise ModuleNotFoundError(
             "Module `graph_tool` has not been installed, cannot use `log_evidence_partition_meanfield` method."
@@ -159,23 +155,23 @@ def log_evidence_partition_meanfield(model: RandomGraph, graph: core.UndirectedM
         def __init__(self):
             self.collection = []
 
-        def __call__(self, m: BlockState):
+        def __call__(self, m: gt.BlockState):
             self.collection.append(m.b.a.copy())
 
     blockstate = model.blockstate()
     mcmc_args = model.gt_mcmc_args()
     mcmc_args["niter"] = kwargs.get("n_steps_per_vertex", 5)
     callback = GTCollectPartition()
-    mcmc_equilibrate(
+    gt.mcmc_equilibrate(
         blockstate,
         force_niter=kwargs.get("n_sweeps", 100),
         mcmc_args=model.gt_mcmc_args(),
         callback=callback,
     )
     partitions = callback.collection
-    pmodes = ModeClusterState(partitions, nested=model.nested)
+    pmodes = gt.ModeClusterState(partitions, nested=model.nested)
     if kwargs.get("equilibriate_mode_cluster", False):
-        mcmc_equilibrate(pmodes, force_niter=1, verbose=kwargs.get("verbose", False))
+        gt.mcmc_equilibrate(pmodes, force_niter=1, verbose=kwargs.get("verbose", False))
     samples = []
     for p in partitions:
         set_labels(p)

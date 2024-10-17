@@ -24,7 +24,7 @@ namespace GraphInf
             .def(py::init<>())
             .def(py::init<double>(), py::arg("mean"));
 
-        py::class_<EdgeCountExponentialPrior, EdgeCountPrior>(m, "EdgeCountExponentialPrior")
+        py::class_<EdgeCountGeometricPrior, EdgeCountPrior>(m, "EdgeCountGeometricPrior")
             .def(py::init<>())
             .def(py::init<double>(), py::arg("mean"));
     }

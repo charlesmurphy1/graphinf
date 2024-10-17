@@ -26,8 +26,8 @@ namespace GraphInf
                 py::init<size_t, double, bool, bool>(),
                 py::arg("size"),
                 py::arg("edge_count"),
-                py::arg("hyperprior") = true,
-                py::arg("canonical") = false);
+                py::arg("canonical") = false,
+                py::arg("hyperprior") = true);
     }
 
 }

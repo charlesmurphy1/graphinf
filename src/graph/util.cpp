@@ -58,7 +58,7 @@ namespace GraphInf
     EdgeCountPrior *makeEdgeCountPrior(double edgeCount, bool canonical)
     {
         if (canonical)
-            return new EdgeCountExponentialPrior(edgeCount);
+            return new EdgeCountGeometricPrior(edgeCount);
         else
             return new EdgeCountDeltaPrior((size_t)edgeCount);
     }

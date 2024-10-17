@@ -118,6 +118,26 @@ class EdgeCollector:
         self._node_count = 0
         self._graph_collection = []
 
+    def save(self, path: str):
+        pd.to_pickle(
+            dict(
+                multiplicities=dict(self.multiplicities),
+                counts=dict(self.counts),
+                total_count=self.total_count,
+                node_count=self.node_count,
+                graph_collection=[save_graph(g) for g, s, e in self._graph_collection],
+            ),
+            path,
+        )
+
+    def load(self, path: str):
+        data = pd.read_pickle(path)
+        self.multiplicities = defaultdict(lambda: defaultdict(int), data["multiplicities"])
+        self.counts = defaultdict(int, data["counts"])
+        self._total_count = data["total_count"]
+        self._node_count = data["node_count"]
+        self._graph_collection = [(load_graph(g), s, e) for g, s, e in data["graph_collection"]]
+
     def update(
         self,
         graph: bg.UndirectedMultigraph = None,
@@ -252,10 +272,12 @@ def load_graph(path: str):
     return g
 
 
-def save_graph(graph, path):
+def save_graph(graph, path: Optional[str] = None):
     nodelist = np.array([v for v in graph])
     edgelist = np.array([(*e, graph.get_edge_multiplicity(*e)) for e in graph.edges()])
-    pd.to_pickle(dict(nodelist=nodelist, edgelist=edgelist), path)
+    if path is not None:
+        pd.to_pickle(dict(nodelist=nodelist, edgelist=edgelist), path)
+    return dict(nodelist=nodelist, edgelist=edgelist)
 
 
 def convert_basegraph_to_networkx(

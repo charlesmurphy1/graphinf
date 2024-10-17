@@ -204,24 +204,22 @@ class ConfigurationModelFamily(RandomGraphWrapper):
         edge_count: float = 250,
         degree_prior_type: str = "uniform",
         canonical: bool = False,
-        degree_constrained: bool = False,
     ):
         if degree_prior_type not in self.available_degree_prior_types:
             raise LiteralError(degree_prior_type, self.available_degree_prior_types)
-        self.constructor = partial(_graph.ConfigurationModelFamily, canonical=canonical)
-        wrapped = _graph.ConfigurationModelFamily(
+        self.constructor = _graph.ConfigurationModelFamily
+        wrapped = self.constructor(
             size,
             edge_count,
             canonical=canonical,
-            hyperprior=(degree_prior_type == "hyper"),
-            degree_constrained=degree_constrained,
+            # hyperprior=(degree_prior_type == "hyper"),
         )
+
         super().__init__(
             wrapped,
             size=size,
             edge_count=edge_count,
             degree_prior_type=degree_prior_type,
-            degree_constrained=degree_constrained,
             canonical=canonical,
         )
 
