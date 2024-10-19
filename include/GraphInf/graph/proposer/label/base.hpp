@@ -68,9 +68,18 @@ namespace GraphInf
         }
         const LabelMove<Label> proposeMove(const BaseGraph::VertexIndex &vertex) const
         {
-            if (m_uniform01(rng) < m_sampleLabelCountProb)
+            if (m_uniform01(rng) < m_sampleLabelCountProb || m_graphPriorPtr->getLabelCount() == 1)
                 return proposeNewLabelMove(vertex);
-            return proposeLabelMove(vertex);
+            LabelMove<Label> move = proposeLabelMove(vertex);
+            int maxiter = 10;
+            for (size_t i = 0; i < maxiter; i++)
+            {
+                move = proposeLabelMove(vertex);
+                if (not isTrivialMove(move))
+                    break;
+            }
+
+            return move;
         }
         virtual const LabelMove<Label> proposeLabelMove(const BaseGraph::VertexIndex &) const = 0;
         virtual const LabelMove<Label> proposeNewLabelMove(const BaseGraph::VertexIndex &) const = 0;
