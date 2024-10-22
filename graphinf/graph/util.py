@@ -167,6 +167,7 @@ def log_evidence_partition_meanfield(model: RandomGraph, graph: core.UndirectedM
         force_niter=kwargs.get("n_sweeps", 100),
         mcmc_args=model.gt_mcmc_args(),
         callback=callback,
+        verbose=False,
     )
     partitions = callback.collection
     pmodes = gt.ModeClusterState(partitions, nested=model.nested)

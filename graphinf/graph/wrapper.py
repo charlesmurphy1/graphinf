@@ -5,7 +5,7 @@ import numpy as np
 from basegraph import core as bg
 from graphinf._graphinf import graph as _graph
 from graphinf.wrapper import Wrapper as _Wrapper
-from graphinf.utility import convert_basegraph_to_graphtool
+from graphinf.utility import convert_basegraph_to_graphtool, sampleRandomWeakComposition
 from functools import partial
 
 from .degree_sequences import nbinom_degreeseq, poisson_degreeseq
@@ -228,10 +228,30 @@ class ConfigurationModelFamily(RandomGraphWrapper):
 
 
 class ConfigurationModel(RandomGraphWrapper):
-    def __init__(self, degree_seq: List[int]):
-        wrapped = _graph.ConfigurationModel(degree_seq)
-        self.degrees = degree_seq
-        super().__init__(wrapped, size=len(degree_seq), edge_count=int(sum(degree_seq) / 2))
+    def __init__(
+        self,
+        degrees: list[int] | None = None,
+        size: int = 100,
+        edge_count: float = 250,
+    ):
+        if degrees is None:
+            assert (
+                size is not None and edge_count is not None
+            ), f"`size` ({size}) and `edge_count` ({edge_count}) must be provided if degrees is `None`."
+            degrees = sampleRandomWeakComposition(2 * edge_count, size)
+        self.constructor = _graph.ConfigurationModel
+        wrapped = self.constructor(degrees)
+        size = len(degrees)
+        edge_count = int(sum(degrees) / 2)
+
+        super().__init__(
+            wrapped,
+            size=size,
+            edge_count=edge_count,
+        )
+
+    def format_graph_into_args(self, graph: bg.UndirectedGraph):
+        return dict(size=graph.get_size(), edge_count=graph.get_total_edge_number())
 
 
 class PoissonGraph(ConfigurationModel):
@@ -402,7 +422,7 @@ class StochasticBlockModelFamily(RandomGraphWrapper):
             out = blockstate.mcmc_sweep(
                 c=self.params["shift"],
                 d=self.params["sample_label_count_prob"],
-                niter=n_steps_per_vertex,
+                niter=n_label_move // self.size(),
                 entropy_args=self.gt_entropy_args(),
                 sequential=False,
                 deterministic=False,
