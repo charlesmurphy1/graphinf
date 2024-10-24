@@ -171,7 +171,9 @@ def log_evidence_partition_meanfield(model: RandomGraph, graph: core.UndirectedM
     partitions = callback.collection
     pmodes = gt.ModeClusterState(partitions, nested=model.nested)
     if kwargs.get("equilibriate_mode_cluster", False):
-        gt.mcmc_equilibrate(pmodes, force_niter=1, verbose=kwargs.get("verbose", False))
+        gt.mcmc_equilibrate(
+            pmodes, force_niter=1, verbose=kwargs.get("verbose", False), multiflip=kwargs.get("multiflip", True)
+        )
     samples = []
     for p in partitions:
         set_labels(p)

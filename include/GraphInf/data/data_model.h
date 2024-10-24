@@ -153,7 +153,7 @@ namespace GraphInf
             for (size_t i = 0; i < nSteps; i++)
             {
                 summary.update(greedyGraphStep(nCandidates));
-                summary.update(m_graphPriorPtr->greedyStep(nCandidates));
+                summary.update(m_graphPriorPtr->greedyParamStep(nCandidates));
             }
             return summary;
         }

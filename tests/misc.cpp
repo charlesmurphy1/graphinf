@@ -2,6 +2,7 @@
 
 #include "GraphInf/utility/functions.h"
 #include "GraphInf/graph/erdosrenyi.h"
+#include "GraphInf/graph/configuration.h"
 #include "GraphInf/data/dynamics/glauber.h"
 #include "BaseGraph/undirected_multigraph.hpp"
 
@@ -18,24 +19,13 @@ namespace GraphInf
     {
 
         seed(time(NULL));
-        auto uniform01 = std::uniform_real_distribution<double>(0, 1);
-        auto graph = ErdosRenyiModel(100, 100, true, true, true);
-        graph.setGraphMoveType("single_edge");
-        std::cout << graph.getSingleEdgeProposer().getEdgeSampler().getTotalWeight() << std::endl;
-
-        CounterMap<std::string> counter;
+        auto graph = ConfigurationModelFamily(105, 441, false, false);
+        graph.sample();
         for (size_t i = 0; i < 1000; i++)
         {
-            auto move = graph.proposeGraphMove();
-            if (move.addedEdges.size() == 1)
-            {
-                counter.increment("add");
-            }
-            else
-            {
-                counter.increment("remove");
-            }
+            std::cout << i << std::endl;
+            graph.metropolisGraphSweep(100000);
+            graph.checkConsistency();
         }
-        std::cout << "add: " << counter["add"] << " remove: " << counter["remove"] << std::endl;
     }
 }

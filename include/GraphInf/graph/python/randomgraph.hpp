@@ -36,8 +36,8 @@ namespace GraphInf
         void checkSelfSafety() const override { PYBIND11_OVERRIDE(void, BaseClass, checkSelfSafety, ); }
         void checkSelfConsistency() const override { PYBIND11_OVERRIDE(void, BaseClass, checkSelfConsistency, ); }
         bool isValidGraphMove(const GraphMove &move) const override { PYBIND11_OVERRIDE(bool, BaseClass, isValidGraphMove, move); }
-        const StepResult<BlockMove> metropolisStep(const double beta_prior = 1, const double beta_likelihood = 1) override { PYBIND11_OVERRIDE(const StepResult<BlockMove>, BaseClass, metropolisStep, beta_prior, beta_likelihood); }
-        const StepResult<BlockMove> greedyStep(size_t nCandidates = 1) override { PYBIND11_OVERRIDE(const StepResult<BlockMove>, BaseClass, greedyStep, nCandidates); }
+        const StepResult<BlockMove> metropolisParamStep(const double beta_prior = 1, const double beta_likelihood = 1) override { PYBIND11_OVERRIDE(const StepResult<BlockMove>, BaseClass, metropolisParamStep, beta_prior, beta_likelihood); }
+        const StepResult<BlockMove> greedyParamStep(size_t nCandidates = 1) override { PYBIND11_OVERRIDE(const StepResult<BlockMove>, BaseClass, greedyParamStep, nCandidates); }
     };
 
     template <typename Label, typename BaseClass = VertexLabeledRandomGraph<Label>>

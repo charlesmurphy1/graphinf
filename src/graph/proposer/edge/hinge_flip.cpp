@@ -59,9 +59,11 @@ namespace GraphInf
 
     const double HingeFlipProposer::getLogProposalProbRatio(const GraphMove &move) const
     {
-        BaseGraph::VertexIndex i = move.addedEdges[0].first;
-        BaseGraph::VertexIndex j = move.removedEdges[0].second;
-        BaseGraph::VertexIndex k = move.addedEdges[0].second;
+        // BaseGraph::VertexIndex i = move.addedEdges[0].first;
+        // BaseGraph::VertexIndex j = move.removedEdges[0].second;
+        // BaseGraph::VertexIndex k = move.addedEdges[0].second;
+        auto [edge, k] = inferEdgeVertexPair(move);
+        auto [i, j] = edge;
 
         if (isTrivialMove(move))
         {
@@ -103,12 +105,12 @@ namespace GraphInf
 
     const double HingeFlipProposer::getLogPropRatioForLoopyMove(const GraphMove &move) const
     {
-        return getLogPropRatioForNormalMove(move) - log(2);
+        return getLogPropRatioForNormalMove(move); // - log(2);
     }
 
     const double HingeFlipProposer::getLogPropRatioForSelfieMove(const GraphMove &move) const
     {
-        return getLogPropRatioForNormalMove(move) + log(2);
+        return getLogPropRatioForNormalMove(move); // + log(2);
     }
 
 } // namespace GraphInf

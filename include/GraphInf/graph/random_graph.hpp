@@ -39,6 +39,7 @@ namespace GraphInf
         std::string m_graphMoveType = "canonical";
         mutable std::discrete_distribution<int> m_canonicalProposer = std::discrete_distribution<int>({1, 1, 1});
         mutable std::discrete_distribution<int> m_microcanonicalProposer = std::discrete_distribution<int>({1, 1});
+        mutable std::uniform_real_distribution<double> m_uniform01 = std::uniform_real_distribution<double>(0, 1);
         bool m_withSelfLoops, m_withParallelEdges;
         size_t m_size;
         MultiGraph m_state;
@@ -216,26 +217,81 @@ namespace GraphInf
             sampleOnlyPrior();
             computeConsistentState(); });
         }
-        virtual const StepResult<LabelMove<BlockIndex>> metropolisStep(double betaPrior = 1, double betaLikelihood = 1)
+
+        virtual const StepResult<GraphMove> metropolisGraphStep(double betaPrior = 1, double betaLikelihood = 1)
         {
-            return {};
+            GraphMove move = proposeGraphMove();
+            double logPriorRatio = 0;
+            if (betaPrior > 0)
+                logPriorRatio = getLogPriorRatioFromGraphMove(move) * betaPrior;
+            double logLikelihoodRatio = 0;
+            if (betaLikelihood > 0)
+                logLikelihoodRatio = getLogLikelihoodRatioFromGraphMove(move) * betaLikelihood;
+            double logJointRatio = logPriorRatio + logLikelihoodRatio;
+            double logProposalRatio = getLogProposalRatioFromGraphMove(move);
+            double logAcceptanceRatio = logJointRatio + logProposalRatio;
+            bool accepted = false;
+            if (logAcceptanceRatio >= 0 or m_uniform01(rng) < exp(logAcceptanceRatio))
+            {
+                accepted = true;
+                applyGraphMove(move);
+            }
+            return {move, logJointRatio, accepted};
         }
-        virtual const StepResult<LabelMove<BlockIndex>> greedyStep(size_t nCandidates = 1)
+        virtual const StepResult<GraphMove> greedyGraphStep(size_t nCandidates = 1)
         {
-            return {};
+            double bestLogJointRatio = -INFINITY;
+            GraphMove bestMove;
+            bool accepted = false;
+            for (size_t i = 0; i < nCandidates; i++)
+            {
+                GraphMove move = proposeGraphMove();
+                double logJointRatio = getLogJointRatioFromGraphMove(move);
+
+                if (isValidGraphMove(move) && logJointRatio > bestLogJointRatio)
+                {
+                    bestMove = move;
+                    bestLogJointRatio = logJointRatio;
+                    accepted = true;
+                }
+            }
+            applyGraphMove(bestMove);
+            return {bestMove, bestLogJointRatio, true};
         }
-        const MCMCSummary metropolisSweep(size_t numSteps, double betaPrior = 1, double betaLikelihood = 1)
+        const MCMCSummary metropolisGraphSweep(size_t numSteps, double betaPrior = 1, double betaLikelihood = 1)
         {
             MCMCSummary summary;
             for (size_t i = 0; i < numSteps; i++)
-                summary.update(metropolisStep(betaPrior, betaLikelihood));
+                summary.update(metropolisGraphStep(betaPrior, betaLikelihood));
             return summary;
         }
-        const MCMCSummary greedySweep(size_t numSteps, size_t nCandidates = 1)
+        const MCMCSummary greedyGraphSweep(size_t numSteps, size_t nCandidates = 1)
         {
             MCMCSummary summary;
             for (size_t i = 0; i < numSteps; i++)
-                summary.update(greedyStep(nCandidates));
+                summary.update(greedyGraphStep(nCandidates));
+            return summary;
+        }
+        virtual const StepResult<LabelMove<BlockIndex>> metropolisParamStep(double betaPrior = 1, double betaLikelihood = 1)
+        {
+            return {};
+        }
+        virtual const StepResult<LabelMove<BlockIndex>> greedyParamStep(size_t nCandidates = 1)
+        {
+            return {};
+        }
+        const MCMCSummary metropolisParamSweep(size_t numSteps, double betaPrior = 1, double betaLikelihood = 1)
+        {
+            MCMCSummary summary;
+            for (size_t i = 0; i < numSteps; i++)
+                summary.update(metropolisParamStep(betaPrior, betaLikelihood));
+            return summary;
+        }
+        const MCMCSummary greedyParamSweep(size_t numSteps, size_t nCandidates = 1)
+        {
+            MCMCSummary summary;
+            for (size_t i = 0; i < numSteps; i++)
+                summary.update(greedyParamStep(nCandidates));
             return summary;
         }
 
@@ -356,7 +412,7 @@ namespace GraphInf
         }
         const double getLogProposalRatioFromLabelMove(const LabelMove<Label> &move) const;
 
-        const StepResult<LabelMove<Label>> metropolisStep(double m_betaPrior = 1, double m_betaLikelihood = 1) override
+        const StepResult<LabelMove<Label>> metropolisParamStep(double m_betaPrior = 1, double m_betaLikelihood = 1) override
         {
             const auto move = proposeLabelMove();
             if (m_labelProposerPtr->isTrivialMove(move))
@@ -388,7 +444,7 @@ namespace GraphInf
             return {move, logLikelihoodRatio + logPriorRatio + logProposalRatio, accepted};
         }
 
-        const StepResult<LabelMove<Label>> greedyStep(size_t nCandidates) override
+        const StepResult<LabelMove<Label>> greedyParamStep(size_t nCandidates) override
         {
             LabelMove<Label> bestMove;
             double bestLogJointRatio = 0;

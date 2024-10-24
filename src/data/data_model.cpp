@@ -83,7 +83,7 @@ namespace GraphInf
         for (size_t i = 0; i < numSteps; i++)
         {
             summary.update(metropolisGraphStep(betaPrior, betaLikelihood, (debugFrequency > 0 && (i + 1) % debugFrequency == 0)));
-            summary.update(m_graphPriorPtr->metropolisStep(betaPrior, betaLikelihood));
+            summary.update(m_graphPriorPtr->metropolisParamStep(betaPrior, betaLikelihood));
         }
         return summary;
     }

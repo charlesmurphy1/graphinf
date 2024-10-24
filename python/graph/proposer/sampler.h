@@ -50,6 +50,7 @@ namespace GraphInf
             .def("on_edge_erasure", &EdgeSampler::onEdgeErasure, py::arg("edge"))
             .def("on_edge_addition", &EdgeSampler::onEdgeAddition, py::arg("edge"))
             .def("on_edge_removal", &EdgeSampler::onEdgeRemoval, py::arg("edge"))
+            .def("get_edge_weight", &EdgeSampler::getEdgeWeight, py::arg("edge"))
             .def("get_total_weight", &EdgeSampler::getTotalWeight)
             .def("get_size", &EdgeSampler::getSize)
             .def("check_safety", &EdgeSampler::checkSafety)

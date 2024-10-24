@@ -21,6 +21,15 @@ namespace GraphInf
         const double getLogPropRatioForLoopyMove(const GraphMove &) const;
         const double getLogPropRatioForSelfieMove(const GraphMove &) const;
         const double getLogPropRatioForSelfieLoopy(const GraphMove &) const;
+        std::tuple<BaseGraph::Edge, BaseGraph::VertexIndex> inferEdgeVertexPair(const GraphMove &move) const
+        {
+            auto edge = move.addedEdges[0];
+            auto [i, j] = move.removedEdges[0];
+
+            if ((edge.first == i) || edge.second == i)
+                return std::make_tuple(edge, j);
+            return std::make_tuple(edge, i);
+        }
 
     protected:
         EdgeSampler m_edgeSampler;
@@ -34,7 +43,6 @@ namespace GraphInf
         void setUpWithGraph(const MultiGraph &) override;
         void setVertexSampler(VertexSampler &vertexSampler) { m_vertexSamplerPtr = &vertexSampler; }
         EdgeSampler &getEdgeSampler() { return m_edgeSampler; }
-        VertexSampler &getVertexSampler() { return *m_vertexSamplerPtr; }
         void applyGraphMove(const GraphMove &move) override;
         // void applyBlockMove(const BlockMove& move) override { };
         const double getLogProposalProbRatio(const GraphMove &move) const override;
@@ -79,6 +87,7 @@ namespace GraphInf
         HingeFlipUniformProposer(bool allowSelfLoops = true, bool allowMultiEdges = true) : HingeFlipProposer(allowSelfLoops, allowMultiEdges) { m_vertexSamplerPtr = &m_vertexUniformSampler; }
         virtual ~HingeFlipUniformProposer() {}
         const double getLogVertexWeightRatio(const GraphMove &move) const override { return 0; }
+        VertexUniformSampler getVertexSampler() { return m_vertexUniformSampler; }
     };
 
     class HingeFlipDegreeProposer : public HingeFlipProposer
