@@ -64,12 +64,6 @@ namespace GraphInf
             m_degreePriorPtr->isRoot(false);
             m_degreePriorPtr->setEdgeCountPrior(*m_edgeCountPriorPtr);
         }
-        // void fromGraph(const MultiGraph &graph) override
-        // {
-        //     RandomGraph::fromGraph(graph);
-        //     m_degreePriorPtr->setGraph(graph);
-        // }
-
         const size_t getDegree(BaseGraph::VertexIndex vertex) const { return m_degreePriorPtr->getDegree(vertex); }
         const std::vector<size_t> &getDegrees() const { return m_degreePriorPtr->getState(); }
 
@@ -92,6 +86,28 @@ namespace GraphInf
             if (not m_degreePriorPtr)
                 throw SafetyError("ConfigurationModelBase", "m_degreePriorPtr");
             m_degreePriorPtr->checkSafety();
+        }
+    };
+
+    class ConfigurationModel : public ConfigurationModelBase
+    {
+    private:
+        DegreeDeltaPrior m_degreeDeltaPrior;
+
+    public:
+        ConfigurationModel(std::vector<size_t> degrees) : ConfigurationModelBase(degrees.size(), 0, false), m_degreeDeltaPrior(degrees)
+        {
+            size_t edgeCount = 0;
+            for (size_t i = 0; i < degrees.size(); i++)
+            {
+                edgeCount += degrees[i];
+            }
+            edgeCount /= 2;
+            m_edgeCountPriorPtr->setState(edgeCount);
+            setDegreePrior(m_degreeDeltaPrior);
+            checkSafety();
+            sample();
+            setGraphMoveType("double_edge_swap");
         }
     };
 

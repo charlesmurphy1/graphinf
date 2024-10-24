@@ -21,6 +21,11 @@ namespace GraphInf
             .def("degrees", &ConfigurationModelBase::getDegrees, py::return_value_policy::reference_internal)
             .def("degrees_copy", &ConfigurationModelBase::getDegrees, py::return_value_policy::copy);
 
+        py::class_<ConfigurationModel, ConfigurationModelBase>(m, "ConfigurationModel")
+            .def(
+                py::init<std::vector<size_t>>(),
+                py::arg("degrees"));
+
         py::class_<ConfigurationModelFamily, ConfigurationModelBase>(m, "ConfigurationModelFamily")
             .def(
                 py::init<size_t, double, bool, bool>(),
