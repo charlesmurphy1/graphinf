@@ -24,13 +24,13 @@ namespace GraphInf
             double infectionStddev = 0.1,
             double recoveryStddev = 0.1,
             double activationStddev = 0.1) : BinaryDynamics(graphPrior,
-                                                              numSteps,
-                                                              autoActivationProb,
-                                                              autoDeactivationProb,
-                                                              activationStddev,
-                                                              0),
-                                               m_infectionProb(infectionProb),
-                                               m_recoveryProb(recoveryProb)
+                                                            numSteps,
+                                                            autoActivationProb,
+                                                            autoDeactivationProb,
+                                                            activationStddev,
+                                                            0),
+                                             m_infectionProb(infectionProb),
+                                             m_recoveryProb(recoveryProb)
         {
             m_paramProposer.insertGaussianProposer("infection", 1.0, 0.0, infectionStddev);
             m_paramProposer.insertGaussianProposer("recovery", 1.0, 0.0, recoveryStddev);
@@ -61,15 +61,16 @@ namespace GraphInf
         bool isValidParamMove(const ParamMove &move) const override
         {
             if (move.key == "infection")
-                return 0 <= m_infectionProb + move.value && m_infectionProb + move.value <= 1;
+                return MIN_PROB <= m_infectionProb + move.value && m_infectionProb + move.value <= MAX_PROB;
             if (move.key == "recovery")
-                return 0 <= m_recoveryProb + move.value && m_recoveryProb + move.value <= 1;
+                return MIN_PROB <= m_recoveryProb + move.value && m_recoveryProb + move.value <= MAX_PROB;
             return BinaryDynamics::isValidParamMove(move);
         }
 
     private:
         double m_infectionProb, m_recoveryProb;
         const double EPSILON = 1e-6;
+        double MIN_PROB = 0 + EPSILON, MAX_PROB = 1 - EPSILON;
     };
 
 } // namespace GraphInf

@@ -59,9 +59,6 @@ namespace GraphInf
 
     const double HingeFlipProposer::getLogProposalProbRatio(const GraphMove &move) const
     {
-        // BaseGraph::VertexIndex i = move.addedEdges[0].first;
-        // BaseGraph::VertexIndex j = move.removedEdges[0].second;
-        // BaseGraph::VertexIndex k = move.addedEdges[0].second;
         auto [edge, k] = inferEdgeVertexPair(move);
         auto [i, j] = edge;
 

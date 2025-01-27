@@ -12,6 +12,7 @@ namespace GraphInf
     class GlauberDynamics : public BinaryDynamics
     {
         double m_coupling;
+        double MIN_COUPLING = 0, MAX_COUPLING = 10;
 
     public:
         GlauberDynamics(
@@ -55,7 +56,7 @@ namespace GraphInf
         bool isValidParamMove(const ParamMove &move) const override
         {
             if (move.key == "coupling")
-                return 0 <= m_coupling + move.value;
+                return move.value + m_coupling >= MIN_COUPLING && move.value + m_coupling <= MAX_COUPLING;
             return BinaryDynamics::isValidParamMove(move);
         }
     };

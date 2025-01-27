@@ -125,7 +125,7 @@ class EdgeCollector:
                 counts=dict(self.counts),
                 total_count=self.total_count,
                 node_count=self.node_count,
-                graph_collection=[save_graph(g) for g, s, e in self._graph_collection],
+                graph_collection=[(save_graph(g), s, e) for g, s, e in self._graph_collection],
             ),
             path,
         )

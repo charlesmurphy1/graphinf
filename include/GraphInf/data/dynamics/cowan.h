@@ -14,6 +14,10 @@ namespace GraphInf
         double m_nu;
         double m_mu;
         double m_eta;
+        double MIN_A = 0, MAX_A = 10;
+        double MIN_MU = 0, MAX_MU = 10;
+        double MIN_NU = 0, MAX_NU = 10;
+        double MIN_ETA = 0, MAX_ETA = 1;
 
     public:
         CowanDynamics(
@@ -78,13 +82,13 @@ namespace GraphInf
         bool isValidParamMove(const ParamMove &move) const override
         {
             if (move.key == "a")
-                return 0 <= m_a + move.value;
+                return MIN_A <= m_a + move.value && m_a + move.value <= MAX_A;
             else if (move.key == "nu")
-                return 0 <= m_nu + move.value;
+                return MIN_NU <= m_nu + move.value && m_nu + move.value <= MAX_NU;
             else if (move.key == "mu")
-                return 0 <= m_mu + move.value;
+                return MIN_MU <= m_mu + move.value && m_mu + move.value <= MAX_MU;
             else if (move.key == "eta")
-                return 0 <= m_eta + move.value && m_eta + move.value <= 1;
+                return MIN_ETA <= m_eta + move.value && m_eta + move.value <= MAX_ETA;
             return BinaryDynamics::isValidParamMove(move);
         }
     };

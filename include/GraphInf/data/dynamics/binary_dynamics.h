@@ -16,6 +16,7 @@ namespace GraphInf
     private:
         double m_autoActivationProb;
         double m_autoDeactivationProb;
+        double MIN_AUTO_PROB = 0, MAX_AUTO_PROB = 1;
 
     public:
         explicit BinaryDynamics(
@@ -55,9 +56,9 @@ namespace GraphInf
         virtual bool isValidParamMove(const ParamMove &move) const override
         {
             if (move.key == "activation")
-                return 0 <= m_autoActivationProb + move.value && m_autoActivationProb + move.value <= 1;
+                return MIN_AUTO_PROB <= m_autoActivationProb + move.value && m_autoActivationProb + move.value <= MAX_AUTO_PROB;
             if (move.key == "deactivation")
-                return 0 <= m_autoDeactivationProb + move.value && m_autoDeactivationProb + move.value <= 1;
+                return MIN_AUTO_PROB <= m_autoDeactivationProb + move.value && m_autoDeactivationProb + move.value <= MAX_AUTO_PROB;
             return Dynamics::isValidParamMove(move);
         }
     };
